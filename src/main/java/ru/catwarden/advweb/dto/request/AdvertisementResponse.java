@@ -1,9 +1,15 @@
 package ru.catwarden.advweb.dto.request;
-
 import ru.catwarden.advweb.enums.AdModerationStatus;
-
 import java.time.LocalDateTime;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class AdvertisementResponse {
     private Long id;
     private String name;

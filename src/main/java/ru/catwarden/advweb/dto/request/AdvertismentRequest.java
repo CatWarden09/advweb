@@ -1,11 +1,14 @@
 package ru.catwarden.advweb.dto.request;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import ru.catwarden.advweb.entity.User;
-import ru.catwarden.advweb.enums.AdModerationStatus;
-
-import java.time.LocalDateTime;
-
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class AdvertismentRequest {
 
     private Long authorId;
