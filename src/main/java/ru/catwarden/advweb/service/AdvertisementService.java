@@ -57,4 +57,8 @@ public class AdvertisementService {
         advertisementRepository.save(advertisement);
 
     }
+
+    public void deleteAdvertisement(Long id){
+        advertisementRepository.deleteById(id);
+    }
 }
