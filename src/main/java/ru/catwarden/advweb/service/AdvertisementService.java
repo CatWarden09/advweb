@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.catwarden.advweb.dto.request.AdvertisementRequest;
 import ru.catwarden.advweb.dto.request.AdvertisementUpdateRequest;
+import ru.catwarden.advweb.dto.response.AdvertisementResponse;
 import ru.catwarden.advweb.entity.Advertisement;
 import ru.catwarden.advweb.entity.User;
 import ru.catwarden.advweb.enums.AdModerationStatus;
@@ -16,6 +17,28 @@ import ru.catwarden.advweb.repository.UserRepository;
 public class AdvertisementService {
     private final UserRepository userRepository;
     private final AdvertisementRepository advertisementRepository;
+
+    // TODO figure out mappers to avoid code repeating
+    public AdvertisementResponse getAdvertisement(Long id){
+        Advertisement advertisement = advertisementRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Advertisement not found"));
+
+        AdvertisementResponse advertisementResponse = AdvertisementResponse.builder()
+                .id(advertisement.getId())
+                .name(advertisement.getName())
+                .description(advertisement.getDescription())
+                .price(advertisement.getPrice())
+                .address(advertisement.getAddress())
+                .category(advertisement.getCategory())
+                .subcategory(advertisement.getSubcategory())
+                .createdAt(advertisement.getCreatedAt())
+                .updatedAt(advertisement.getUpdatedAt())
+                .adModerationStatus(advertisement.getAdModerationStatus())
+                .moderationRejectionReason(advertisement.getModerationRejectionReason())
+                .build();
+
+        return advertisementResponse;
+    }
 
     public void createAdvertisement(AdvertisementRequest advertisementRequest){
 

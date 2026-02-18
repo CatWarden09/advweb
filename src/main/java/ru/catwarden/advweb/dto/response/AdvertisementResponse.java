@@ -1,4 +1,4 @@
-package ru.catwarden.advweb.dto.request;
+package ru.catwarden.advweb.dto.response;
 import ru.catwarden.advweb.enums.AdModerationStatus;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;

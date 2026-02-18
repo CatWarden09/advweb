@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.catwarden.advweb.dto.request.AdvertisementRequest;
 import ru.catwarden.advweb.dto.request.AdvertisementUpdateRequest;
+import ru.catwarden.advweb.dto.response.AdvertisementResponse;
 import ru.catwarden.advweb.service.AdvertisementService;
 
 @RestController
@@ -12,19 +13,24 @@ import ru.catwarden.advweb.service.AdvertisementService;
 public class AdvertisementController {
     private final AdvertisementService advertisementService;
 
+    @GetMapping("/{id}")
+    public AdvertisementResponse getAdvertisement(@PathVariable Long id){
+        return advertisementService.getAdvertisement(id);
+    }
+
     @PostMapping
-    void createAdvertisement(@RequestBody AdvertisementRequest advertisementRequest){
+    public void createAdvertisement(@RequestBody AdvertisementRequest advertisementRequest){
         advertisementService.createAdvertisement(advertisementRequest);
     }
 
     @PatchMapping("/{id}")
-    void updateAdvertisement(@PathVariable Long id,
+    public void updateAdvertisement(@PathVariable Long id,
                              @RequestBody AdvertisementUpdateRequest advertisementUpdateRequest){
         advertisementService.updateAdvertisement(id, advertisementUpdateRequest);
     }
 
     @DeleteMapping("/{id}")
-    void deleteAdvertisement(@PathVariable Long id){
+    public void deleteAdvertisement(@PathVariable Long id){
         advertisementService.deleteAdvertisement(id);
     }
 }
