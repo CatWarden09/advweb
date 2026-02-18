@@ -1,11 +1,9 @@
 package ru.catwarden.advweb.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import ru.catwarden.advweb.dto.request.AdvertismentRequest;
+import org.springframework.web.bind.annotation.*;
+import ru.catwarden.advweb.dto.request.AdvertisementRequest;
+import ru.catwarden.advweb.dto.request.AdvertisementUpdateRequest;
 import ru.catwarden.advweb.service.AdvertisementService;
 
 @RestController
@@ -15,7 +13,13 @@ public class AdvertisementController {
     private final AdvertisementService advertisementService;
 
     @PostMapping
-    void createAdv(@RequestBody AdvertismentRequest advertismentRequest){
-        advertisementService.createAdvertisement(advertismentRequest);
+    void createAdvertisement(@RequestBody AdvertisementRequest advertisementRequest){
+        advertisementService.createAdvertisement(advertisementRequest);
+    }
+
+    @PatchMapping("/{id}")
+    void updateAdvertisement(@PathVariable Long id,
+                             @RequestBody AdvertisementUpdateRequest advertisementUpdateRequest){
+        advertisementService.updateAdvertisement(id, advertisementUpdateRequest);
     }
 }

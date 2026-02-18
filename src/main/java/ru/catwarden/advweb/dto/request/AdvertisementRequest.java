@@ -1,5 +1,6 @@
 package ru.catwarden.advweb.dto.request;
 
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,12 +10,16 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AdvertismentRequest {
+public class AdvertisementRequest {
+
 
     private Long authorId;
     private String name;
     private String description;
+
+    @Positive
     private Double price;
+
     private String address;
     private String category;
     private String subcategory;
