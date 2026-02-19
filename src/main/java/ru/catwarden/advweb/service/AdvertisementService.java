@@ -1,6 +1,8 @@
 package ru.catwarden.advweb.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.catwarden.advweb.dto.request.AdvertisementRequest;
 import ru.catwarden.advweb.dto.request.AdvertisementUpdateRequest;
@@ -20,12 +22,17 @@ public class AdvertisementService {
     private final AdvertisementRepository advertisementRepository;
     private final AdvertisementMapper advertisementMapper;
 
-    // TODO figure out mappers to avoid code repeating
+    // DONE figure out mappers to avoid code repeating
     public AdvertisementResponse getAdvertisement(Long id){
         Advertisement advertisement = advertisementRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Advertisement not found"));
 
         return advertisementMapper.toResponse(advertisement);
+    }
+
+    public Page<AdvertisementResponse> getAllAdvertisements(Pageable pageable){
+        return advertisementRepository.findAll(pageable)
+                .map(advertisementMapper::toResponse);
     }
 
     public void createAdvertisement(AdvertisementRequest advertisementRequest){

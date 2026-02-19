@@ -1,11 +1,15 @@
 package ru.catwarden.advweb.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import ru.catwarden.advweb.dto.request.AdvertisementRequest;
 import ru.catwarden.advweb.dto.request.AdvertisementUpdateRequest;
 import ru.catwarden.advweb.dto.response.AdvertisementResponse;
 import ru.catwarden.advweb.service.AdvertisementService;
+
+
 
 @RestController
 @RequestMapping("/advertisements")
@@ -16,6 +20,11 @@ public class AdvertisementController {
     @GetMapping("/{id}")
     public AdvertisementResponse getAdvertisement(@PathVariable Long id){
         return advertisementService.getAdvertisement(id);
+    }
+
+    @GetMapping("/page")
+    public Page<AdvertisementResponse> getAllAdvertisements(Pageable pageable){
+        return advertisementService.getAllAdvertisements(pageable);
     }
 
     @PostMapping
