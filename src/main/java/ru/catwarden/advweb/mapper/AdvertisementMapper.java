@@ -26,7 +26,7 @@ public class AdvertisementMapper {
                 .build();
     }
 
-    public Advertisement toEntity(AdvertisementRequest req, User author) {
+    public Advertisement toEntity(AdvertisementRequest req, User author, AdModerationStatus adModerationStatus) {
         return Advertisement.builder()
                 .author(author)
                 .name(req.getName())
@@ -35,7 +35,7 @@ public class AdvertisementMapper {
                 .address(req.getAddress())
                 .category(req.getCategory())
                 .subcategory(req.getSubcategory())
-                .adModerationStatus(AdModerationStatus.PENDING)
+                .adModerationStatus(adModerationStatus)
                 .build();
     }
 }
