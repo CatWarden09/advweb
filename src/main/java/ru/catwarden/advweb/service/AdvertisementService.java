@@ -48,6 +48,7 @@ public class AdvertisementService {
                 .orElseThrow(() -> new RuntimeException("Category not found"));
 
         // Updated the flow to keep the mapper more clean (all other fields are set after builder and checked inside the service)
+        // TODO add hierarchy validation
         AdvertisementCategory subcategory = null;
         if (advertisementRequest.getSubcategoryId() != null) {
             subcategory = categoryRepository.findById(advertisementRequest.getSubcategoryId())
@@ -59,6 +60,7 @@ public class AdvertisementService {
         advertisement.setAuthor(author);
         advertisement.setCategory(category);
         advertisement.setSubcategory(subcategory);
+        advertisement.setAdModerationStatus(AdModerationStatus.PENDING);
 
         advertisementRepository.save(advertisement);
 
