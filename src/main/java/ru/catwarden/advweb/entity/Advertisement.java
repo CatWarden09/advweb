@@ -37,11 +37,13 @@ public class Advertisement {
 
     private String address;
 
-    @Column(nullable = false)
-    private String category;
+    @ManyToOne
+    @JoinColumn(name = "category_id", nullable = false)
+    private AdvertisementCategory category;
 
-    @Column(nullable = false)
-    private String subcategory;
+    @ManyToOne
+    @JoinColumn(name = "subcategory_id", nullable = false)
+    private AdvertisementCategory subcategory;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;

@@ -1,4 +1,5 @@
 package ru.catwarden.advweb.dto.response;
+import ru.catwarden.advweb.entity.AdvertisementCategory;
 import ru.catwarden.advweb.enums.AdModerationStatus;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
@@ -16,8 +17,8 @@ public class AdvertisementResponse {
     private String description;
     private Double price;
     private String address;
-    private String category;
-    private String subcategory;
+    private AdvertisementCategory category;
+    private AdvertisementCategory subcategory;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private AdModerationStatus adModerationStatus;

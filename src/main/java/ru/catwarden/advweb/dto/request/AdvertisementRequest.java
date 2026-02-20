@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.catwarden.advweb.entity.AdvertisementCategory;
 
 @Data
 @Builder
@@ -21,7 +22,7 @@ public class AdvertisementRequest {
     private Double price;
 
     private String address;
-    private String category;
-    private String subcategory;
+    private AdvertisementCategory category;
+    private AdvertisementCategory subcategory;
 
 }
