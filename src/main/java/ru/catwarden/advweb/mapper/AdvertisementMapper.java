@@ -17,8 +17,8 @@ public class AdvertisementMapper {
                 .description(ad.getDescription())
                 .price(ad.getPrice())
                 .address(ad.getAddress())
-                .category(ad.getCategory())
-                .subcategory(ad.getSubcategory())
+                .categoryId(ad.getCategory().getId())
+                .subcategoryId(ad.getSubcategory() != null ? ad.getSubcategory().getId() : null)
                 .createdAt(ad.getCreatedAt())
                 .updatedAt(ad.getUpdatedAt())
                 .adModerationStatus(ad.getAdModerationStatus())
@@ -26,16 +26,12 @@ public class AdvertisementMapper {
                 .build();
     }
 
-    public Advertisement toEntity(AdvertisementRequest req, User author, AdModerationStatus adModerationStatus) {
+    public Advertisement toEntity(AdvertisementRequest advertisementRequest) {
         return Advertisement.builder()
-                .author(author)
-                .name(req.getName())
-                .description(req.getDescription())
-                .price(req.getPrice())
-                .address(req.getAddress())
-                .category(req.getCategory())
-                .subcategory(req.getSubcategory())
-                .adModerationStatus(adModerationStatus)
+                .name(advertisementRequest.getName())
+                .description(advertisementRequest.getDescription())
+                .price(advertisementRequest.getPrice())
+                .address(advertisementRequest.getAddress())
                 .build();
     }
 }

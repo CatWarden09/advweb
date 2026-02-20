@@ -8,10 +8,12 @@ import ru.catwarden.advweb.dto.request.AdvertisementRequest;
 import ru.catwarden.advweb.dto.request.AdvertisementUpdateRequest;
 import ru.catwarden.advweb.dto.response.AdvertisementResponse;
 import ru.catwarden.advweb.entity.Advertisement;
+import ru.catwarden.advweb.entity.AdvertisementCategory;
 import ru.catwarden.advweb.entity.User;
 import ru.catwarden.advweb.enums.AdModerationStatus;
 import ru.catwarden.advweb.mapper.AdvertisementMapper;
 import ru.catwarden.advweb.repository.AdvertisementRepository;
+import ru.catwarden.advweb.repository.CategoryRepository;
 import ru.catwarden.advweb.repository.UserRepository;
 
 
@@ -20,6 +22,7 @@ import ru.catwarden.advweb.repository.UserRepository;
 @RequiredArgsConstructor
 public class AdvertisementService {
     private final UserRepository userRepository;
+    private final CategoryRepository categoryRepository;
     private final AdvertisementRepository advertisementRepository;
     private final AdvertisementMapper advertisementMapper;
 
@@ -41,7 +44,21 @@ public class AdvertisementService {
         User author = userRepository.findById(advertisementRequest.getAuthorId())
                 .orElseThrow(() -> new RuntimeException("Author not found"));
 
-        Advertisement advertisement = advertisementMapper.toEntity(advertisementRequest, author, AdModerationStatus.PENDING);
+        AdvertisementCategory category = categoryRepository.findById(advertisementRequest.getCategoryId())
+                .orElseThrow(() -> new RuntimeException("Category not found"));
+
+        // Updated the flow to keep the mapper more clean (all other fields are set after builder and checked inside the service)
+        AdvertisementCategory subcategory = null;
+        if (advertisementRequest.getSubcategoryId() != null) {
+            subcategory = categoryRepository.findById(advertisementRequest.getSubcategoryId())
+                    .orElseThrow(() -> new RuntimeException("Subcategory not found"));
+        }
+
+        Advertisement advertisement = advertisementMapper.toEntity(advertisementRequest);
+
+        advertisement.setAuthor(author);
+        advertisement.setCategory(category);
+        advertisement.setSubcategory(subcategory);
 
         advertisementRepository.save(advertisement);
 
