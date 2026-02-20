@@ -1,0 +1,36 @@
+package ru.catwarden.advweb.controller;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
+import ru.catwarden.advweb.dto.request.AdvertisementCategoryRequest;
+import ru.catwarden.advweb.dto.response.AdvertisementCategoryResponse;
+import ru.catwarden.advweb.service.CategoryService;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/categories_admin")
+@RequiredArgsConstructor
+public class CategoryController {
+    private final CategoryService categoryService;
+
+    @GetMapping("/{id}")
+    public AdvertisementCategoryResponse getCategory(@PathVariable Long id){
+        return categoryService.getCategory(id);
+    }
+
+    @GetMapping("/all")
+    public List<AdvertisementCategoryResponse> getAllCategories(){
+        return categoryService.getAllCategories();
+    }
+
+    @PostMapping
+    public void createCategory(@RequestBody AdvertisementCategoryRequest advertisementCategoryRequest){
+        categoryService.createCategory(advertisementCategoryRequest);
+    }
+
+    @PostMapping("/{id}")
+    public void createSubcategories(@PathVariable Long id, @RequestBody List<AdvertisementCategoryRequest> subcategoryList){
+        categoryService.createSubcategories(id, subcategoryList);
+    }
+}

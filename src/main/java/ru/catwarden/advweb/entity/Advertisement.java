@@ -9,7 +9,8 @@ import ru.catwarden.advweb.enums.AdModerationStatus;
 
 import java.time.LocalDateTime;
 
-// TODO add photos, category entity(?)
+// TODO add photos,
+// DONE category entity
 @Entity
 @Table(name = "advertisements")
 @NoArgsConstructor

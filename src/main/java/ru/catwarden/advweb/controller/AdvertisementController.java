@@ -10,7 +10,7 @@ import ru.catwarden.advweb.dto.response.AdvertisementResponse;
 import ru.catwarden.advweb.service.AdvertisementService;
 
 
-
+// TODO add default redirect (@ExceptionHandler...)
 @RestController
 @RequestMapping("/advertisements")
 @RequiredArgsConstructor
