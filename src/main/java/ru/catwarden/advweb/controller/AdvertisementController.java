@@ -2,6 +2,7 @@ package ru.catwarden.advweb.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import ru.catwarden.advweb.dto.request.AdvertisementRequest;
@@ -23,7 +24,9 @@ public class AdvertisementController {
     }
 
     @GetMapping("/page")
-    public Page<AdvertisementResponse> getAllAdvertisements(Pageable pageable){
+    public Page<AdvertisementResponse> getAllAdvertisements(@RequestParam(defaultValue = "0") int page,
+                                                            @RequestParam(defaultValue = "10") int size){
+        Pageable pageable = PageRequest.of(page, size);
         return advertisementService.getAllAdvertisements(pageable);
     }
 
