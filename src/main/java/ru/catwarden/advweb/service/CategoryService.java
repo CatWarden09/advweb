@@ -44,19 +44,24 @@ public class CategoryService {
     }
 
     public void createCategory(AdvertisementCategoryRequest advertisementCategoryRequest){
-        AdvertisementCategory advertisementCategory = advertisementCategoryMapper.toEntity(advertisementCategoryRequest, null);
+        AdvertisementCategory advertisementCategory = advertisementCategoryMapper.toEntity(advertisementCategoryRequest);
         categoryRepository.save(advertisementCategory);
     }
 
-    // FIXME
+    // FIXED - forbid to create more than 2 levels of hierarchy
     //  if the front passes the subcategory id, then we create a deeper hierarchy than 2 levels intended
     //  need to figure out a solution for deleting such deep tree (like recursively checking the subcategories and forbidding to delete those)
     public void createSubcategories(Long id, List<AdvertisementCategoryRequest> subcategoryList){
         AdvertisementCategory parent = categoryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Category not found"));
 
+        if (parent.getParent() != null){
+            throw new RuntimeException("Cannot create subcategory for a subcategory");
+        }
+
         for(AdvertisementCategoryRequest advertisementCategoryRequest : subcategoryList){
-            AdvertisementCategory advertisementSubcategory = advertisementCategoryMapper.toEntity(advertisementCategoryRequest, parent);
+            AdvertisementCategory advertisementSubcategory = advertisementCategoryMapper.toEntity(advertisementCategoryRequest);
+            advertisementSubcategory.setParent(parent);
 
             categoryRepository.save(advertisementSubcategory);
         }
@@ -72,7 +77,6 @@ public class CategoryService {
 
     }
 
-    // TODO support the cases of deep hierarchy
     public void deleteCategory(Long id){
         AdvertisementCategory advertisementCategory = categoryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Category not found"));

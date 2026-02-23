@@ -15,10 +15,9 @@ public class AdvertisementCategoryMapper {
                 .build();
     }
 
-    public AdvertisementCategory toEntity(AdvertisementCategoryRequest advertisementCategoryRequest, AdvertisementCategory parent){
+    public AdvertisementCategory toEntity(AdvertisementCategoryRequest advertisementCategoryRequest){
         return AdvertisementCategory.builder()
                 .name(advertisementCategoryRequest.getName())
-                .parent(parent)
                 .build();
     }
 }

@@ -27,6 +27,7 @@ public class AdvertisementService {
     private final AdvertisementMapper advertisementMapper;
 
     // DONE figure out mappers to avoid code repeating
+    // TODO figure out MapStruct for better code
     public AdvertisementResponse getAdvertisement(Long id){
         Advertisement advertisement = advertisementRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Advertisement not found"));
