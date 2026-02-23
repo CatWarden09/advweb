@@ -9,7 +9,7 @@ import ru.catwarden.advweb.service.CategoryService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/categories_admin")
+@RequestMapping("/admin/categories")
 @RequiredArgsConstructor
 public class CategoryController {
     private final CategoryService categoryService;
@@ -19,9 +19,15 @@ public class CategoryController {
         return categoryService.getCategory(id);
     }
 
-    @GetMapping("/all")
+    @GetMapping
     public List<AdvertisementCategoryResponse> getAllCategories(){
         return categoryService.getAllCategories();
+    }
+
+    @GetMapping("/{id}/subcategories")
+    public List<AdvertisementCategoryResponse>
+    getSubcategories(@PathVariable Long id){
+        return categoryService.getSubcategories(id);
     }
 
     @PostMapping
@@ -29,7 +35,7 @@ public class CategoryController {
         categoryService.createCategory(advertisementCategoryRequest);
     }
 
-    @PostMapping("/{id}")
+    @PostMapping("/{id}/subcategories")
     public void createSubcategories(@PathVariable Long id, @RequestBody List<AdvertisementCategoryRequest> subcategoryList){
         categoryService.createSubcategories(id, subcategoryList);
     }

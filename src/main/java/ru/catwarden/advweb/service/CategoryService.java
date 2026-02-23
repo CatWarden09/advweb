@@ -24,7 +24,17 @@ public class CategoryService {
     }
 
     public List<AdvertisementCategoryResponse> getAllCategories(){
-        return categoryRepository.findAll()
+        return categoryRepository.findByParentIsNull()
+                .stream()
+                .map(advertisementCategoryMapper::toResponse)
+                .toList();
+    }
+
+    public List<AdvertisementCategoryResponse> getSubcategories(Long id){
+        AdvertisementCategory parent = categoryRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Category not found"));
+
+        return categoryRepository.findByParent(parent)
                 .stream()
                 .map(advertisementCategoryMapper::toResponse)
                 .toList();
