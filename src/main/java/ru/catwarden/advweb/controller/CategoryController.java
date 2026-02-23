@@ -3,6 +3,7 @@ package ru.catwarden.advweb.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.catwarden.advweb.dto.request.AdvertisementCategoryRequest;
+import ru.catwarden.advweb.dto.request.AdvertisementCategoryUpdateRequest;
 import ru.catwarden.advweb.dto.response.AdvertisementCategoryResponse;
 import ru.catwarden.advweb.service.CategoryService;
 
@@ -25,8 +26,7 @@ public class CategoryController {
     }
 
     @GetMapping("/{id}/subcategories")
-    public List<AdvertisementCategoryResponse>
-    getSubcategories(@PathVariable Long id){
+    public List<AdvertisementCategoryResponse> getSubcategories(@PathVariable Long id){
         return categoryService.getSubcategories(id);
     }
 
@@ -38,5 +38,15 @@ public class CategoryController {
     @PostMapping("/{id}/subcategories")
     public void createSubcategories(@PathVariable Long id, @RequestBody List<AdvertisementCategoryRequest> subcategoryList){
         categoryService.createSubcategories(id, subcategoryList);
+    }
+
+    @PatchMapping("/{id}")
+    public void updateCategory(@PathVariable Long id, @RequestBody AdvertisementCategoryUpdateRequest advertisementCategoryUpdateRequest){
+        categoryService.updateCategory(id, advertisementCategoryUpdateRequest);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteCategory(@PathVariable Long id){
+        categoryService.deleteCategory(id);
     }
 }
