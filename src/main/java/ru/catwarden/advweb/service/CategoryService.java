@@ -48,6 +48,9 @@ public class CategoryService {
         categoryRepository.save(advertisementCategory);
     }
 
+    // FIXME
+    //  if the front passes the subcategory id, then we create a deeper hierarchy than 2 levels intended
+    //  need to figure out a solution for deleting such deep tree (like recursively checking the subcategories and forbidding to delete those)
     public void createSubcategories(Long id, List<AdvertisementCategoryRequest> subcategoryList){
         AdvertisementCategory parent = categoryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Category not found"));
@@ -69,6 +72,7 @@ public class CategoryService {
 
     }
 
+    // TODO support the cases of deep hierarchy
     public void deleteCategory(Long id){
         AdvertisementCategory advertisementCategory = categoryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Category not found"));

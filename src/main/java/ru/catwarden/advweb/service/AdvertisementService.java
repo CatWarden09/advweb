@@ -32,10 +32,21 @@ public class AdvertisementService {
                 .orElseThrow(() -> new RuntimeException("Advertisement not found"));
 
         return advertisementMapper.toResponse(advertisement);
+
     }
 
-    public Page<AdvertisementResponse> getAllAdvertisements(Pageable pageable){
-        return advertisementRepository.findAll(pageable)
+    public Page<AdvertisementResponse> getAllApprovedAdvertisements(Pageable pageable){
+        return advertisementRepository.findAllByAdModerationStatus(AdModerationStatus.APPROVED, pageable)
+                .map(advertisementMapper::toResponse);
+    }
+
+    public Page<AdvertisementResponse> getAllPendingAdvertisements(Pageable pageable){
+        return advertisementRepository.findAllByAdModerationStatus(AdModerationStatus.PENDING, pageable)
+                .map(advertisementMapper::toResponse);
+    }
+
+    public Page<AdvertisementResponse> getAllRejectedAdvertisements(Pageable pageable){
+        return advertisementRepository.findAllByAdModerationStatus(AdModerationStatus.REJECTED, pageable)
                 .map(advertisementMapper::toResponse);
     }
 
@@ -83,8 +94,30 @@ public class AdvertisementService {
             advertisement.setAddress(advertisementUpdateRequest.getAddress());
         }
 
+        advertisement.setAdModerationStatus(AdModerationStatus.PENDING);
+
         advertisementRepository.save(advertisement);
 
+    }
+
+    // TODO add status checking (cannot approve not pending)
+    public void approveAdvertisement(Long id){
+        Advertisement advertisement = advertisementRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Advertisement not found"));
+
+        advertisement.setAdModerationStatus(AdModerationStatus.APPROVED);
+
+        advertisementRepository.save(advertisement);
+    }
+
+    public void rejectAdvertisement(Long id, String moderationRejectionReason){
+        Advertisement advertisement = advertisementRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Advertisement not found"));
+
+        advertisement.setAdModerationStatus(AdModerationStatus.REJECTED);
+        advertisement.setModerationRejectionReason(moderationRejectionReason);
+
+        advertisementRepository.save(advertisement);
     }
 
     public void deleteAdvertisement(Long id){

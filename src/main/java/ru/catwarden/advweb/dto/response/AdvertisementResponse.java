@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class AdvertisementResponse {
     private Long id;
+    private Long authorId;
     private String name;
     private String description;
     private Double price;
