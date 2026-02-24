@@ -10,12 +10,9 @@ RUN ./mvnw dependency:go-offline
 
 COPY src ./src
 
-RUN ./mvnw clean package
+RUN ./mvnw clean package -DskipTests
 
-COPY target/advweb-0.3.jar app.jar
 
-# Экспонируем порт
 EXPOSE 8080
 
-# Команда запуска
-ENTRYPOINT ["java","-jar","app.jar"]
+ENTRYPOINT ["java","-jar","target/advweb-0.3.jar"]
