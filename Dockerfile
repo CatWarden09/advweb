@@ -1,7 +1,11 @@
 FROM eclipse-temurin:21-jdk-jammy
 
 WORKDIR /app
-COPY pom.xml .
+COPY pom.xml mvnw ./
+COPY .mvn/ .mvn/
+
+RUN chmod +x mvnw
+
 RUN ./mvnw dependency:go-offline
 
 COPY src ./src
