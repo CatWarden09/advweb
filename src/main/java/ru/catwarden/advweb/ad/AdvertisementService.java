@@ -33,23 +33,23 @@ public class AdvertisementService {
         Advertisement advertisement = advertisementRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Advertisement not found"));
 
-        return advertisementMapper.toResponse(advertisement);
+        return this.mapWithImages(advertisement);
 
     }
 
     public Page<AdvertisementResponse> getAllApprovedAdvertisements(Pageable pageable){
         return advertisementRepository.findAllByAdModerationStatus(AdModerationStatus.APPROVED, pageable)
-                .map(advertisementMapper::toResponse);
+                .map(this::mapWithPreviewImage);
     }
 
     public Page<AdvertisementResponse> getAllPendingAdvertisements(Pageable pageable){
         return advertisementRepository.findAllByAdModerationStatus(AdModerationStatus.PENDING, pageable)
-                .map(advertisementMapper::toResponse);
+                .map(this::mapWithPreviewImage);
     }
 
     public Page<AdvertisementResponse> getAllRejectedAdvertisements(Pageable pageable){
         return advertisementRepository.findAllByAdModerationStatus(AdModerationStatus.REJECTED, pageable)
-                .map(advertisementMapper::toResponse);
+                .map(this::mapWithPreviewImage);
     }
 
     // need to use @Transactional because there are multiple DB operations in single method
@@ -131,7 +131,26 @@ public class AdvertisementService {
         advertisementRepository.save(advertisement);
     }
 
+    // TODO add cascade images deletion (or assigned to ad = false and auto deletion later)
     public void deleteAdvertisement(Long id){
         advertisementRepository.deleteById(id);
     }
+
+    // use private mapper to avoid code repeating in get ads methods and not to overload Ad entity with all the images
+    // (we get images only when we open the add or show the ad list (and then we use the preview image and not all of them))
+    // 1st method is for ads list (get only 1st image)
+    // 2nd method is for specific ad page (get all images)
+    private AdvertisementResponse mapWithPreviewImage(Advertisement advertisement){
+        AdvertisementResponse advertisementResponse = advertisementMapper.toResponse(advertisement);
+        advertisementResponse.setImageUrls(imageService.getPreviewImageUrlByAdvertisementId(advertisement.getId()));
+
+        return advertisementResponse;
+    }
+    private AdvertisementResponse mapWithImages(Advertisement advertisement){
+        AdvertisementResponse advertisementResponse = advertisementMapper.toResponse(advertisement);
+        advertisementResponse.setImageUrls(imageService.getImageUrlsByAdvertisementId(advertisement.getId()));
+
+        return advertisementResponse;
+    }
 }
+
