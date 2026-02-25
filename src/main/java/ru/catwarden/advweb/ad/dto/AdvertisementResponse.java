@@ -1,4 +1,4 @@
-package ru.catwarden.advweb.dto.response;
+package ru.catwarden.advweb.ad.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

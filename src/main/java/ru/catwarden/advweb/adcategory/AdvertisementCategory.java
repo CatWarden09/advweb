@@ -1,6 +1,5 @@
-package ru.catwarden.advweb.entity;
+package ru.catwarden.advweb.adcategory;
 
-import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -1,9 +1,8 @@
-package ru.catwarden.advweb.mapper;
+package ru.catwarden.advweb.adcategory;
 
 import org.springframework.stereotype.Component;
-import ru.catwarden.advweb.dto.request.AdvertisementCategoryRequest;
-import ru.catwarden.advweb.dto.response.AdvertisementCategoryResponse;
-import ru.catwarden.advweb.entity.AdvertisementCategory;
+import ru.catwarden.advweb.adcategory.dto.AdvertisementCategoryRequest;
+import ru.catwarden.advweb.adcategory.dto.AdvertisementCategoryResponse;
 
 @Component
 public class AdvertisementCategoryMapper {

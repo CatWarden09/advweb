@@ -1,14 +1,13 @@
-package ru.catwarden.advweb.controller;
+package ru.catwarden.advweb.ad;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
-import ru.catwarden.advweb.dto.request.AdvertisementRequest;
-import ru.catwarden.advweb.dto.request.AdvertisementUpdateRequest;
-import ru.catwarden.advweb.dto.response.AdvertisementResponse;
-import ru.catwarden.advweb.service.AdvertisementService;
+import ru.catwarden.advweb.ad.dto.AdvertisementRequest;
+import ru.catwarden.advweb.ad.dto.AdvertisementUpdateRequest;
+import ru.catwarden.advweb.ad.dto.AdvertisementResponse;
 
 
 // TODO add default redirect (@ExceptionHandler...)

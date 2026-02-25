@@ -5,8 +5,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
-import ru.catwarden.advweb.dto.response.AdvertisementResponse;
-import ru.catwarden.advweb.service.AdvertisementService;
+import ru.catwarden.advweb.ad.dto.AdvertisementResponse;
+import ru.catwarden.advweb.ad.AdvertisementService;
 
 @RestController
 @RequestMapping("/admin/moderation")

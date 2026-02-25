@@ -1,11 +1,8 @@
-package ru.catwarden.advweb.mapper;
+package ru.catwarden.advweb.ad;
 
 import org.springframework.stereotype.Component;
-import ru.catwarden.advweb.dto.request.AdvertisementRequest;
-import ru.catwarden.advweb.dto.response.AdvertisementResponse;
-import ru.catwarden.advweb.entity.Advertisement;
-import ru.catwarden.advweb.entity.User;
-import ru.catwarden.advweb.enums.AdModerationStatus;
+import ru.catwarden.advweb.ad.dto.AdvertisementRequest;
+import ru.catwarden.advweb.ad.dto.AdvertisementResponse;
 
 @Component
 public class AdvertisementMapper {
