@@ -1,4 +1,4 @@
-package ru.catwarden.advweb.dto.response;
+package ru.catwarden.advweb.adcategory.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,9 +9,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AdvertisementCategoryResponse {
-    private Long id;
+public class AdvertisementCategoryUpdateRequest {
     private String name;
-    private Long parentId;
-
 }

@@ -1,4 +1,4 @@
-package ru.catwarden.advweb.dto.request;
+package ru.catwarden.advweb.ad.dto;
 
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;

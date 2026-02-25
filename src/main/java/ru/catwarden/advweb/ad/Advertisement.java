@@ -1,10 +1,12 @@
-package ru.catwarden.advweb.entity;
+package ru.catwarden.advweb.ad;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.catwarden.advweb.adcategory.AdvertisementCategory;
+import ru.catwarden.advweb.entity.User;
 import ru.catwarden.advweb.enums.AdModerationStatus;
 
 import java.time.LocalDateTime;

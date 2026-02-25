@@ -1,14 +1,11 @@
-package ru.catwarden.advweb.service;
+package ru.catwarden.advweb.adcategory;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.catwarden.advweb.dto.request.AdvertisementCategoryRequest;
-import ru.catwarden.advweb.dto.request.AdvertisementCategoryUpdateRequest;
-import ru.catwarden.advweb.dto.response.AdvertisementCategoryResponse;
-import ru.catwarden.advweb.entity.AdvertisementCategory;
-import ru.catwarden.advweb.mapper.AdvertisementCategoryMapper;
-import ru.catwarden.advweb.repository.AdvertisementRepository;
-import ru.catwarden.advweb.repository.CategoryRepository;
+import ru.catwarden.advweb.adcategory.dto.AdvertisementCategoryRequest;
+import ru.catwarden.advweb.adcategory.dto.AdvertisementCategoryUpdateRequest;
+import ru.catwarden.advweb.adcategory.dto.AdvertisementCategoryResponse;
+import ru.catwarden.advweb.ad.AdvertisementRepository;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,8 +1,7 @@
-package ru.catwarden.advweb.repository;
+package ru.catwarden.advweb.adcategory;
 
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import ru.catwarden.advweb.entity.AdvertisementCategory;
 
 import java.util.List;
 
