@@ -19,7 +19,7 @@ public class ImageService {
     private final ImageRepository imageRepository;
     private final ImageMapper imageMapper;
 
-    private final Path uploadDir = Paths.get("uploads");
+    private final Path uploadDir = Paths.get("/app/uploads");
 
     public List<ImageDto> uploadImage(List<MultipartFile> files){
         List<Image> images = new ArrayList<>();
