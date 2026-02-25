@@ -10,6 +10,7 @@ import ru.catwarden.advweb.mapper.AdvertisementCategoryMapper;
 import ru.catwarden.advweb.repository.AdvertisementRepository;
 import ru.catwarden.advweb.repository.CategoryRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -59,12 +60,15 @@ public class CategoryService {
             throw new RuntimeException("Cannot create subcategory for a subcategory");
         }
 
+        // DONE add batch updating
+        List<AdvertisementCategory> advertisementSubcategories = new ArrayList<>();
         for(AdvertisementCategoryRequest advertisementCategoryRequest : subcategoryList){
             AdvertisementCategory advertisementSubcategory = advertisementCategoryMapper.toEntity(advertisementCategoryRequest);
             advertisementSubcategory.setParent(parent);
 
-            categoryRepository.save(advertisementSubcategory);
+            advertisementSubcategories.add(advertisementSubcategory);
         }
+        categoryRepository.saveAll(advertisementSubcategories);
     }
 
     public void updateCategory(Long id, AdvertisementCategoryUpdateRequest advertisementCategoryUpdateRequest){
