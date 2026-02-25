@@ -1,6 +1,9 @@
 FROM eclipse-temurin:21-jdk-jammy
 
 WORKDIR /app
+
+RUN mkdir -p /app/uploads
+
 COPY pom.xml mvnw ./
 COPY .mvn/ .mvn/
 

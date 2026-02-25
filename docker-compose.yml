@@ -26,8 +26,12 @@ services:
       - db
     ports:
       - "8080:8080"
+    volumes:
+      - uploads:/app/uploads
     restart: on-failure
 
 volumes:
   advweb_db_data:
     name: advweb_db_data
+  uploads:
+    name: advweb_uploads
