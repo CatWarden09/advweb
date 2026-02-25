@@ -59,7 +59,7 @@ public class AdvertisementService {
         AdvertisementCategory category = categoryRepository.findById(advertisementRequest.getCategoryId())
                 .orElseThrow(() -> new RuntimeException("Category not found"));
 
-        // Updated the flow to keep the mapper more clean (all other fields are set after builder and checked inside the service)
+        // DONE Updated the flow to keep the mapper more clean (all other fields are set after builder and checked inside the service)
         // TODO add hierarchy validation
         AdvertisementCategory subcategory = null;
         if (advertisementRequest.getSubcategoryId() != null) {
