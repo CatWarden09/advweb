@@ -21,14 +21,20 @@ public class ImageService {
 
     private final Path uploadDir = Paths.get("uploads");
 
-    public List<ImageDto> uploadImage(List<MultipartFile> files) {
+    public List<ImageDto> uploadImage(List<MultipartFile> files){
         List<Image> images = new ArrayList<>();
+
+        try{
+            Files.createDirectories(uploadDir);
+        } catch (IOException e){
+            throw new RuntimeException("Failed to create directory");
+        }
 
         for(MultipartFile file : files) {
             try {
                 String filename = UUID.randomUUID() + "_" + file.getOriginalFilename();
-                Files.createDirectories(uploadDir);
                 Path filePath = uploadDir.resolve(filename);
+
                 file.transferTo(filePath.toFile());
 
                 Image image = new Image();
@@ -50,4 +56,20 @@ public class ImageService {
 
         return imageDtoList;
     }
+
+    // TODO add image validation
+    public void setImagesToAdvertisement(List<Long> imageIds, Long advertisementId){
+        List<Image> images = imageRepository.findAllById(imageIds);
+
+        for(Image image : images){
+            image.setAdId(advertisementId);
+            image.setLinkedToAd(true);
+        }
+        imageRepository.saveAll(images);
+    }
+
+    public List<Image> findUnusedImages(){
+        return imageRepository.findAllByLinkedToAdFalse();
+    }
+
 }

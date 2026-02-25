@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.catwarden.advweb.ad.dto.AdvertisementRequest;
 import ru.catwarden.advweb.ad.dto.AdvertisementUpdateRequest;
 import ru.catwarden.advweb.ad.dto.AdvertisementResponse;
@@ -11,6 +12,7 @@ import ru.catwarden.advweb.adcategory.AdvertisementCategory;
 import ru.catwarden.advweb.entity.User;
 import ru.catwarden.advweb.enums.AdModerationStatus;
 import ru.catwarden.advweb.adcategory.CategoryRepository;
+import ru.catwarden.advweb.image.ImageService;
 import ru.catwarden.advweb.repository.UserRepository;
 
 
@@ -22,6 +24,8 @@ public class AdvertisementService {
     private final CategoryRepository categoryRepository;
     private final AdvertisementRepository advertisementRepository;
     private final AdvertisementMapper advertisementMapper;
+
+    private final ImageService imageService;
 
     // DONE figure out mappers to avoid code repeating
     // TODO figure out MapStruct for better code
@@ -48,8 +52,10 @@ public class AdvertisementService {
                 .map(advertisementMapper::toResponse);
     }
 
-    public void createAdvertisement(AdvertisementRequest advertisementRequest){
-
+    // need to use @Transactional because there are multiple DB operations in single method
+    // if some operations go wrong, we need to roll back all of them or then part changes will be applied to the DB
+    @Transactional
+    public Long createAdvertisement(AdvertisementRequest advertisementRequest){
         User author = userRepository.findById(advertisementRequest.getAuthorId())
                 .orElseThrow(() -> new RuntimeException("Author not found"));
 
@@ -71,7 +77,14 @@ public class AdvertisementService {
         advertisement.setSubcategory(subcategory);
         advertisement.setAdModerationStatus(AdModerationStatus.PENDING);
 
-        advertisementRepository.save(advertisement);
+        Advertisement savedAdvertisement = advertisementRepository.save(advertisement);
+
+        imageService.setImagesToAdvertisement(
+                advertisementRequest.getImageIds(),
+                savedAdvertisement.getId()
+        );
+
+        return savedAdvertisement.getId();
 
     }
 
