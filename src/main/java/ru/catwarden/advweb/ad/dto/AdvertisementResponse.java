@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import ru.catwarden.advweb.enums.AdModerationStatus;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Builder
@@ -25,4 +26,5 @@ public class AdvertisementResponse {
     private LocalDateTime updatedAt;
     private AdModerationStatus adModerationStatus;
     private String moderationRejectionReason;
+    private List<String> imageUrls;
 }

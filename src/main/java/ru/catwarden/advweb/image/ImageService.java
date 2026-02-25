@@ -57,6 +57,23 @@ public class ImageService {
         return imageDtoList;
     }
 
+    public List<String> getPreviewImageUrlByAdvertisementId(Long id){
+        Image image = imageRepository.findFirstByAdId(id)
+                .orElseThrow(() -> new RuntimeException("Image not found"));
+
+        List<String> images = new ArrayList<>();
+        images.add(image.getUrl());
+
+        return images;
+    }
+    public List<String> getImageUrlsByAdvertisementId(Long id){
+        List<Image> images = imageRepository.findAllByAdId(id);
+
+        return images.stream()
+                .map(Image::getUrl)
+                .toList();
+    }
+
     // TODO add image validation
     public void setImagesToAdvertisement(List<Long> imageIds, Long advertisementId){
         List<Image> images = imageRepository.findAllById(imageIds);
