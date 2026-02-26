@@ -25,7 +25,7 @@ public class Comment {
     @Column(nullable = false)
     private String text;
 
-    private Boolean isModerated = false;
+    private Boolean isModerated;
 
     @ManyToOne
     @JoinColumn(name = "author_id", nullable = false)
