@@ -18,6 +18,7 @@ public class CommentMapper {
     public Comment toEntity(CommentRequest commentRequest) {
         return Comment.builder()
                 .text(commentRequest.getText())
+                .isModerated(false)
                 .build();
     }
 }
