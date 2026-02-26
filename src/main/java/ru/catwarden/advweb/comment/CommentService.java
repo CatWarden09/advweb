@@ -26,7 +26,7 @@ public class CommentService {
     private final UserRepository userRepository;
 
     public Page<CommentResponse> getAllUnmoderatedComments(Pageable pageable){
-        return commentRepository.findAllIsModeratedFalse(pageable).
+        return commentRepository.findAllByIsModeratedFalse(pageable).
                 map(commentMapper::toResponse);
     }
 
