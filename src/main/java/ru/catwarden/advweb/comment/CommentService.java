@@ -30,8 +30,9 @@ public class CommentService {
                 map(commentMapper::toResponse);
     }
 
-    public List<CommentResponse> getAdvertisementModeratedComments(Long advertisementId){
-        return commentRepository.findAllByAdIdAndIsModeratedTrue(advertisementId)
+    public List<CommentResponse> getAdvertisementModeratedComments(Long advertisementId, Pageable pageable){
+
+        return commentRepository.findAllByAdIdAndIsModeratedTrue(advertisementId, pageable)
                 .stream()
                 .map(comment -> {
                     CommentResponse response = commentMapper.toResponse(comment);

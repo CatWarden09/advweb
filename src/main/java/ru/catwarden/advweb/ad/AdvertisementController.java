@@ -21,8 +21,11 @@ public class AdvertisementController {
     private final AdvertisementService advertisementService;
 
     @GetMapping("/{id}")
-    public AdvertisementResponse getAdvertisement(@PathVariable Long id){
-        return advertisementService.getAdvertisement(id);
+    public AdvertisementResponse getAdvertisement(@PathVariable Long id, @RequestParam(defaultValue = "0") int page,
+                                                  @RequestParam(defaultValue = "10") int size){
+        Pageable pageable = PageRequest.of(page, size);
+
+        return advertisementService.getAdvertisement(id, pageable);
     }
 
     @GetMapping

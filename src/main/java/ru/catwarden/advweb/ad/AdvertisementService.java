@@ -31,7 +31,8 @@ public class AdvertisementService {
 
     // DONE figure out mappers to avoid code repeating
     // TODO figure out MapStruct for better code
-    public AdvertisementResponse getAdvertisement(Long id){
+    //  add moderation status validation
+    public AdvertisementResponse getAdvertisement(Long id, Pageable pageable){
         Advertisement advertisement = advertisementRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Advertisement not found"));
 
@@ -39,7 +40,7 @@ public class AdvertisementService {
 
         AdvertisementResponse response = this.mapWithImages(advertisement);
 
-        response.setComments(commentService.getAdvertisementModeratedComments(advertisementId));
+        response.setComments(commentService.getAdvertisementModeratedComments(advertisementId, pageable));
 
         return response;
     }
