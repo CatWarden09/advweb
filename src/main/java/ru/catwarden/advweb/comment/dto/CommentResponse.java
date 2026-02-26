@@ -12,6 +12,8 @@ import ru.catwarden.advweb.user.dto.ShortUserInfoResponse;
 @AllArgsConstructor
 public class CommentResponse {
     private Long id;
+    private Long adId;
     private String text;
+    private Boolean isModerated;
     private ShortUserInfoResponse authorInfo;
 }

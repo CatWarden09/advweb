@@ -1,6 +1,8 @@
 package ru.catwarden.advweb.comment;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.catwarden.advweb.ad.Advertisement;
 import ru.catwarden.advweb.ad.AdvertisementRepository;
@@ -23,6 +25,26 @@ public class CommentService {
     private final AdvertisementRepository advertisementRepository;
     private final UserRepository userRepository;
 
+    public Page<CommentResponse> getAllUnmoderatedComments(Pageable pageable){
+        return commentRepository.findAllIsModeratedFalse(pageable).
+                map(commentMapper::toResponse);
+    }
+
+    public List<CommentResponse> getAdvertisementModeratedComments(Long advertisementId){
+        return commentRepository.findAllByAdIdAndIsModeratedTrue(advertisementId)
+                .stream()
+                .map(comment -> {
+                    CommentResponse response = commentMapper.toResponse(comment);
+
+                    ShortUserInfoResponse authorInfo = userMapper.toShortUserInfoResponse(comment.getAuthor());
+                    response.setAuthorInfo(authorInfo);
+
+                    return response;
+                })
+                .toList();
+
+    }
+
     public void createComment(CommentRequest commentRequest){
         User author = userRepository.findById(commentRequest.getAuthorId())
             .orElseThrow(() -> new RuntimeException("User not found"));
@@ -37,18 +59,28 @@ public class CommentService {
         commentRepository.save(comment);
     }
 
-    public List<CommentResponse> getAdvertisementComments(Long advertisementId){
-        return commentRepository.findAllByAdId(advertisementId)
-            .stream()
-            .map(comment -> {
-                CommentResponse response = commentMapper.toResponse(comment);
+    public void updateComment(Long id, CommentRequest commentRequest){
+        Comment comment = commentRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Comment not found"));
 
-                ShortUserInfoResponse authorInfo = userMapper.toShortUserInfoResponse(comment.getAuthor());
-                response.setAuthorInfo(authorInfo);
+        comment.setText(commentRequest.getText());
 
-                return response;
-            })
-            .toList();
-
+        commentRepository.save(comment);
     }
+
+    public void updateCommentOnModeration(Long id, CommentRequest commentRequest){
+        Comment comment = commentRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Comment not found"));
+
+        comment.setText(commentRequest.getText());
+        comment.setIsModerated(true);
+
+        commentRepository.save(comment);
+    }
+
+    public void deleteComment(Long id){
+        commentRepository.deleteById(id);
+    }
+
+
 }

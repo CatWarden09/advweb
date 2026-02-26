@@ -9,6 +9,8 @@ public class CommentMapper {
     public CommentResponse toResponse(Comment comment) {
         return CommentResponse.builder()
                 .id(comment.getId())
+                .adId(comment.getAd().getId())
+                .isModerated(comment.getIsModerated())
                 .text(comment.getText())
                 .build();
     }
