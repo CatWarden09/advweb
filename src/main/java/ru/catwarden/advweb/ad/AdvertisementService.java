@@ -14,7 +14,7 @@ import ru.catwarden.advweb.user.User;
 import ru.catwarden.advweb.enums.AdModerationStatus;
 import ru.catwarden.advweb.adcategory.CategoryRepository;
 import ru.catwarden.advweb.image.ImageService;
-import ru.catwarden.advweb.repository.UserRepository;
+import ru.catwarden.advweb.user.UserRepository;
 
 
 

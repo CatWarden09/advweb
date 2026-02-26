@@ -1,7 +1,6 @@
-package ru.catwarden.advweb.repository;
+package ru.catwarden.advweb.user;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import ru.catwarden.advweb.user.User;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 }
