@@ -39,7 +39,7 @@ public class AdvertisementService {
 
         AdvertisementResponse response = this.mapWithImages(advertisement);
 
-        response.setComments(commentService.getAdvertisementComments(advertisementId));
+        response.setComments(commentService.getAdvertisementModeratedComments(advertisementId));
 
         return response;
     }

@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 import ru.catwarden.advweb.ad.Advertisement;
 import ru.catwarden.advweb.user.User;
 
+import java.time.LocalDateTime;
+
 
 @Entity
 @Table(name = "comments")
@@ -23,6 +25,8 @@ public class Comment {
     @Column(nullable = false)
     private String text;
 
+    private Boolean isModerated = false;
+
     @ManyToOne
     @JoinColumn(name = "author_id", nullable = false)
     private User author;
@@ -30,5 +34,13 @@ public class Comment {
     @ManyToOne
     @JoinColumn(name = "ad_id", nullable = false)
     private Advertisement ad;
+
+    @Column(nullable = false)
+    private LocalDateTime createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
 
 }
