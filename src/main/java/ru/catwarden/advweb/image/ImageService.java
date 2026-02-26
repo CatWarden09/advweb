@@ -43,7 +43,7 @@ public class ImageService {
                 images.add(image);
 
             } catch (IOException e) {
-                throw new RuntimeException("Не удалось сохранить файл", e);
+                throw new RuntimeException("Failed to save the file", e);
             }
         }
 

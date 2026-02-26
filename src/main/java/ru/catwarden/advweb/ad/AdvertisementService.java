@@ -9,7 +9,8 @@ import ru.catwarden.advweb.ad.dto.AdvertisementRequest;
 import ru.catwarden.advweb.ad.dto.AdvertisementUpdateRequest;
 import ru.catwarden.advweb.ad.dto.AdvertisementResponse;
 import ru.catwarden.advweb.adcategory.AdvertisementCategory;
-import ru.catwarden.advweb.entity.User;
+import ru.catwarden.advweb.comment.CommentService;
+import ru.catwarden.advweb.user.User;
 import ru.catwarden.advweb.enums.AdModerationStatus;
 import ru.catwarden.advweb.adcategory.CategoryRepository;
 import ru.catwarden.advweb.image.ImageService;
@@ -26,6 +27,7 @@ public class AdvertisementService {
     private final AdvertisementMapper advertisementMapper;
 
     private final ImageService imageService;
+    private final CommentService commentService;
 
     // DONE figure out mappers to avoid code repeating
     // TODO figure out MapStruct for better code
@@ -33,8 +35,13 @@ public class AdvertisementService {
         Advertisement advertisement = advertisementRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Advertisement not found"));
 
-        return this.mapWithImages(advertisement);
+        Long advertisementId = advertisement.getId();
 
+        AdvertisementResponse response = this.mapWithImages(advertisement);
+
+        response.setComments(commentService.getAdvertisementComments(advertisementId));
+
+        return response;
     }
 
     public Page<AdvertisementResponse> getAllApprovedAdvertisements(Pageable pageable){
