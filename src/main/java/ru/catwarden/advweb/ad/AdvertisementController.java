@@ -42,4 +42,9 @@ public class AdvertisementController {
                              @RequestBody AdvertisementUpdateRequest advertisementUpdateRequest){
         advertisementService.updateAdvertisement(id, advertisementUpdateRequest);
     }
+
+    @DeleteMapping("/{id}")
+    public void deleteAdvertisement(@PathVariable Long id){
+        advertisementService.deleteAdvertisement(id);
+    }
 }
