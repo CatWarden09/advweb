@@ -1,0 +1,2 @@
+ALTER TABLE users
+    ADD rating DOUBLE PRECISION;
