@@ -1,4 +1,4 @@
-package ru.catwarden.advweb.entity;
+package ru.catwarden.advweb.user;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -30,6 +30,8 @@ public class User {
 
     @Column(nullable = false, unique = true)
     private String email;
+
+    private Double rating;
 
     @Column(nullable = false)
     private String password;

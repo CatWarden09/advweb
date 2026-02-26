@@ -1,3 +1,5 @@
+# separate layers allow not to download all dependencies if only the code has changed (src folder)
+# mvnw is used because it allows not to dowload Maven to the machine from where the project is built
 FROM eclipse-temurin:21-jdk-jammy
 
 WORKDIR /app
