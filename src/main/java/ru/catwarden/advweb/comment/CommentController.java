@@ -3,6 +3,7 @@ package ru.catwarden.advweb.comment;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.catwarden.advweb.comment.dto.CommentRequest;
+import ru.catwarden.advweb.comment.dto.CommentUpdateRequest;
 
 @RestController
 @RequestMapping("/comments")
@@ -16,8 +17,8 @@ public class CommentController {
     }
 
     @PatchMapping("/{id}")
-    public void updateComment(@PathVariable Long id, @RequestBody CommentRequest commentRequest) {
-        commentService.updateComment(id, commentRequest);
+    public void updateComment(@PathVariable Long id, @RequestBody CommentUpdateRequest commentUpdateRequest) {
+        commentService.updateComment(id, commentUpdateRequest);
     }
 
     @DeleteMapping("/{id}")
