@@ -8,6 +8,7 @@ import ru.catwarden.advweb.ad.Advertisement;
 import ru.catwarden.advweb.ad.AdvertisementRepository;
 import ru.catwarden.advweb.comment.dto.CommentRequest;
 import ru.catwarden.advweb.comment.dto.CommentResponse;
+import ru.catwarden.advweb.comment.dto.CommentUpdateRequest;
 import ru.catwarden.advweb.user.UserRepository;
 import ru.catwarden.advweb.user.User;
 import ru.catwarden.advweb.user.UserMapper;
@@ -60,11 +61,12 @@ public class CommentService {
         commentRepository.save(comment);
     }
 
-    public void updateComment(Long id, CommentRequest commentRequest){
+    public void updateComment(Long id, CommentUpdateRequest commentUpdateRequest){
         Comment comment = commentRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Comment not found"));
 
-        comment.setText(commentRequest.getText());
+        comment.setText(commentUpdateRequest.getText());
+        comment.setIsModerated(false);
 
         commentRepository.save(comment);
     }
