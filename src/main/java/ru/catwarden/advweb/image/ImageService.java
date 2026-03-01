@@ -74,7 +74,7 @@ public class ImageService {
                 .toList();
     }
 
-    // TODO add image validation
+    // TODO add image format validation
     public void setImagesToAdvertisement(List<Long> imageIds, Long advertisementId){
         List<Image> images = imageRepository.findAllById(imageIds);
 
@@ -83,6 +83,10 @@ public class ImageService {
             image.setLinkedToAd(true);
         }
         imageRepository.saveAll(images);
+    }
+
+    public void unlinkImagesFromAdvertisement(Long advertisementId, List<Long> imageIds){
+        imageRepository.unlinkImagesFromAdvertisement(advertisementId, imageIds);
     }
 
     public List<Image> findUnusedImages(){
