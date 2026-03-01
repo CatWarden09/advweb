@@ -16,6 +16,7 @@ import ru.catwarden.advweb.adcategory.CategoryRepository;
 import ru.catwarden.advweb.image.ImageService;
 import ru.catwarden.advweb.user.UserRepository;
 
+import java.util.List;
 
 
 @Service
@@ -96,6 +97,7 @@ public class AdvertisementService {
 
     }
 
+    @Transactional
     public void updateAdvertisement(Long id, AdvertisementUpdateRequest advertisementUpdateRequest){
         Advertisement advertisement = advertisementRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Advertisement not found"));
@@ -111,6 +113,15 @@ public class AdvertisementService {
         }
         if(advertisementUpdateRequest.getAddress() != null) {
             advertisement.setAddress(advertisementUpdateRequest.getAddress());
+        }
+
+        // TODO add no updates check
+        List<Long> imageIds = advertisementUpdateRequest.getImageIds();
+        if(imageIds != null) {
+            imageService.unlinkImagesFromAdvertisement(id, imageIds);
+            imageService.setImagesToAdvertisement(imageIds, id);
+        } else{
+            throw new RuntimeException("Advertisement must have at least one image");
         }
 
         advertisement.setAdModerationStatus(AdModerationStatus.PENDING);
