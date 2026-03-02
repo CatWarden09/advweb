@@ -20,9 +20,10 @@ public class Image {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false, unique = true)
     private String path;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String url;
 
     private Boolean linkedToAd = false;
