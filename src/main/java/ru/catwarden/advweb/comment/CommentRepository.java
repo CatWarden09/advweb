@@ -12,4 +12,6 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     Page<Comment> findAllByAdIdAndIsModeratedTrue(Long id, Pageable pageable);
 
     Page<Comment> findAllByIsModeratedFalse(Pageable pageable);
+
+    void deleteAllByAdId(Long id);
 }

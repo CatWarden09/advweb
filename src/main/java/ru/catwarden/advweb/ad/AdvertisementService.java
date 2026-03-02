@@ -153,6 +153,8 @@ public class AdvertisementService {
     // TODO add cascade images deletion (or assigned to ad = false and auto deletion later)
     public void deleteAdvertisement(Long id){
         advertisementRepository.deleteById(id);
+
+        commentService.deleteCommentsByAdId(id);
     }
 
     // use private mapper to avoid code repeating in get ads methods and not to overload Ad entity with all the images
