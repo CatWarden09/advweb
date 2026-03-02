@@ -85,8 +85,27 @@ public class ImageService {
         imageRepository.saveAll(images);
     }
 
-    public void unlinkImagesFromAdvertisement(Long advertisementId, List<Long> imageIds){
-        imageRepository.unlinkImagesFromAdvertisement(advertisementId, imageIds);
+    // NOTE found out another way to do this with .filter(), without custom SQL (more flexible, less resource-efficient)
+    //    List<Image> images = imageRepository.findAllByAdId(advertisementId);
+    //    List<Image> toUnlink = images.stream()
+    //            .filter(image -> !imageIds.contains(image.getId()))
+    //            .toList();
+    //    List<Image> toUnlink = images.stream()
+    //            .filter(image -> !imageIds.contains(image.getId()))
+    //            .toList();
+    //    imageRepository.saveAll(toUnlink);
+    public void unlinkDeletedImagesFromAdvertisement(Long advertisementId, List<Long> imageIds){
+        imageRepository.unlinkDeletedImagesFromAdvertisement(advertisementId, imageIds);
+    }
+
+    public void unlinkAllImagesFromAdvertisement(Long advertisementId){
+        List<Image> images = imageRepository.findAllByAdId(advertisementId);
+
+        for(Image image : images){
+            image.setAdId(null);
+            image.setLinkedToAd(false);
+        }
+        imageRepository.saveAll(images);
     }
 
     public List<Image> findUnusedImages(){

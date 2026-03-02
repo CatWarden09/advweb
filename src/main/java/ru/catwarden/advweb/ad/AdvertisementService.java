@@ -10,6 +10,7 @@ import ru.catwarden.advweb.ad.dto.AdvertisementUpdateRequest;
 import ru.catwarden.advweb.ad.dto.AdvertisementResponse;
 import ru.catwarden.advweb.adcategory.AdvertisementCategory;
 import ru.catwarden.advweb.comment.CommentService;
+import ru.catwarden.advweb.image.ImageRepository;
 import ru.catwarden.advweb.user.User;
 import ru.catwarden.advweb.enums.AdModerationStatus;
 import ru.catwarden.advweb.adcategory.CategoryRepository;
@@ -29,6 +30,7 @@ public class AdvertisementService {
 
     private final ImageService imageService;
     private final CommentService commentService;
+    private final ImageRepository imageRepository;
 
     // DONE figure out mappers to avoid code repeating
     // TODO figure out MapStruct for better code
@@ -118,7 +120,7 @@ public class AdvertisementService {
         // TODO add no updates check
         List<Long> imageIds = advertisementUpdateRequest.getImageIds();
         if(imageIds != null) {
-            imageService.unlinkImagesFromAdvertisement(id, imageIds);
+            imageService.unlinkDeletedImagesFromAdvertisement(id, imageIds);
             imageService.setImagesToAdvertisement(imageIds, id);
         } else{
             throw new RuntimeException("Advertisement must have at least one image");
@@ -150,11 +152,12 @@ public class AdvertisementService {
         advertisementRepository.save(advertisement);
     }
 
-    // TODO add cascade images deletion (or assigned to ad = false and auto deletion later)
     public void deleteAdvertisement(Long id){
         advertisementRepository.deleteById(id);
 
         commentService.deleteCommentsByAdId(id);
+
+        imageService.unlinkAllImagesFromAdvertisement(id);
     }
 
     // use private mapper to avoid code repeating in get ads methods and not to overload Ad entity with all the images

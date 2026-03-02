@@ -23,5 +23,7 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
         WHERE i.adId = :adId
         AND i.id NOT IN :imageIds
 """)
-    void unlinkImagesFromAdvertisement(Long adId, List<Long> imageIds);
+    void unlinkDeletedImagesFromAdvertisement(Long adId, List<Long> imageIds);
+
+
 }
