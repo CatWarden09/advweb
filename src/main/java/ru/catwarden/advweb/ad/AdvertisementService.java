@@ -32,6 +32,8 @@ public class AdvertisementService {
     private final CommentService commentService;
     private final ImageRepository imageRepository;
 
+    private final int MAX_IMAGES_PER_AD = 10;
+
     // DONE figure out mappers to avoid code repeating
     // TODO figure out MapStruct for better code
     //  add moderation status validation
@@ -79,6 +81,10 @@ public class AdvertisementService {
         if (advertisementRequest.getSubcategoryId() != null) {
             subcategory = categoryRepository.findById(advertisementRequest.getSubcategoryId())
                     .orElseThrow(() -> new RuntimeException("Subcategory not found"));
+        }
+
+        if (advertisementRequest.getImageIds().size() > MAX_IMAGES_PER_AD) {
+            throw new RuntimeException("Limit for advertisement pictures is exceeded");
         }
 
         Advertisement advertisement = advertisementMapper.toEntity(advertisementRequest);
