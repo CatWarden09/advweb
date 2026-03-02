@@ -1,6 +1,7 @@
 package ru.catwarden.advweb.image;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.catwarden.advweb.image.dto.ImageDto;
@@ -39,6 +40,8 @@ public class ImageService {
 
                 Image image = new Image();
                 image.setUrl("/uploads/" + filename);
+
+                image.setPath(filePath.toString());
 
                 images.add(image);
 
@@ -108,8 +111,19 @@ public class ImageService {
         imageRepository.saveAll(images);
     }
 
-    public List<Image> findUnusedImages(){
-        return imageRepository.findAllByLinkedToAdFalse();
+    @Scheduled(cron = "0 0 4 * * *", zone = "Europe/Moscow")
+    public void deleteUnusedImages(){
+        List<Image> images = imageRepository.findAllByLinkedToAdFalse();
+
+        try{
+            for(Image image : images){
+                Files.deleteIfExists(Paths.get(image.getPath()));
+            }
+        } catch (IOException e){
+            throw new RuntimeException("Failed to delete unused images");
+        }
+
+        imageRepository.deleteAll(images);
     }
 
 }
