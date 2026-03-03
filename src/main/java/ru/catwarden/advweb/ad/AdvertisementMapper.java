@@ -6,7 +6,6 @@ import ru.catwarden.advweb.ad.dto.AdvertisementResponse;
 
 @Component
 public class AdvertisementMapper {
-
     public AdvertisementResponse toResponse(Advertisement ad) {
         return AdvertisementResponse.builder()
                 .id(ad.getId())

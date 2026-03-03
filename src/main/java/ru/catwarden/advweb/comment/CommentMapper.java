@@ -12,6 +12,7 @@ public class CommentMapper {
                 .adId(comment.getAd().getId())
                 .isModerated(comment.getIsModerated())
                 .text(comment.getText())
+                .createdAt(comment.getCreatedAt())
                 .build();
     }
 

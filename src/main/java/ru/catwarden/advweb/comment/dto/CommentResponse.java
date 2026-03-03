@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.catwarden.advweb.user.dto.ShortUserInfoResponse;
 
+import java.time.LocalDateTime;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -16,4 +18,5 @@ public class CommentResponse {
     private String text;
     private Boolean isModerated;
     private ShortUserInfoResponse authorInfo;
+    private LocalDateTime createdAt;
 }
