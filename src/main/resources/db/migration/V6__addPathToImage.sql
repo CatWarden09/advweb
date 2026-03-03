@@ -1,4 +1,4 @@
 ALTER TABLE images
     ADD path VARCHAR(255) NOT NULL,
-    ADD CONSTRAINT uc_image_path UNIQUE (path),
-    ADD CONSTRAINT uc_image_url UNIQUE (url);
+    ADD CONSTRAINT UC_IMAGE_PATH UNIQUE (path),
+    ADD CONSTRAINT UC_IMAGE_URL UNIQUE (url);
