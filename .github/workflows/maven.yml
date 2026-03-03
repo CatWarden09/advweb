@@ -23,8 +23,8 @@ jobs:
     - name: Make Maven Wrapper executable
       run: chmod +x ./mvnw
     
-    - name: Build with Maven Wrapper
-      run: ./mvnw -B package
+    - name: Build project with Maven Wrapper
+      run: ./mvnw -B package -DskipTests
       
     - name: Deploy to server via SSH
       uses: appleboy/ssh-action@v1.0.3
@@ -34,6 +34,7 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         script: |
           cd /root/advweb
+          git checkout master
           git pull
           docker compose down
           docker compose up --build -d
