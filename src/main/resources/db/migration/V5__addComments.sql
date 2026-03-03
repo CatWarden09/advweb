@@ -6,7 +6,7 @@ CREATE TABLE comments
     author_id    BIGINT                                  NOT NULL,
     ad_id        BIGINT                                  NOT NULL,
     created_at   TIMESTAMP WITHOUT TIME ZONE             NOT NULL,
-    CONSTRAINT PK_COMMENTS PRIMARY KEY (id)
+    CONSTRAINT pk_comments PRIMARY KEY (id)
 );
 
 ALTER TABLE comments

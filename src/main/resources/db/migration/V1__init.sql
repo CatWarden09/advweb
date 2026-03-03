@@ -12,7 +12,7 @@ CREATE TABLE advertisements
     updated_at                  TIMESTAMP WITHOUT TIME ZONE,
     ad_moderation_status        SMALLINT                                NOT NULL,
     moderation_rejection_reason VARCHAR(255),
-    CONSTRAINT PK_ADVERTISEMENTS PRIMARY KEY (id)
+    CONSTRAINT pk_advertisements PRIMARY KEY (id)
 );
 
 CREATE TABLE users
@@ -23,14 +23,14 @@ CREATE TABLE users
     phone      VARCHAR(255)                            NOT NULL,
     email      VARCHAR(255)                            NOT NULL,
     password   VARCHAR(255)                            NOT NULL,
-    CONSTRAINT PK_USERS PRIMARY KEY (id)
+    CONSTRAINT pk_users PRIMARY KEY (id)
 );
 
 ALTER TABLE users
-    ADD CONSTRAINT UC_USERS_EMAIL UNIQUE (email);
+    ADD CONSTRAINT uc_users_email UNIQUE (email);
 
 ALTER TABLE users
-    ADD CONSTRAINT UC_USERS_PHONE UNIQUE (phone);
+    ADD CONSTRAINT uc_users_phone UNIQUE (phone);
 
 ALTER TABLE advertisements
     ADD CONSTRAINT FK_ADVERTISEMENTS_ON_AUTHOR FOREIGN KEY (author_id) REFERENCES users (id);

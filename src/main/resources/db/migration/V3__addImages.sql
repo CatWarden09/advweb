@@ -4,5 +4,5 @@ CREATE TABLE images
     url          VARCHAR(255)                            NOT NULL,
     linked_to_ad BOOLEAN,
     ad_id        BIGINT,
-    CONSTRAINT PK_IMAGES PRIMARY KEY (id)
+    CONSTRAINT pk_images PRIMARY KEY (id)
 );
