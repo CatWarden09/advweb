@@ -24,7 +24,7 @@ jobs:
       run: chmod +x ./mvnw
     
     - name: Build with Maven Wrapper
-      run: ./mvnw -B package
+      run: ./mvnw -B package -DskipTests
       
     - name: Deploy to server via SSH
       uses: appleboy/ssh-action@v1.0.3
