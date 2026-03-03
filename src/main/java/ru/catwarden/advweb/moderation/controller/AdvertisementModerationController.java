@@ -1,4 +1,4 @@
-package ru.catwarden.advweb.controller;
+package ru.catwarden.advweb.moderation.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -12,13 +12,12 @@ import ru.catwarden.advweb.comment.dto.CommentRequest;
 import ru.catwarden.advweb.comment.dto.CommentResponse;
 
 @RestController
-@RequestMapping("/admin/moderation")
+@RequestMapping("/admin/ads-moderation")
 @RequiredArgsConstructor
-public class ModerationController {
+public class AdvertisementModerationController {
     private final AdvertisementService advertisementService;
-    private final CommentService commentService;
 
-    @GetMapping("/ads/pending")
+    @GetMapping("/pending")
     public Page<AdvertisementResponse> getAllPendingAdvertisements(@RequestParam(defaultValue = "0") int page,
                                                                    @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
@@ -26,56 +25,37 @@ public class ModerationController {
         return advertisementService.getAllPendingAdvertisements(pageable);
     }
 
-    @GetMapping("/ads/rejected")
+    @GetMapping("/rejected")
     public Page<AdvertisementResponse> getAllRejectedAdvertisements(@RequestParam(defaultValue = "0") int page,
-                                                                   @RequestParam(defaultValue = "10") int size) {
+                                                                    @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
 
         return advertisementService.getAllRejectedAdvertisements(pageable);
     }
 
-    @GetMapping("/ads/{id}")
+    @GetMapping("/{id}")
     public AdvertisementResponse getAdvertisement(@RequestParam(defaultValue = "0") int page,
                                                   @RequestParam(defaultValue = "10") int size,
-            @PathVariable Long id){
-
+                                                  @PathVariable Long id) {
         Pageable pageable = PageRequest.of(page, size);
 
         return advertisementService.getAdvertisement(id, pageable);
     }
 
-    @PatchMapping("/ads/pending/{id}/approve")
-    public void approveAdvertisement(@PathVariable Long id){
+    @PatchMapping("pending/{id}/approve")
+    public void approveAdvertisement(@PathVariable Long id) {
         advertisementService.approveAdvertisement(id);
     }
 
-    @PatchMapping("/ads/pending/{id}/reject")
+    @PatchMapping("/pending/{id}/reject")
     public void rejectAdvertisement(@PathVariable Long id,
-                                    @RequestParam String moderationRejectionReason){
+                                    @RequestParam String moderationRejectionReason) {
         advertisementService.rejectAdvertisement(id, moderationRejectionReason);
     }
 
 
-    @DeleteMapping("/ads/{id}")
-    public void deleteAdvertisement(@PathVariable Long id){
+    @DeleteMapping("/{id}")
+    public void deleteAdvertisement(@PathVariable Long id) {
         advertisementService.deleteAdvertisement(id);
-    }
-
-    @GetMapping("/comments")
-    public Page<CommentResponse> getAllComments(@RequestParam(defaultValue = "0") int page,
-                                                @RequestParam(defaultValue = "10") int size) {
-        Pageable pageable = PageRequest.of(page, size);
-
-        return commentService.getAllUnmoderatedComments(pageable);
-    }
-
-    @PatchMapping("/comments/{id}")
-    public void updateCommentOnModeration(@PathVariable Long id, @RequestBody CommentRequest commentRequest) {
-        commentService.updateCommentOnModeration(id, commentRequest);
-    }
-
-    @DeleteMapping("/comments/{id}")
-    public void deleteComment(@PathVariable Long id) {
-        commentService.deleteComment(id);
     }
 }

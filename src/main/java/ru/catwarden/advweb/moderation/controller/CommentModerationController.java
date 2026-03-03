@@ -1,0 +1,38 @@
+package ru.catwarden.advweb.moderation.controller;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.web.bind.annotation.*;
+import ru.catwarden.advweb.comment.CommentService;
+import ru.catwarden.advweb.comment.dto.CommentRequest;
+import ru.catwarden.advweb.comment.dto.CommentResponse;
+
+@RestController
+@RequestMapping("/admin/comments-moderation")
+@RequiredArgsConstructor
+public class CommentModerationController {
+    private final CommentService commentService;
+
+    @GetMapping
+    public Page<CommentResponse> getAllUnmoderatedComments(@RequestParam(defaultValue = "0") int page,
+                                                           @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        return commentService.getAllUnmoderatedComments(pageable);
+    }
+
+    @PatchMapping("/{id}")
+    public void updateCommentOnModeration(@PathVariable Long id, @RequestBody CommentRequest commentRequest) {
+        commentService.updateCommentOnModeration(id, commentRequest);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteComment(@PathVariable Long id) {
+        commentService.deleteComment(id);
+    }
+}
+
+
+
