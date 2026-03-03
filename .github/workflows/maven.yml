@@ -23,7 +23,7 @@ jobs:
     - name: Make Maven Wrapper executable
       run: chmod +x ./mvnw
     
-    - name: Build with Maven Wrapper
+    - name: Build project with Maven Wrapper
       run: ./mvnw -B package -DskipTests
       
     - name: Deploy to server via SSH
