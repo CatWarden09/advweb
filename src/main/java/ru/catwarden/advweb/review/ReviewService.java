@@ -9,7 +9,9 @@ import ru.catwarden.advweb.review.dto.ReviewRequest;
 import ru.catwarden.advweb.review.dto.ReviewResponse;
 import ru.catwarden.advweb.review.dto.ReviewUpdateRequest;
 import ru.catwarden.advweb.user.User;
+import ru.catwarden.advweb.user.UserMapper;
 import ru.catwarden.advweb.user.UserRepository;
+import ru.catwarden.advweb.user.dto.ShortUserInfoResponse;
 
 @Service
 @RequiredArgsConstructor
@@ -18,20 +20,21 @@ public class ReviewService {
     private final UserRepository userRepository;
 
     private final ReviewMapper reviewMapper;
+    private final UserMapper userMapper;
 
     public Page<ReviewResponse> getAllApprovedReviews(Pageable pageable) {
         return reviewRepository.findByModerationStatus(AdModerationStatus.APPROVED, pageable)
-                .map(reviewMapper::toResponse);
+                .map(this::mapWithShortUserInfo);
     }
 
     public Page<ReviewResponse> getAllPendingReviews(Pageable pageable) {
         return reviewRepository.findByModerationStatus(AdModerationStatus.PENDING, pageable)
-                .map(reviewMapper::toResponse);
+                .map(this::mapWithShortUserInfo);
     }
 
     public Page<ReviewResponse> getAllRejectedReviews(Pageable pageable) {
         return reviewRepository.findByModerationStatus(AdModerationStatus.REJECTED, pageable)
-                .map(reviewMapper::toResponse);
+                .map(this::mapWithShortUserInfo);
     }
 
     public void createReview(ReviewRequest reviewRequest) {
@@ -82,5 +85,12 @@ public class ReviewService {
 
     public void deleteReview(Long id) {
         reviewRepository.deleteById(id);
+    }
+
+    private ReviewResponse mapWithShortUserInfo(Review review){
+        ReviewResponse response = reviewMapper.toResponse(review);
+        response.setAuthorInfo(userMapper.toShortUserInfoResponse(review.getAuthor()));
+
+        return response;
     }
 }

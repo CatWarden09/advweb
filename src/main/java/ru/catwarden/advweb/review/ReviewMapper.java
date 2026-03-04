@@ -13,7 +13,6 @@ public class ReviewMapper {
                 .rating(review.getRating())
                 .moderationStatus(review.getModerationStatus())
                 .moderationRejectionReason(review.getModerationRejectionReason())
-                .authorId(review.getAuthor().getId())
                 .recipientId(review.getRecipient().getId())
                 .createdAt(review.getCreatedAt())
                 .build();

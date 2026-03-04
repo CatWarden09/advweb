@@ -28,7 +28,12 @@ public class CommentService {
 
     public Page<CommentResponse> getAllUnmoderatedComments(Pageable pageable){
         return commentRepository.findAllByIsModeratedFalse(pageable).
-                map(commentMapper::toResponse);
+                map(comment -> {
+                    CommentResponse response = commentMapper.toResponse(comment);
+                    ShortUserInfoResponse authorInfo = userMapper.toShortUserInfoResponse(comment.getAuthor());
+                    response.setAuthorInfo(authorInfo);
+                    return response;
+                });
     }
 
     public List<CommentResponse> getAdvertisementModeratedComments(Long advertisementId, Pageable pageable){
