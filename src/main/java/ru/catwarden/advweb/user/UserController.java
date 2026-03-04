@@ -62,7 +62,7 @@ public class UserController {
         return reviewService.getUserPendingReviews(id, pageable);
     }
 
-    @GetMapping("/{id}/my_reviews/approved")
+    @GetMapping("/{id}/reviews/authored/approved")
     public Page<ReviewResponse> getUserApprovedReviews(@PathVariable Long id, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size){
         Pageable pageable = PageRequest.of(page, size);
         return reviewService.getUserApprovedReviews(id, pageable);
