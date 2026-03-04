@@ -13,8 +13,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AdvertisementRequest {
-
-
     private Long authorId;
     private String name;
     private String description;

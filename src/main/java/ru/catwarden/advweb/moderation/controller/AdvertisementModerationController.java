@@ -34,12 +34,8 @@ public class AdvertisementModerationController {
     }
 
     @GetMapping("/{id}")
-    public AdvertisementResponse getAdvertisement(@RequestParam(defaultValue = "0") int page,
-                                                  @RequestParam(defaultValue = "10") int size,
-                                                  @PathVariable Long id) {
-        Pageable pageable = PageRequest.of(page, size);
-
-        return advertisementService.getAdvertisement(id, pageable);
+    public AdvertisementResponse getAdvertisement(@PathVariable Long id) {
+        return advertisementService.getAdvertisement(id);
     }
 
     @PatchMapping("pending/{id}/approve")

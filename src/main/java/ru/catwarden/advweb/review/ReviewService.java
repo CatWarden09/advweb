@@ -11,7 +11,6 @@ import ru.catwarden.advweb.review.dto.ReviewUpdateRequest;
 import ru.catwarden.advweb.user.User;
 import ru.catwarden.advweb.user.UserMapper;
 import ru.catwarden.advweb.user.UserRepository;
-import ru.catwarden.advweb.user.dto.ShortUserInfoResponse;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +33,26 @@ public class ReviewService {
 
     public Page<ReviewResponse> getAllRejectedReviews(Pageable pageable) {
         return reviewRepository.findByModerationStatus(AdModerationStatus.REJECTED, pageable)
+                .map(this::mapWithShortUserInfo);
+    }
+
+    public Page<ReviewResponse> getApprovedReviewsAboutUser(Long userId, Pageable pageable) {
+        return reviewRepository.findByRecipientIdAndModerationStatus(userId, AdModerationStatus.APPROVED, pageable)
+                .map(this::mapWithShortUserInfo);
+    }
+
+    public Page<ReviewResponse> getUserApprovedReviews(Long userId, Pageable pageable) {
+        return reviewRepository.findByAuthorIdAndModerationStatus(userId, AdModerationStatus.APPROVED, pageable)
+                .map(this::mapWithShortUserInfo);
+    }
+
+    public Page<ReviewResponse> getUserPendingReviews(Long userId, Pageable pageable) {
+        return reviewRepository.findByAuthorIdAndModerationStatus(userId, AdModerationStatus.PENDING, pageable)
+                .map(this::mapWithShortUserInfo);
+    }
+
+    public Page<ReviewResponse> getUserRejectedReviews(Long userId, Pageable pageable) {
+        return reviewRepository.findByAuthorIdAndModerationStatus(userId, AdModerationStatus.REJECTED, pageable)
                 .map(this::mapWithShortUserInfo);
     }
 

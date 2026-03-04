@@ -58,6 +58,21 @@ public class AdvertisementService {
                 .map(this::mapWithPreviewImage);
     }
 
+    public Page<AdvertisementResponse> getUserApprovedAdvertisements(Long userId, Pageable pageable){
+        return advertisementRepository.findAllByAuthorIdAndAdModerationStatus(userId, AdModerationStatus.APPROVED, pageable)
+                .map(this::mapWithPreviewImage);
+    }
+
+    public Page<AdvertisementResponse> getUserPendingAdvertisements(Long userId, Pageable pageable){
+        return advertisementRepository.findAllByAuthorIdAndAdModerationStatus(userId, AdModerationStatus.PENDING, pageable)
+                .map(this::mapWithPreviewImage);
+    }
+
+    public Page<AdvertisementResponse> getUserRejectedAdvertisements(Long userId, Pageable pageable){
+        return advertisementRepository.findAllByAuthorIdAndAdModerationStatus(userId, AdModerationStatus.REJECTED, pageable)
+                .map(this::mapWithPreviewImage);
+    }
+
     // need to use @Transactional because there are multiple DB operations in single method
     // if some operations go wrong, we need to roll back all of them or then part changes will be applied to the DB
     @Transactional

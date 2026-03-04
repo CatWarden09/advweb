@@ -7,4 +7,8 @@ import ru.catwarden.advweb.enums.AdModerationStatus;
 
 public interface ReviewRepository extends JpaRepository<Review, Long> {
     Page<Review> findByModerationStatus(AdModerationStatus moderationStatus, Pageable pageable);
+
+    Page<Review> findByRecipientIdAndModerationStatus(Long recipientId, AdModerationStatus moderationStatus, Pageable pageable);
+
+    Page<Review> findByAuthorIdAndModerationStatus(Long authorId, AdModerationStatus moderationStatus, Pageable pageable);
 }

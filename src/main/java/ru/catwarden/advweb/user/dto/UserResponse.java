@@ -4,8 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.catwarden.advweb.ad.dto.AdvertisementResponse;
-import ru.catwarden.advweb.review.dto.ReviewResponse;
+
 
 import java.util.List;
 
@@ -13,8 +12,11 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ShortUserInfoResponse {
+public class UserResponse {
     private Long id;
     private String firstName;
     private String lastName;
+    private Double rating;
+    private String phone;
+    private String email;
 }

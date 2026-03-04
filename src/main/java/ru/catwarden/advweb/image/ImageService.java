@@ -93,9 +93,6 @@ public class ImageService {
     //    List<Image> toUnlink = images.stream()
     //            .filter(image -> !imageIds.contains(image.getId()))
     //            .toList();
-    //    List<Image> toUnlink = images.stream()
-    //            .filter(image -> !imageIds.contains(image.getId()))
-    //            .toList();
     //    imageRepository.saveAll(toUnlink);
     public void unlinkDeletedImagesFromAdvertisement(Long advertisementId, List<Long> imageIds){
         imageRepository.unlinkDeletedImagesFromAdvertisement(advertisementId, imageIds);

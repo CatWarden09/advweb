@@ -6,8 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.catwarden.advweb.adcategory.AdvertisementCategory;
-import ru.catwarden.advweb.user.User;
 import ru.catwarden.advweb.enums.AdModerationStatus;
+import ru.catwarden.advweb.user.User;
 
 import java.time.LocalDateTime;
 
