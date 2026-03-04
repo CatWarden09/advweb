@@ -8,6 +8,9 @@ import org.springframework.web.bind.annotation.*;
 import ru.catwarden.advweb.ad.dto.AdvertisementRequest;
 import ru.catwarden.advweb.ad.dto.AdvertisementUpdateRequest;
 import ru.catwarden.advweb.ad.dto.AdvertisementResponse;
+import ru.catwarden.advweb.comment.Comment;
+import ru.catwarden.advweb.comment.CommentService;
+import ru.catwarden.advweb.comment.dto.CommentResponse;
 import ru.catwarden.advweb.image.ImageService;
 
 import java.util.List;
@@ -19,13 +22,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AdvertisementController {
     private final AdvertisementService advertisementService;
+    private final CommentService commentService;
 
     @GetMapping("/{id}")
-    public AdvertisementResponse getAdvertisement(@PathVariable Long id, @RequestParam(defaultValue = "0") int page,
-                                                  @RequestParam(defaultValue = "10") int size){
-        Pageable pageable = PageRequest.of(page, size);
-
-        return advertisementService.getAdvertisement(id, pageable);
+    public AdvertisementResponse getAdvertisement(@PathVariable Long id){
+        return advertisementService.getAdvertisement(id);
     }
 
     @GetMapping
@@ -33,6 +34,14 @@ public class AdvertisementController {
                                                                     @RequestParam(defaultValue = "10") int size){
         Pageable pageable = PageRequest.of(page, size);
         return advertisementService.getAllApprovedAdvertisements(pageable);
+
+    }
+
+    @GetMapping("/{id}/comments")
+    public Page<CommentResponse> getAdvertisementComments(@PathVariable Long id, @RequestParam(defaultValue = "0") int page,
+                                                            @RequestParam(defaultValue = "10") int size){
+        Pageable pageable = PageRequest.of(page, size);
+        return commentService.getAdvertisementModeratedComments(id, pageable);
     }
 
     @PostMapping
@@ -50,4 +59,6 @@ public class AdvertisementController {
     public void deleteAdvertisement(@PathVariable Long id){
         advertisementService.deleteAdvertisement(id);
     }
+
+
 }

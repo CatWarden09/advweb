@@ -36,10 +36,8 @@ public class CommentService {
                 });
     }
 
-    public List<CommentResponse> getAdvertisementModeratedComments(Long advertisementId, Pageable pageable){
-
+    public Page<CommentResponse> getAdvertisementModeratedComments(Long advertisementId, Pageable pageable){
         return commentRepository.findAllByAdIdAndIsModeratedTrue(advertisementId, pageable)
-                .stream()
                 .map(comment -> {
                     CommentResponse response = commentMapper.toResponse(comment);
 
@@ -47,9 +45,7 @@ public class CommentService {
                     response.setAuthorInfo(authorInfo);
 
                     return response;
-                })
-                .toList();
-
+                });
     }
 
     public void createComment(CommentRequest commentRequest){

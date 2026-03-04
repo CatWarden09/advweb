@@ -30,24 +30,17 @@ public class AdvertisementService {
 
     private final ImageService imageService;
     private final CommentService commentService;
-    private final ImageRepository imageRepository;
 
     private final int MAX_IMAGES_PER_AD = 10;
 
     // DONE figure out mappers to avoid code repeating
     // TODO figure out MapStruct for better code
     //  add moderation status validation
-    public AdvertisementResponse getAdvertisement(Long id, Pageable pageable){
+    public AdvertisementResponse getAdvertisement(Long id){
         Advertisement advertisement = advertisementRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Advertisement not found"));
 
-        Long advertisementId = advertisement.getId();
-
-        AdvertisementResponse response = this.mapWithImages(advertisement);
-
-        response.setComments(commentService.getAdvertisementModeratedComments(advertisementId, pageable));
-
-        return response;
+        return this.mapWithImages(advertisement);
     }
 
     public Page<AdvertisementResponse> getAllApprovedAdvertisements(Pageable pageable){
