@@ -27,7 +27,7 @@ public class ImageService {
     private final String fileUrl = "/uploads/adv_photos/";
 
     public List<ImageDto> uploadImage(List<MultipartFile> files){
-        List<StoredFile> uploadedFiles = fileUploader.uploadFile(files, uploadDir);
+        List<StoredFile> uploadedFiles = fileUploader.uploadFiles(files, uploadDir);
 
         List<Image> images = new ArrayList<>();
 

@@ -12,8 +12,7 @@ import java.util.UUID;
 
 @Service
 public class FileUploader {
-
-    public List<StoredFile> uploadFile(List<MultipartFile> files, Path uploadDir){
+    public List<StoredFile> uploadFiles(List<MultipartFile> files, Path uploadDir){
         List<StoredFile> uploadedFiles = new ArrayList<>();
 
         try{
@@ -37,5 +36,9 @@ public class FileUploader {
         }
 
         return uploadedFiles;
+    }
+
+    public StoredFile uploadFile(MultipartFile file, Path uploadDir){
+        return uploadFiles(List.of(file), uploadDir).getFirst();
     }
 }

@@ -11,7 +11,7 @@ import ru.catwarden.advweb.image.dto.ImageDto;
 import java.util.List;
 
 // TODO add security
-//  add unused image cleaning
+// DONE add unused image cleaning
 @RestController
 @RequestMapping("/images")
 @RequiredArgsConstructor

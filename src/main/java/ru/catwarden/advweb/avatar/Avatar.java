@@ -28,5 +28,5 @@ public class Avatar {
 
     private Boolean linkedToUser;
 
-    private Long adId;
+    private Long userId;
 }
