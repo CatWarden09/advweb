@@ -5,6 +5,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.catwarden.advweb.image.dto.ImageDto;
+import ru.catwarden.advweb.storage.FileUploader;
+import ru.catwarden.advweb.storage.StoredFile;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -12,7 +14,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -20,34 +21,24 @@ public class ImageService {
     private final ImageRepository imageRepository;
     private final ImageMapper imageMapper;
 
-    private final Path uploadDir = Paths.get("/app/uploads");
+    private final FileUploader fileUploader;
+
+    private final Path uploadDir = Paths.get("/app/uploads/adv_photos/");
+    private final String fileUrl = "/uploads/adv_photos/";
 
     public List<ImageDto> uploadImage(List<MultipartFile> files){
+        List<StoredFile> uploadedFiles = fileUploader.uploadFile(files, uploadDir);
+
         List<Image> images = new ArrayList<>();
 
-        try{
-            Files.createDirectories(uploadDir);
-        } catch (IOException e){
-            throw new RuntimeException("Failed to create directory");
-        }
+        for(StoredFile uploadedImage : uploadedFiles) {
+            Image image = new Image();
 
-        for(MultipartFile file : files) {
-            try {
-                String filename = UUID.randomUUID() + "_" + file.getOriginalFilename();
-                Path filePath = uploadDir.resolve(filename);
+            image.setPath(uploadedImage.getPath());
+            image.setUrl(fileUrl + uploadedImage.getFilename());
+            image.setLinkedToAd(false);
 
-                file.transferTo(filePath.toFile());
-
-                Image image = new Image();
-                image.setUrl("/uploads/" + filename);
-
-                image.setPath(filePath.toString());
-
-                images.add(image);
-
-            } catch (IOException e) {
-                throw new RuntimeException("Failed to save the file", e);
-            }
+            images.add(image);
         }
 
         // need to get the result of DB saving to get the images generated ids

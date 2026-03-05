@@ -1,4 +1,4 @@
-package ru.catwarden.advweb.image;
+package ru.catwarden.advweb.avatar;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -10,12 +10,12 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "images")
+@Table(name = "avatars")
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
 @Builder
-public class Image {
+public class Avatar {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -26,7 +26,7 @@ public class Image {
     @Column(nullable = false, unique = true)
     private String url;
 
-    private Boolean linkedToAd;
+    private Boolean linkedToUser;
 
     private Long adId;
 }
