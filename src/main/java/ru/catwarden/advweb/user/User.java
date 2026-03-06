@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.catwarden.advweb.avatar.Avatar;
 
 // TODO add roles
 @Entity
@@ -14,7 +15,6 @@ import lombok.NoArgsConstructor;
 @Data
 @Builder
 public class User {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -32,6 +32,8 @@ public class User {
     private String email;
 
     private Double rating;
+
+    private Long avatarId;
 
     @Column(nullable = false)
     private String password;
