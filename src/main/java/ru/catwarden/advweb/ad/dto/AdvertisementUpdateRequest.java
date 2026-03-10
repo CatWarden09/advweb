@@ -1,9 +1,6 @@
 package ru.catwarden.advweb.ad.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,10 +13,15 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AdvertisementUpdateRequest {
+    @NotBlank
+    @Size(min = 5, max = 100)
     private String name;
 
+    @NotBlank
+    @Size(min = 10, max = 1000)
     private String description;
 
+    @NotNull
     @Positive
     private Double price;
 
