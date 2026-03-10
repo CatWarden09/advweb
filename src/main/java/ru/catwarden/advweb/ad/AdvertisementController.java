@@ -18,7 +18,7 @@ import ru.catwarden.advweb.image.ImageService;
 import java.util.List;
 
 
-// TODO add default redirect (@GlobalExceptionHandler...)
+// TODO add default redirect (@ExceptionHandler...)
 @RestController
 @RequestMapping("/advertisements")
 @RequiredArgsConstructor
