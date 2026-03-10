@@ -27,6 +27,7 @@ public class AdvertisementUpdateRequest {
 
     private String address;
 
+    @NotEmpty
     private List<Long> imageIds;
 
 }

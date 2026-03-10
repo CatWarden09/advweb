@@ -13,7 +13,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -85,8 +87,30 @@ public class ImageService {
     //            .filter(image -> !imageIds.contains(image.getId()))
     //            .toList();
     //    imageRepository.saveAll(toUnlink);
-    public void unlinkDeletedImagesFromAdvertisement(Long advertisementId, List<Long> imageIds){
-        imageRepository.unlinkDeletedImagesFromAdvertisement(advertisementId, imageIds);
+    public boolean syncImagesInAdvertisement(Long advertisementId, List<Long> requestImageIds){
+        List<Long> currentImageIds = imageRepository.findAllByAdId(advertisementId)
+                .stream()
+                .map(Image::getId)
+                .toList();
+
+        Set<Long> current = new HashSet<>(currentImageIds);
+        Set<Long> requested = new HashSet<>(requestImageIds);
+
+        if (current.equals(requested)) {
+            return false;
+        }
+
+        List<Long> imageIdsToUnlink = currentImageIds.stream()
+                .filter(id -> !requested.contains(id))
+                .toList();
+
+        if (!imageIdsToUnlink.isEmpty()) {
+            imageRepository.unlinkDeletedImagesFromAdvertisement(advertisementId, imageIdsToUnlink);
+        }
+
+        setImagesToAdvertisement(requestImageIds, advertisementId);
+
+        return true;
     }
 
     public void unlinkAllImagesFromAdvertisement(Long advertisementId){

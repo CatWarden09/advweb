@@ -10,7 +10,6 @@ import ru.catwarden.advweb.ad.dto.AdvertisementUpdateRequest;
 import ru.catwarden.advweb.ad.dto.AdvertisementResponse;
 import ru.catwarden.advweb.adcategory.AdvertisementCategory;
 import ru.catwarden.advweb.comment.CommentService;
-import ru.catwarden.advweb.image.ImageRepository;
 import ru.catwarden.advweb.user.User;
 import ru.catwarden.advweb.enums.AdModerationStatus;
 import ru.catwarden.advweb.adcategory.CategoryRepository;
@@ -84,11 +83,15 @@ public class AdvertisementService {
                 .orElseThrow(() -> new RuntimeException("Category not found"));
 
         // DONE Updated the flow to keep the mapper more clean (all other fields are set after builder and checked inside the service)
-        // TODO add hierarchy validation
+        // DONE add hierarchy validation
         AdvertisementCategory subcategory = null;
         if (advertisementRequest.getSubcategoryId() != null) {
             subcategory = categoryRepository.findById(advertisementRequest.getSubcategoryId())
                     .orElseThrow(() -> new RuntimeException("Subcategory not found"));
+        }
+
+        if (subcategory != null && !subcategory.getParent().equals(category)) {
+            throw new RuntimeException("Subcategory is not a child of the category");
         }
 
         if (advertisementRequest.getImageIds().size() > MAX_IMAGES_PER_AD) {
@@ -115,34 +118,36 @@ public class AdvertisementService {
 
     @Transactional
     public void updateAdvertisement(Long id, AdvertisementUpdateRequest advertisementUpdateRequest){
+        boolean isFieldsChanged = false;
+        boolean isImagesChanged = false;
+
         Advertisement advertisement = advertisementRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Advertisement not found"));
 
-        if(advertisementUpdateRequest.getName() != null) {
-            advertisement.setName(advertisementUpdateRequest.getName());
-        }
-        if(advertisementUpdateRequest.getDescription() != null) {
-            advertisement.setDescription(advertisementUpdateRequest.getDescription());
-        }
-        if(advertisementUpdateRequest.getPrice() != null) {
-            advertisement.setPrice(advertisementUpdateRequest.getPrice());
-        }
-        if(advertisementUpdateRequest.getAddress() != null) {
-            advertisement.setAddress(advertisementUpdateRequest.getAddress());
+        if(!advertisement.getName().equals(advertisementUpdateRequest.getName())
+                || !advertisement.getDescription().equals(advertisementUpdateRequest.getDescription())
+                || !advertisement.getPrice().equals(advertisementUpdateRequest.getPrice())
+                || !advertisement.getAddress().equals(advertisementUpdateRequest.getAddress())){
+
+            isFieldsChanged = true;
         }
 
-        // TODO add no updates check
-        List<Long> imageIds = advertisementUpdateRequest.getImageIds();
-        if(imageIds != null) {
-            imageService.unlinkDeletedImagesFromAdvertisement(id, imageIds);
-            imageService.setImagesToAdvertisement(imageIds, id);
-        } else{
-            throw new RuntimeException("Advertisement must have at least one image");
+
+        // DONE add no updates check
+        List<Long> requestImageIds = advertisementUpdateRequest.getImageIds();
+
+        isImagesChanged = imageService.syncImagesInAdvertisement(id, requestImageIds);
+
+        if(!isFieldsChanged && !isImagesChanged){
+            return;
         }
+
+        advertisement.setName(advertisementUpdateRequest.getName());
+        advertisement.setDescription(advertisementUpdateRequest.getDescription());
+        advertisement.setPrice(advertisementUpdateRequest.getPrice());
+        advertisement.setAddress(advertisementUpdateRequest.getAddress());
 
         advertisement.setAdModerationStatus(AdModerationStatus.PENDING);
-
-        advertisementRepository.save(advertisement);
 
     }
 
@@ -167,11 +172,14 @@ public class AdvertisementService {
     }
 
     public void deleteAdvertisement(Long id){
-        advertisementRepository.deleteById(id);
+        Advertisement advertisement = advertisementRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Advertisement not found"));
 
-        commentService.deleteCommentsByAdId(id);
+        advertisementRepository.deleteById(advertisement.getId());
 
-        imageService.unlinkAllImagesFromAdvertisement(id);
+        commentService.deleteCommentsByAdId(advertisement.getId());
+
+        imageService.unlinkAllImagesFromAdvertisement(advertisement.getId());
     }
 
     // use private mapper to avoid code repeating in get ads methods and not to overload Ad entity with all the images

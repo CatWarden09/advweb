@@ -14,15 +14,6 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
 
     Optional<Image> findFirstByAdId(Long adId);
 
-    // annotations for write request (default queries are read mode)
-    @Modifying
-    @Query("""
-        UPDATE Image i
-        SET i.linkedToAd = false,
-            i.adId = null
-        WHERE i.adId = :adId
-        AND i.id NOT IN :imageIds
-""")
     void unlinkDeletedImagesFromAdvertisement(Long adId, List<Long> imageIds);
 
 
