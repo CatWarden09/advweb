@@ -72,8 +72,9 @@ public class CategoryService {
         AdvertisementCategory advertisementCategory = categoryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Category not found"));
 
-        advertisementCategory.setName(advertisementCategoryUpdateRequest.getName());
-
+        if(!advertisementCategory.getName().equals(advertisementCategoryUpdateRequest.getName())) {
+            advertisementCategory.setName(advertisementCategoryUpdateRequest.getName());
+        }
         categoryRepository.save(advertisementCategory);
 
     }
@@ -84,7 +85,6 @@ public class CategoryService {
 
         if(advertisementRepository.existsByCategory(advertisementCategory)){
             throw new RuntimeException("Cannot delete category with advertisements");
-
         }
 
         if (!categoryRepository.findByParent(advertisementCategory).isEmpty()) { // .isEmpty > != null (null = [])
