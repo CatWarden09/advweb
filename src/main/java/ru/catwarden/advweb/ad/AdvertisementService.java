@@ -34,7 +34,7 @@ public class AdvertisementService {
 
     // DONE figure out mappers to avoid code repeating
     // TODO figure out MapStruct for better code
-    //  add moderation status validation
+    // DONE moderation status validation
     public AdvertisementResponse getAdvertisement(Long id){
         Advertisement advertisement = advertisementRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Advertisement not found"));
@@ -91,7 +91,7 @@ public class AdvertisementService {
         }
 
         if (subcategory != null && !subcategory.getParent().equals(category)) {
-            throw new RuntimeException("Subcategory is not a child of the category");
+            throw new RuntimeException("Subcategory is not a child of the given category");
         }
 
         if (advertisementRequest.getImageIds().size() > MAX_IMAGES_PER_AD) {
@@ -124,6 +124,10 @@ public class AdvertisementService {
         Advertisement advertisement = advertisementRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Advertisement not found"));
 
+        if (advertisementUpdateRequest.getImageIds().size() > MAX_IMAGES_PER_AD) {
+            throw new RuntimeException("Limit for advertisement pictures is exceeded");
+        }
+
         if(!advertisement.getName().equals(advertisementUpdateRequest.getName())
                 || !advertisement.getDescription().equals(advertisementUpdateRequest.getDescription())
                 || !advertisement.getPrice().equals(advertisementUpdateRequest.getPrice())
@@ -151,10 +155,14 @@ public class AdvertisementService {
 
     }
 
-    // TODO add status checking (cannot approve not pending)
+    // DONE add status checking (cannot approve/reject not pending)
     public void approveAdvertisement(Long id){
         Advertisement advertisement = advertisementRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Advertisement not found"));
+
+        if(advertisement.getAdModerationStatus() != AdModerationStatus.PENDING){
+            throw new RuntimeException("Cannot change status of a non-pending advertisement");
+        }
 
         advertisement.setAdModerationStatus(AdModerationStatus.APPROVED);
 
@@ -164,6 +172,10 @@ public class AdvertisementService {
     public void rejectAdvertisement(Long id, String moderationRejectionReason){
         Advertisement advertisement = advertisementRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Advertisement not found"));
+
+        if(advertisement.getAdModerationStatus() != AdModerationStatus.PENDING){
+            throw new RuntimeException("Cannot change status of a non-pending advertisement");
+        }
 
         advertisement.setAdModerationStatus(AdModerationStatus.REJECTED);
         advertisement.setModerationRejectionReason(moderationRejectionReason);
