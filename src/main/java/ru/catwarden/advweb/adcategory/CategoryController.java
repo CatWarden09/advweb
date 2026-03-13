@@ -1,6 +1,8 @@
 package ru.catwarden.advweb.adcategory;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.catwarden.advweb.adcategory.dto.AdvertisementCategoryRequest;
 import ru.catwarden.advweb.adcategory.dto.AdvertisementCategoryUpdateRequest;
@@ -11,6 +13,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/admin/categories")
 @RequiredArgsConstructor
+@Validated
 public class CategoryController {
     private final CategoryService categoryService;
 
@@ -30,17 +33,19 @@ public class CategoryController {
     }
 
     @PostMapping
-    public void createCategory(@RequestBody AdvertisementCategoryRequest advertisementCategoryRequest){
+    public void createCategory(@Valid @RequestBody AdvertisementCategoryRequest advertisementCategoryRequest){
         categoryService.createCategory(advertisementCategoryRequest);
     }
 
     @PostMapping("/{id}/subcategories")
-    public void createSubcategories(@PathVariable Long id, @RequestBody List<AdvertisementCategoryRequest> subcategoryList){
+    public void createSubcategories(@PathVariable Long id,
+                                    @Valid @RequestBody List<AdvertisementCategoryRequest> subcategoryList){
         categoryService.createSubcategories(id, subcategoryList);
     }
 
     @PatchMapping("/{id}")
-    public void updateCategory(@PathVariable Long id, @RequestBody AdvertisementCategoryUpdateRequest advertisementCategoryUpdateRequest){
+    public void updateCategory(@PathVariable Long id,
+                               @Valid @RequestBody AdvertisementCategoryUpdateRequest advertisementCategoryUpdateRequest){
         categoryService.updateCategory(id, advertisementCategoryUpdateRequest);
     }
 

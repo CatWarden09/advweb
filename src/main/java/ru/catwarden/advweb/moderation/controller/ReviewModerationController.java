@@ -1,5 +1,7 @@
 package ru.catwarden.advweb.moderation.controller;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -24,7 +26,7 @@ public class ReviewModerationController {
 
     @GetMapping("/rejected")
     public Page<ReviewResponse> getAllRejectedReviews(@RequestParam(defaultValue = "0") int page,
-                                                                    @RequestParam(defaultValue = "10") int size) {
+                                                      @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
 
         return reviewService.getAllRejectedReviews(pageable);
@@ -37,7 +39,7 @@ public class ReviewModerationController {
 
     @PatchMapping("/pending/{id}/reject")
     public void rejectReview(@PathVariable Long id,
-                                    @RequestParam String moderationRejectionReason) {
+                             @RequestParam @NotBlank @Size(max = 255) String moderationRejectionReason) {
         reviewService.rejectReview(id, moderationRejectionReason);
     }
 

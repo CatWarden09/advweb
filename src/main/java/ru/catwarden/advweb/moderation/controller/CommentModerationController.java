@@ -1,9 +1,11 @@
 package ru.catwarden.advweb.moderation.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.catwarden.advweb.comment.CommentService;
 import ru.catwarden.advweb.comment.dto.CommentRequest;
@@ -12,6 +14,7 @@ import ru.catwarden.advweb.comment.dto.CommentResponse;
 @RestController
 @RequestMapping("/admin/comments-moderation")
 @RequiredArgsConstructor
+@Validated
 public class CommentModerationController {
     private final CommentService commentService;
 
@@ -24,7 +27,8 @@ public class CommentModerationController {
     }
 
     @PatchMapping("/{id}")
-    public void updateCommentOnModeration(@PathVariable Long id, @RequestBody CommentRequest commentRequest) {
+    public void updateCommentOnModeration(@PathVariable Long id,
+                                          @Valid @RequestBody CommentRequest commentRequest) {
         commentService.updateCommentOnModeration(id, commentRequest);
     }
 

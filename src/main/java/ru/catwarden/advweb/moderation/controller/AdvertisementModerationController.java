@@ -1,5 +1,7 @@
 package ru.catwarden.advweb.moderation.controller;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -45,7 +47,7 @@ public class AdvertisementModerationController {
 
     @PatchMapping("/pending/{id}/reject")
     public void rejectAdvertisement(@PathVariable Long id,
-                                    @RequestParam String moderationRejectionReason) {
+                                    @RequestParam @NotBlank @Size(max = 255) String moderationRejectionReason) {
         advertisementService.rejectAdvertisement(id, moderationRejectionReason);
     }
 

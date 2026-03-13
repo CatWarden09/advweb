@@ -25,45 +25,59 @@ public class UserController {
     }
 
     @GetMapping("/{id}/advertisements")
-    public Page<AdvertisementResponse> getUserApprovedAdvertisements(@PathVariable Long id, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+    public Page<AdvertisementResponse> getUserApprovedAdvertisements(@PathVariable Long id,
+                                                                     @RequestParam(defaultValue = "0") int page,
+                                                                     @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
         return advertisementService.getUserApprovedAdvertisements(id, pageable);
     }
 
     // TODO add authentication
     @GetMapping("/{id}/advertisements/pending")
-    public Page<AdvertisementResponse> getUserPendingAdvertisements(@PathVariable Long id, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+    public Page<AdvertisementResponse> getUserPendingAdvertisements(@PathVariable Long id,
+                                                                    @RequestParam(defaultValue = "0") int page,
+                                                                    @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
         return advertisementService.getUserPendingAdvertisements(id, pageable);
     }
 
     @GetMapping("/{id}/advertisements/rejected")
-    public Page<AdvertisementResponse> getUserRejectedAdvertisements(@PathVariable Long id, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+    public Page<AdvertisementResponse> getUserRejectedAdvertisements(@PathVariable Long id,
+                                                                     @RequestParam(defaultValue = "0") int page,
+                                                                     @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
         return advertisementService.getUserRejectedAdvertisements(id, pageable);
     }
 
     @GetMapping("/{id}/reviews/received")
-    public Page<ReviewResponse> getApprovedReviewsAboutUser(@PathVariable Long id, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+    public Page<ReviewResponse> getApprovedReviewsAboutUser(@PathVariable Long id,
+                                                            @RequestParam(defaultValue = "0") int page,
+                                                            @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
         return reviewService.getApprovedReviewsAboutUser(id, pageable);
     }
 
     // TODO add authentication
     @GetMapping("/{id}/reviews/authored/rejected")
-    public Page<ReviewResponse> getUserRejectedReviews(@PathVariable Long id, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+    public Page<ReviewResponse> getUserRejectedReviews(@PathVariable Long id,
+                                                       @RequestParam(defaultValue = "0") int page,
+                                                       @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
         return reviewService.getUserRejectedReviews(id, pageable);
     }
 
     @GetMapping("/{id}/reviews/authored/pending")
-    public Page<ReviewResponse> getUserPendingReviews(@PathVariable Long id, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size){
+    public Page<ReviewResponse> getUserPendingReviews(@PathVariable Long id,
+                                                      @RequestParam(defaultValue = "0") int page,
+                                                      @RequestParam(defaultValue = "10") int size){
         Pageable pageable = PageRequest.of(page, size);
         return reviewService.getUserPendingReviews(id, pageable);
     }
 
     @GetMapping("/{id}/reviews/authored/approved")
-    public Page<ReviewResponse> getUserApprovedReviews(@PathVariable Long id, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size){
+    public Page<ReviewResponse> getUserApprovedReviews(@PathVariable Long id,
+                                                       @RequestParam(defaultValue = "0") int page,
+                                                       @RequestParam(defaultValue = "10") int size){
         Pageable pageable = PageRequest.of(page, size);
         return reviewService.getUserApprovedReviews(id, pageable);
     }

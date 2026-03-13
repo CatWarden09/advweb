@@ -1,25 +1,27 @@
 package ru.catwarden.advweb.review;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.catwarden.advweb.comment.dto.CommentRequest;
-import ru.catwarden.advweb.comment.dto.CommentUpdateRequest;
 import ru.catwarden.advweb.review.dto.ReviewRequest;
 import ru.catwarden.advweb.review.dto.ReviewUpdateRequest;
 
 @RestController
 @RequestMapping("/reviews")
 @RequiredArgsConstructor
+@Validated
 public class ReviewController {
     private final ReviewService reviewService;
 
     @PostMapping
-    public void createReview(@RequestBody ReviewRequest reviewRequest) {
+    public void createReview(@Valid @RequestBody ReviewRequest reviewRequest) {
         reviewService.createReview(reviewRequest);
     }
 
     @PatchMapping("/{id}")
-    public void updateReview(@PathVariable Long id, @RequestBody ReviewUpdateRequest reviewUpdateRequest) {
+    public void updateReview(@PathVariable Long id,
+                             @Valid @RequestBody ReviewUpdateRequest reviewUpdateRequest) {
         reviewService.updateReview(id, reviewUpdateRequest);
     }
 

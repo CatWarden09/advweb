@@ -1,6 +1,8 @@
 package ru.catwarden.advweb.comment;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.catwarden.advweb.comment.dto.CommentRequest;
 import ru.catwarden.advweb.comment.dto.CommentUpdateRequest;
@@ -8,16 +10,18 @@ import ru.catwarden.advweb.comment.dto.CommentUpdateRequest;
 @RestController
 @RequestMapping("/comments")
 @RequiredArgsConstructor
+@Validated
 public class CommentController {
     private final CommentService commentService;
 
     @PostMapping
-    public void createComment(@RequestBody CommentRequest commentRequest) {
+    public void createComment(@Valid @RequestBody CommentRequest commentRequest) {
         commentService.createComment(commentRequest);
     }
 
     @PatchMapping("/{id}")
-    public void updateComment(@PathVariable Long id, @RequestBody CommentUpdateRequest commentUpdateRequest) {
+    public void updateComment(@PathVariable Long id,
+                              @Valid @RequestBody CommentUpdateRequest commentUpdateRequest) {
         commentService.updateComment(id, commentUpdateRequest);
     }
 
