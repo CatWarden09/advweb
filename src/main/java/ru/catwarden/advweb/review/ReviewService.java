@@ -89,6 +89,10 @@ public class ReviewService {
         Review review = reviewRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Review not found"));
 
+        if(review.getModerationStatus() != AdModerationStatus.PENDING){
+            throw new RuntimeException("Cannot change status of a non-pending review");
+        }
+
         review.setModerationStatus(AdModerationStatus.APPROVED);
 
         reviewRepository.save(review);
@@ -97,6 +101,10 @@ public class ReviewService {
     public void rejectReview(Long id, String moderationRejectionReason) {
         Review review = reviewRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Review not found"));
+
+        if(review.getModerationStatus() != AdModerationStatus.PENDING){
+            throw new RuntimeException("Cannot change status of a non-pending review");
+        }
 
         review.setModerationStatus(AdModerationStatus.REJECTED);
         review.setModerationRejectionReason(review.getModerationRejectionReason());

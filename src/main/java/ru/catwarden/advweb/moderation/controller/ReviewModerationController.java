@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.catwarden.advweb.review.ReviewService;
 import ru.catwarden.advweb.review.dto.ReviewResponse;
@@ -13,6 +14,7 @@ import ru.catwarden.advweb.review.dto.ReviewResponse;
 @RestController
 @RequestMapping("/admin/reviews-moderation")
 @RequiredArgsConstructor
+@Validated
 public class ReviewModerationController {
     private final ReviewService reviewService;
     

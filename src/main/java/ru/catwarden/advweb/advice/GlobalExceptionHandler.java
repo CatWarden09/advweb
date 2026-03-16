@@ -14,7 +14,7 @@ import java.util.List;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-
+    // used for validating via @Valid on DTO or RequestBody
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseBody
     public ResponseEntity<ValidationResponse> handleMethodArgumentNotValid(
@@ -29,7 +29,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(new ValidationResponse(errors), HttpStatus.BAD_REQUEST);
     }
 
-
+    // used for validating via @Validated + annotations on method arguments or entities
     @ExceptionHandler(ConstraintViolationException.class)
     @ResponseBody
     public ResponseEntity<ValidationResponse> handleConstraintViolation(
