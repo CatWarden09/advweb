@@ -7,6 +7,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
+import ru.catwarden.advweb.exception.EntityNotFoundException;
 import ru.catwarden.advweb.validation.dto.ValidationResponse;
 
 import java.util.List;
@@ -42,5 +43,15 @@ public class GlobalExceptionHandler {
                 .toList();
 
         return new ResponseEntity<>(new ValidationResponse(errors), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    @ResponseBody
+    public ResponseEntity<ValidationResponse> handleEntityNotFound(EntityNotFoundException ex) {
+        return new ResponseEntity<>(
+                new ValidationResponse(List.of(ex.getMessage())),
+                HttpStatus.NOT_FOUND
+        );
+
     }
 }
