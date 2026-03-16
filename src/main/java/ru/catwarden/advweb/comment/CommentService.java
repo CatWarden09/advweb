@@ -6,9 +6,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.catwarden.advweb.ad.Advertisement;
 import ru.catwarden.advweb.ad.AdvertisementRepository;
+import ru.catwarden.advweb.avatar.Avatar;
 import ru.catwarden.advweb.comment.dto.CommentRequest;
 import ru.catwarden.advweb.comment.dto.CommentResponse;
 import ru.catwarden.advweb.comment.dto.CommentUpdateRequest;
+import ru.catwarden.advweb.exception.EntityNotFoundException;
 import ru.catwarden.advweb.user.UserRepository;
 import ru.catwarden.advweb.user.User;
 import ru.catwarden.advweb.user.UserMapper;
@@ -50,10 +52,10 @@ public class CommentService {
 
     public void createComment(CommentRequest commentRequest){
         User author = userRepository.findById(commentRequest.getAuthorId())
-            .orElseThrow(() -> new RuntimeException("User not found"));
+            .orElseThrow(() -> new EntityNotFoundException(User.class.getName(), commentRequest.getAuthorId()));
 
         Advertisement advertisement = advertisementRepository.findById(commentRequest.getAdvertisementId())
-            .orElseThrow(() -> new RuntimeException("Advertisement not found"));
+            .orElseThrow(() -> new EntityNotFoundException(Advertisement.class.getName(), commentRequest.getAdvertisementId()));
 
         Comment comment = commentMapper.toEntity(commentRequest);
         comment.setAuthor(author);
@@ -64,7 +66,7 @@ public class CommentService {
 
     public void updateComment(Long id, CommentUpdateRequest commentUpdateRequest){
         Comment comment = commentRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Comment not found"));
+            .orElseThrow(() -> new EntityNotFoundException(Comment.class.getName(), id));
 
         comment.setText(commentUpdateRequest.getText());
         comment.setIsModerated(false);
@@ -74,7 +76,7 @@ public class CommentService {
 
     public void updateCommentOnModeration(Long id, CommentRequest commentRequest){
         Comment comment = commentRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Comment not found"));
+            .orElseThrow(() -> new EntityNotFoundException(Comment.class.getName(), id));
 
         comment.setText(commentRequest.getText());
         comment.setIsModerated(true);
@@ -83,10 +85,17 @@ public class CommentService {
     }
 
     public void deleteComment(Long id){
+        if(!commentRepository.existsById(id)){
+            throw new EntityNotFoundException(Comment.class.getName(), id);
+        }
         commentRepository.deleteById(id);
     }
 
     public void deleteCommentsByAdId(Long adId){
+        if(!advertisementRepository.existsById(adId)){
+            throw new EntityNotFoundException(Advertisement.class.getName(), adId);
+        }
+
         commentRepository.deleteAllByAdId(adId);
     }
 
