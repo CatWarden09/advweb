@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import ru.catwarden.advweb.ad.Advertisement;
+import ru.catwarden.advweb.exception.EntityNotFoundException;
 import ru.catwarden.advweb.image.dto.ImageDto;
 import ru.catwarden.advweb.storage.FileUploader;
 import ru.catwarden.advweb.storage.StoredFile;
@@ -55,7 +57,7 @@ public class ImageService {
 
     public List<String> getPreviewImageUrlByAdvertisementId(Long id){
         Image image = imageRepository.findFirstByAdId(id)
-                .orElseThrow(() -> new RuntimeException("Image not found"));
+                .orElseThrow(() -> new EntityNotFoundException(Advertisement.class.getName(), id));
 
         List<String> images = new ArrayList<>();
         images.add(image.getUrl());
