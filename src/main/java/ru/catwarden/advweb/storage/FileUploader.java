@@ -12,6 +12,14 @@ import java.util.UUID;
 
 @Service
 public class FileUploader {
+    private static final List<String> ALLOWED_CONTENT_TYPES = List.of(
+            "image/png",
+            "image/jpeg",
+            "image/webp"
+    );
+
+    private static final long MAX_FILE_SIZE = 5 * 1024 * 1024;
+
     public List<StoredFile> uploadFiles(List<MultipartFile> files, Path uploadDir){
         List<StoredFile> uploadedFiles = new ArrayList<>();
 
@@ -22,6 +30,15 @@ public class FileUploader {
         }
 
         for(MultipartFile file : files) {
+            if (file.getSize() > MAX_FILE_SIZE) {
+                throw new RuntimeException("File too large: " + file.getOriginalFilename());
+            }
+
+            String contentType = file.getContentType();
+            if (contentType == null || !ALLOWED_CONTENT_TYPES.contains(contentType)) {
+                throw new RuntimeException("Unsupported file type: " + file.getOriginalFilename());
+            }
+
             try {
                 String filename = UUID.randomUUID() + "_" + file.getOriginalFilename();
                 Path filePath = uploadDir.resolve(filename);

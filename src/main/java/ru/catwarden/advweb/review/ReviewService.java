@@ -12,7 +12,7 @@ import ru.catwarden.advweb.user.User;
 import ru.catwarden.advweb.user.UserMapper;
 import ru.catwarden.advweb.user.UserRepository;
 
-// NOTE users cant leave reviews for themselves
+// DONE users cant leave reviews for themselves
 
 @Service
 @RequiredArgsConstructor

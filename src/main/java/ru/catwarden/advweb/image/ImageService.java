@@ -70,7 +70,7 @@ public class ImageService {
                 .toList();
     }
 
-    // TODO add image format validation
+    // DONE in FileUploader (add image format validation)
     public void setImagesToAdvertisement(List<Long> imageIds, Long advertisementId){
         List<Image> images = imageRepository.findAllById(imageIds);
 
@@ -81,12 +81,6 @@ public class ImageService {
         imageRepository.saveAll(images);
     }
 
-    // NOTE found out another way to do this with .filter(), without custom SQL (more flexible, less resource-efficient)
-    //    List<Image> images = imageRepository.findAllByAdId(advertisementId);
-    //    List<Image> toUnlink = images.stream()
-    //            .filter(image -> !imageIds.contains(image.getId()))
-    //            .toList();
-    //    imageRepository.saveAll(toUnlink);
     public boolean syncImagesInAdvertisement(Long advertisementId, List<Long> requestImageIds){
         List<Long> currentImageIds = imageRepository.findAllByAdId(advertisementId)
                 .stream()
