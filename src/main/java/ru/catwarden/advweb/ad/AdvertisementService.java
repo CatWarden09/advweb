@@ -94,9 +94,15 @@ public class AdvertisementService {
             throw new RuntimeException("Subcategory is not a child of the given category");
         }
 
+        if (subcategory.equals(category)){
+            throw new RuntimeException("Subcategory cannot be the same as the category");
+        }
+
         if (advertisementRequest.getImageIds().size() > MAX_IMAGES_PER_AD) {
             throw new RuntimeException("Limit for advertisement pictures is exceeded");
         }
+
+
 
         Advertisement advertisement = advertisementMapper.toEntity(advertisementRequest);
 

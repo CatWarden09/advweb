@@ -64,6 +64,10 @@ public class ReviewService {
         User recipient = userRepository.findById(reviewRequest.getRecipientId())
                 .orElseThrow(() -> new RuntimeException("Recipient not found"));
 
+        if (author.equals(recipient)){
+            throw new RuntimeException("Users cannot create review for themselves");
+        }
+
         Review review = reviewMapper.toEntity(reviewRequest);
 
         review.setAuthor(author);
