@@ -2,6 +2,7 @@ package ru.catwarden.advweb.user;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.catwarden.advweb.exception.EntityNotFoundException;
 import ru.catwarden.advweb.user.dto.UserResponse;
 
 @Service
@@ -14,6 +15,6 @@ public class UserService {
     public UserResponse getUser(Long id) {
         return userRepository.findById(id)
                 .map(userMapper::toUserResponse)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new EntityNotFoundException(User.class.getName(), id));
     }
 }
