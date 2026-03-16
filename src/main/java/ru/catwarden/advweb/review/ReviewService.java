@@ -65,7 +65,7 @@ public class ReviewService {
                 .orElseThrow(() -> new RuntimeException("Recipient not found"));
 
         if (author.equals(recipient)){
-            throw new RuntimeException("Users cannot create review for themselves");
+            throw new RuntimeException("Users cannot create reviews for themselves");
         }
 
         Review review = reviewMapper.toEntity(reviewRequest);

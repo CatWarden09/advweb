@@ -10,6 +10,7 @@ import ru.catwarden.advweb.ad.dto.AdvertisementUpdateRequest;
 import ru.catwarden.advweb.ad.dto.AdvertisementResponse;
 import ru.catwarden.advweb.adcategory.AdvertisementCategory;
 import ru.catwarden.advweb.comment.CommentService;
+import ru.catwarden.advweb.exception.EntityNotFoundException;
 import ru.catwarden.advweb.user.User;
 import ru.catwarden.advweb.enums.AdModerationStatus;
 import ru.catwarden.advweb.adcategory.CategoryRepository;
@@ -37,7 +38,7 @@ public class AdvertisementService {
     // DONE moderation status validation
     public AdvertisementResponse getAdvertisement(Long id){
         Advertisement advertisement = advertisementRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Advertisement not found"));
+                .orElseThrow(() -> new EntityNotFoundException(Advertisement.class.getName(), id));
 
         return this.mapWithImages(advertisement);
     }
@@ -77,17 +78,17 @@ public class AdvertisementService {
     @Transactional
     public Long createAdvertisement(AdvertisementRequest advertisementRequest){
         User author = userRepository.findById(advertisementRequest.getAuthorId())
-                .orElseThrow(() -> new RuntimeException("Author not found"));
+                .orElseThrow(() -> new EntityNotFoundException(User.class.getName(), advertisementRequest.getAuthorId()));
 
         AdvertisementCategory category = categoryRepository.findById(advertisementRequest.getCategoryId())
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+                .orElseThrow(() -> new EntityNotFoundException(AdvertisementCategory.class.getName(), advertisementRequest.getCategoryId()));
 
         // DONE Updated the flow to keep the mapper more clean (all other fields are set after builder and checked inside the service)
         // DONE add hierarchy validation
         AdvertisementCategory subcategory = null;
         if (advertisementRequest.getSubcategoryId() != null) {
             subcategory = categoryRepository.findById(advertisementRequest.getSubcategoryId())
-                    .orElseThrow(() -> new RuntimeException("Subcategory not found"));
+                    .orElseThrow(() -> new EntityNotFoundException(AdvertisementCategory.class.getName(), advertisementRequest.getSubcategoryId()));
         }
 
         if (subcategory != null && !subcategory.getParent().equals(category)) {
@@ -128,7 +129,7 @@ public class AdvertisementService {
         boolean isImagesChanged = false;
 
         Advertisement advertisement = advertisementRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Advertisement not found"));
+                .orElseThrow(() -> new EntityNotFoundException(Advertisement.class.getName(), id));
 
         if (advertisementUpdateRequest.getImageIds().size() > MAX_IMAGES_PER_AD) {
             throw new RuntimeException("Limit for advertisement pictures is exceeded");
@@ -164,7 +165,7 @@ public class AdvertisementService {
     // DONE add status checking (cannot approve/reject not pending)
     public void approveAdvertisement(Long id){
         Advertisement advertisement = advertisementRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Advertisement not found"));
+                .orElseThrow(() -> new EntityNotFoundException(Advertisement.class.getName(), id));
 
         if(advertisement.getAdModerationStatus() != AdModerationStatus.PENDING){
             throw new RuntimeException("Cannot change status of a non-pending advertisement");
@@ -177,7 +178,7 @@ public class AdvertisementService {
 
     public void rejectAdvertisement(Long id, String moderationRejectionReason){
         Advertisement advertisement = advertisementRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Advertisement not found"));
+                .orElseThrow(() -> new EntityNotFoundException(Advertisement.class.getName(), id));
 
         if(advertisement.getAdModerationStatus() != AdModerationStatus.PENDING){
             throw new RuntimeException("Cannot change status of a non-pending advertisement");
@@ -191,7 +192,7 @@ public class AdvertisementService {
 
     public void deleteAdvertisement(Long id){
         Advertisement advertisement = advertisementRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Advertisement not found"));
+                .orElseThrow(() -> new EntityNotFoundException(Advertisement.class.getName(), id));
 
         advertisementRepository.deleteById(advertisement.getId());
 
