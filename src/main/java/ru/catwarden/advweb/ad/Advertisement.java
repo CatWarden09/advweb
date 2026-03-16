@@ -20,7 +20,6 @@ import java.time.LocalDateTime;
 @Data
 @Builder
 public class Advertisement {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

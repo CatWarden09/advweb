@@ -88,7 +88,7 @@ public class ReviewService {
         reviewRepository.save(review);
     }
 
-    // TODO add status checking (cannot approve not pending)
+    // DONE add status checking (cannot approve not pending)
     public void approveReview(Long id) {
         Review review = reviewRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Review not found"));
