@@ -2,10 +2,12 @@ package ru.catwarden.advweb.adcategory;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.catwarden.advweb.ad.Advertisement;
 import ru.catwarden.advweb.adcategory.dto.AdvertisementCategoryRequest;
 import ru.catwarden.advweb.adcategory.dto.AdvertisementCategoryUpdateRequest;
 import ru.catwarden.advweb.adcategory.dto.AdvertisementCategoryResponse;
 import ru.catwarden.advweb.ad.AdvertisementRepository;
+import ru.catwarden.advweb.exception.EntityNotFoundException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +21,7 @@ public class CategoryService {
 
     public AdvertisementCategoryResponse getCategory(Long id){
         AdvertisementCategory advertisementCategory = categoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+                .orElseThrow(() -> new EntityNotFoundException(AdvertisementCategory.class.getName(), id));
 
         return advertisementCategoryMapper.toResponse(advertisementCategory);
     }
@@ -33,7 +35,7 @@ public class CategoryService {
 
     public List<AdvertisementCategoryResponse> getSubcategories(Long id){
         AdvertisementCategory parent = categoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+                .orElseThrow(() -> new EntityNotFoundException(AdvertisementCategory.class.getName(), id));
 
         return categoryRepository.findByParent(parent)
                 .stream()
@@ -51,7 +53,7 @@ public class CategoryService {
     //  need to figure out a solution for deleting such deep tree (like recursively checking the subcategories and forbidding to delete those)
     public void createSubcategories(Long id, List<AdvertisementCategoryRequest> subcategoryList){
         AdvertisementCategory parent = categoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+                .orElseThrow(() -> new EntityNotFoundException(AdvertisementCategory.class.getName(), id));
 
         if (parent.getParent() != null){
             throw new RuntimeException("Cannot create subcategory for a subcategory");
@@ -70,7 +72,7 @@ public class CategoryService {
 
     public void updateCategory(Long id, AdvertisementCategoryUpdateRequest advertisementCategoryUpdateRequest){
         AdvertisementCategory advertisementCategory = categoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+                .orElseThrow(() -> new EntityNotFoundException(AdvertisementCategory.class.getName(), id));
 
         if(!advertisementCategory.getName().equals(advertisementCategoryUpdateRequest.getName())) {
             advertisementCategory.setName(advertisementCategoryUpdateRequest.getName());
@@ -81,7 +83,7 @@ public class CategoryService {
 
     public void deleteCategory(Long id){
         AdvertisementCategory advertisementCategory = categoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+                .orElseThrow(() -> new EntityNotFoundException(AdvertisementCategory.class.getName(), id));
 
         if(advertisementRepository.existsByCategory(advertisementCategory)){
             throw new RuntimeException("Cannot delete category with advertisements");
