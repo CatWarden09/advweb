@@ -114,7 +114,7 @@ public class ReviewService {
         }
 
         review.setModerationStatus(AdModerationStatus.REJECTED);
-        review.setModerationRejectionReason(review.getModerationRejectionReason());
+        review.setModerationRejectionReason(moderationRejectionReason);
 
         reviewRepository.save(review);
     }

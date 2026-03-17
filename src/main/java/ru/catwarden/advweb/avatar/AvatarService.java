@@ -4,12 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import ru.catwarden.advweb.adcategory.AdvertisementCategory;
 import ru.catwarden.advweb.avatar.dto.AvatarDto;
 import ru.catwarden.advweb.exception.EntityNotFoundException;
 import ru.catwarden.advweb.exception.FileOperationException;
 import ru.catwarden.advweb.storage.FileUploader;
 import ru.catwarden.advweb.storage.StoredFile;
+import ru.catwarden.advweb.user.User;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -44,14 +44,14 @@ public class AvatarService {
 
     public AvatarDto getUserAvatar(Long userId){
         Avatar avatar = avatarRepository.findByUserId(userId)
-                .orElseThrow(() -> new EntityNotFoundException(Avatar.class, userId));
+                .orElseThrow(() -> new EntityNotFoundException(User.class, userId));
 
         return avatarMapper.toDto(avatar);
     }
 
     public void setUserAvatar(Long avatarId, Long userId){
         Avatar avatar = avatarRepository.findById(avatarId)
-                .orElseThrow(() -> new EntityNotFoundException(Avatar.class, userId));
+                .orElseThrow(() -> new EntityNotFoundException(Avatar.class, avatarId));
 
 
         avatar.setLinkedToUser(true);
@@ -62,7 +62,7 @@ public class AvatarService {
 
     public void unlinkUserAvatar(Long userId){
         Avatar avatar = avatarRepository.findByUserId(userId)
-                .orElseThrow(() -> new EntityNotFoundException(Avatar.class, userId));
+                .orElseThrow(() -> new EntityNotFoundException(User.class, userId));
 
         avatar.setLinkedToUser(false);
         avatar.setUserId(null);
