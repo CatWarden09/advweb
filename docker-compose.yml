@@ -3,33 +3,75 @@ services:
     image: postgres:15
     container_name: advweb_db
     environment:
-      POSTGRES_DB: advweb
-      POSTGRES_USER: advweb_user
-      POSTGRES_PASSWORD: admin
-    ports:
-      - "5432:5432"
+      POSTGRES_DB: ${POSTGRES_DB:-advweb}
+      POSTGRES_USER: ${POSTGRES_USER:-advweb_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-admin}
     volumes:
       - advweb_db_data:/var/lib/postgresql/data
-    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-advweb_user} -d ${POSTGRES_DB:-advweb}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.1
+    container_name: advweb_keycloak
+    command:
+      - start
+      - --http-enabled=true
+      - --proxy-headers=xforwarded
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN_USERNAME:-admin}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-change_me_admin_password}
+      KC_HOSTNAME: ${APP_KEYCLOAK_BASE_URL:-https://advweb.duckdns.org/auth}
+      KC_HTTP_RELATIVE_PATH: /auth
+      KC_PROXY_HEADERS: xforwarded
+      KC_HOSTNAME_STRICT: true
+      KC_LOG_LEVEL: info
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-advweb}
+      KC_DB_USERNAME: ${POSTGRES_USER:-advweb_user}
+      KC_DB_PASSWORD: ${POSTGRES_PASSWORD:-admin}
+      KC_DB_SCHEMA: public
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8082:8080"
+    volumes:
+      - keycloak_data:/opt/keycloak/data
+    restart: unless-stopped
 
   app:
     build: .
     container_name: advweb_app
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/advweb
-      SPRING_DATASOURCE_USERNAME: advweb_user
-      SPRING_DATASOURCE_PASSWORD: admin
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-advweb}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-advweb_user}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-admin}
       SPRING_FLYWAY_ENABLED: "true"
+      APP_PUBLIC_BASE_URL: ${APP_PUBLIC_BASE_URL:-https://advweb.duckdns.org}
+      APP_KEYCLOAK_BASE_URL: ${APP_KEYCLOAK_BASE_URL:-https://advweb.duckdns.org/auth}
+      APP_KEYCLOAK_REALM: ${APP_KEYCLOAK_REALM:-advweb}
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/auth/realms/${APP_KEYCLOAK_REALM:-advweb}/protocol/openid-connect/certs
+      SPRINGDOC_SWAGGER_UI_OAUTH_CLIENT_ID: ${SPRINGDOC_SWAGGER_UI_OAUTH_CLIENT_ID:-advweb-swagger}
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
     ports:
-      - "8080:8080"
+      - "127.0.0.1:8081:8080"
     volumes:
       - uploads:/app/uploads
-    restart: on-failure
+    restart: unless-stopped
 
 volumes:
   advweb_db_data:
     name: advweb_db_data
+  keycloak_data:
+    name: advweb_keycloak_data
   uploads:
     name: advweb_uploads

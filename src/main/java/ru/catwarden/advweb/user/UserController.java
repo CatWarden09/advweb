@@ -32,8 +32,8 @@ public class UserController {
         return advertisementService.getUserApprovedAdvertisements(id, pageable);
     }
 
-    // TODO add authentication
     @GetMapping("/{id}/advertisements/pending")
+    @org.springframework.security.access.prepost.PreAuthorize("@userService.isCurrentUserOrAdmin(#id)")
     public Page<AdvertisementResponse> getUserPendingAdvertisements(@PathVariable Long id,
                                                                     @RequestParam(defaultValue = "0") int page,
                                                                     @RequestParam(defaultValue = "10") int size) {
@@ -42,6 +42,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}/advertisements/rejected")
+    @org.springframework.security.access.prepost.PreAuthorize("@userService.isCurrentUserOrAdmin(#id)")
     public Page<AdvertisementResponse> getUserRejectedAdvertisements(@PathVariable Long id,
                                                                      @RequestParam(defaultValue = "0") int page,
                                                                      @RequestParam(defaultValue = "10") int size) {
@@ -57,8 +58,8 @@ public class UserController {
         return reviewService.getApprovedReviewsAboutUser(id, pageable);
     }
 
-    // TODO add authentication
     @GetMapping("/{id}/reviews/authored/rejected")
+    @org.springframework.security.access.prepost.PreAuthorize("@userService.isCurrentUserOrAdmin(#id)")
     public Page<ReviewResponse> getUserRejectedReviews(@PathVariable Long id,
                                                        @RequestParam(defaultValue = "0") int page,
                                                        @RequestParam(defaultValue = "10") int size) {
@@ -67,6 +68,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}/reviews/authored/pending")
+    @org.springframework.security.access.prepost.PreAuthorize("@userService.isCurrentUserOrAdmin(#id)")
     public Page<ReviewResponse> getUserPendingReviews(@PathVariable Long id,
                                                       @RequestParam(defaultValue = "0") int page,
                                                       @RequestParam(defaultValue = "10") int size){
