@@ -50,8 +50,8 @@ services:
       SPRING_DATASOURCE_USERNAME: advweb_user
       SPRING_DATASOURCE_PASSWORD: admin
       SPRING_FLYWAY_ENABLED: "true"
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: https://advweb.duckdns.org/realms/advweb
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: https://advweb.duckdns.org/realms/advweb/protocol/openid-connect/certs
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: https://advweb.duckdns.org:8443/realms/advweb
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: https://advweb.duckdns.org:8443/realms/advweb/protocol/openid-connect/certs
     depends_on:
       - db
       - keycloak
