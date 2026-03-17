@@ -2,6 +2,7 @@ package ru.catwarden.advweb.storage;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import ru.catwarden.advweb.exception.FileOperationException;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -26,17 +27,17 @@ public class FileUploader {
         try{
             Files.createDirectories(uploadDir);
         } catch (IOException e){
-            throw new RuntimeException("Failed to create directory");
+            throw new FileOperationException("Failed to create directory");
         }
 
         for(MultipartFile file : files) {
             if (file.getSize() > MAX_FILE_SIZE) {
-                throw new RuntimeException("File too large: " + file.getOriginalFilename());
+                throw new FileOperationException("File too large: " + file.getOriginalFilename());
             }
 
             String contentType = file.getContentType();
             if (contentType == null || !ALLOWED_CONTENT_TYPES.contains(contentType)) {
-                throw new RuntimeException("Unsupported file type: " + file.getOriginalFilename());
+                throw new FileOperationException("Unsupported file type: " + file.getOriginalFilename());
             }
 
             try {
@@ -48,7 +49,7 @@ public class FileUploader {
                 uploadedFiles.add(new StoredFile(filename, filePath.toString()));
 
             } catch (IOException e) {
-                throw new RuntimeException("Failed to save the file", e);
+                throw new FileOperationException("Failed to save the file");
             }
         }
 

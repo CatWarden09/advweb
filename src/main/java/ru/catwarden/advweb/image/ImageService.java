@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.catwarden.advweb.ad.Advertisement;
 import ru.catwarden.advweb.exception.EntityNotFoundException;
+import ru.catwarden.advweb.exception.FileOperationException;
 import ru.catwarden.advweb.image.dto.ImageDto;
 import ru.catwarden.advweb.storage.FileUploader;
 import ru.catwarden.advweb.storage.StoredFile;
@@ -128,7 +129,7 @@ public class ImageService {
                 Files.deleteIfExists(Paths.get(image.getPath()));
             }
         } catch (IOException e){
-            throw new RuntimeException("Failed to delete unused images");
+            throw new FileOperationException("Failed to delete unused images");
         }
 
         imageRepository.deleteAll(images);
