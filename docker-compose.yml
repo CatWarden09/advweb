@@ -25,7 +25,7 @@ services:
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN_USERNAME:-admin}
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-change_me_admin_password}
-      KC_HOSTNAME: ${APP_PUBLIC_BASE_URL:-https://advweb.duckdns.org}
+      KC_HOSTNAME: ${APP_KEYCLOAK_BASE_URL:-https://advweb.duckdns.org/auth}
       KC_HTTP_RELATIVE_PATH: /auth
       KC_PROXY_HEADERS: xforwarded
       KC_HOSTNAME_STRICT: true
