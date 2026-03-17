@@ -7,7 +7,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
-import ru.catwarden.advweb.exception.EntityNotFoundException;
+import ru.catwarden.advweb.exception.*;
 import ru.catwarden.advweb.validation.dto.ValidationResponse;
 
 import java.util.List;
@@ -52,6 +52,50 @@ public class GlobalExceptionHandler {
                 new ValidationResponse(List.of(ex.getMessage())),
                 HttpStatus.NOT_FOUND
         );
+    }
 
+    @ExceptionHandler(FileOperationException.class)
+    @ResponseBody
+    public ResponseEntity<ValidationResponse> handleFileOperation(FileOperationException ex) {
+        return new ResponseEntity<>(
+                new ValidationResponse(List.of(ex.getMessage())),
+                HttpStatus.INTERNAL_SERVER_ERROR
+        );
+    }
+
+    @ExceptionHandler(InvalidRelationException.class)
+    @ResponseBody
+    public ResponseEntity<ValidationResponse> handleInvalidRelation(InvalidRelationException ex) {
+        return new ResponseEntity<>(
+                new ValidationResponse(List.of(ex.getMessage())),
+                HttpStatus.BAD_REQUEST
+        );
+    }
+
+    @ExceptionHandler(InvalidStateException.class)
+    @ResponseBody
+    public ResponseEntity<ValidationResponse> handleInvalidState(InvalidStateException ex) {
+        return new ResponseEntity<>(
+                new ValidationResponse(List.of(ex.getMessage())),
+                HttpStatus.CONFLICT
+        );
+    }
+
+    @ExceptionHandler(LimitExceededException.class)
+    @ResponseBody
+    public ResponseEntity<ValidationResponse> handleLimitExceeded(LimitExceededException ex) {
+        return new ResponseEntity<>(
+                new ValidationResponse(List.of(ex.getMessage())),
+                HttpStatus.BAD_REQUEST
+        );
+    }
+
+    @ExceptionHandler(OperationNotAllowedException.class)
+    @ResponseBody
+    public ResponseEntity<ValidationResponse> handleOperationNotAllowed(OperationNotAllowedException ex) {
+        return new ResponseEntity<>(
+                new ValidationResponse(List.of(ex.getMessage())),
+                HttpStatus.CONFLICT
+        );
     }
 }

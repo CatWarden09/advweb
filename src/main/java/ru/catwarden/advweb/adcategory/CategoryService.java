@@ -2,14 +2,13 @@ package ru.catwarden.advweb.adcategory;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.catwarden.advweb.ad.Advertisement;
 import ru.catwarden.advweb.adcategory.dto.AdvertisementCategoryRequest;
 import ru.catwarden.advweb.adcategory.dto.AdvertisementCategoryUpdateRequest;
 import ru.catwarden.advweb.adcategory.dto.AdvertisementCategoryResponse;
 import ru.catwarden.advweb.ad.AdvertisementRepository;
 import ru.catwarden.advweb.exception.EntityNotFoundException;
 import ru.catwarden.advweb.exception.InvalidRelationException;
-import ru.catwarden.advweb.exception.OperationNowAllowedException;
+import ru.catwarden.advweb.exception.OperationNotAllowedException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -88,11 +87,11 @@ public class CategoryService {
                 .orElseThrow(() -> new EntityNotFoundException(AdvertisementCategory.class, id));
 
         if(advertisementRepository.existsByCategory(advertisementCategory)){
-            throw new OperationNowAllowedException("Cannot delete category with advertisements");
+            throw new OperationNotAllowedException("Cannot delete category with advertisements");
         }
 
         if (!categoryRepository.findByParent(advertisementCategory).isEmpty()) { // .isEmpty > != null (null = [])
-            throw new OperationNowAllowedException("Cannot delete category with subcategories");
+            throw new OperationNotAllowedException("Cannot delete category with subcategories");
         }
 
         categoryRepository.delete(advertisementCategory);
