@@ -13,6 +13,7 @@ import ru.catwarden.advweb.comment.CommentService;
 import ru.catwarden.advweb.exception.EntityNotFoundException;
 import ru.catwarden.advweb.exception.InvalidRelationException;
 import ru.catwarden.advweb.exception.InvalidStateException;
+import ru.catwarden.advweb.exception.LimitExceededException;
 import ru.catwarden.advweb.user.User;
 import ru.catwarden.advweb.enums.AdModerationStatus;
 import ru.catwarden.advweb.adcategory.CategoryRepository;
@@ -101,7 +102,7 @@ public class AdvertisementService {
         }
 
         if (advertisementRequest.getImageIds().size() > MAX_IMAGES_PER_AD) {
-            throw new RuntimeException("Limit for advertisement pictures is exceeded");
+            throw new LimitExceededException("Limit for advertisement pictures is exceeded");
         }
 
 
@@ -133,7 +134,7 @@ public class AdvertisementService {
                 .orElseThrow(() -> new EntityNotFoundException(Advertisement.class, id));
 
         if (advertisementUpdateRequest.getImageIds().size() > MAX_IMAGES_PER_AD) {
-            throw new RuntimeException("Limit for advertisement pictures is exceeded");
+            throw new LimitExceededException("Limit for advertisement pictures is exceeded");
         }
 
         if(!advertisement.getName().equals(advertisementUpdateRequest.getName())
