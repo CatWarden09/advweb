@@ -14,34 +14,34 @@ services:
       - advweb_db_data:/var/lib/postgresql/data
     restart: always
 
-keycloak:
-  image: quay.io/keycloak/keycloak:26.1
-  container_name: advweb_keycloak
-  command: start
-  environment:
-    KC_BOOTSTRAP_ADMIN_USERNAME: admin
-    KC_BOOTSTRAP_ADMIN_PASSWORD: admin
-    KC_HTTPS_CERTIFICATE_FILE: /etc/x509/https/keystore.p12
-    KC_HTTPS_CERTIFICATE_KEY_FILE: /etc/x509/https/keystore.p12
-    KC_HTTPS_CERTIFICATE_KEY_STORE_PASSWORD: mypass
-    KC_HTTPS_CERTIFICATE_KEY_STORE_TYPE: PKCS12
-    KC_HTTPS_PORT: 8443
-    KC_PROXY: edge
-    KC_HOSTNAME: advweb.duckdns.org
-    KC_LOG_LEVEL: info
-    KC_DB: postgres
-    KC_DB_URL: jdbc:postgresql://db:5432/advweb
-    KC_DB_USERNAME: advweb_user
-    KC_DB_PASSWORD: admin
-    KC_DB_SCHEMA: public
-  ports:
-    - "8443:8443"
-  depends_on:
-    - db
-  volumes:
-    - keycloak_data:/opt/keycloak/data
-    - /etc/letsencrypt/live/advweb.duckdns.org/keystore.p12:/etc/x509/https/keystore.p12:ro
-  restart: always
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.1
+    container_name: advweb_keycloak
+    command: start
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_HTTPS_CERTIFICATE_FILE: /etc/x509/https/keystore.p12
+      KC_HTTPS_CERTIFICATE_KEY_FILE: /etc/x509/https/keystore.p12    # <-- вот эта строка
+      KC_HTTPS_CERTIFICATE_KEY_STORE_PASSWORD: mypass
+      KC_HTTPS_CERTIFICATE_KEY_STORE_TYPE: PKCS12
+      KC_HTTPS_PORT: 8443
+      KC_PROXY: edge
+      KC_HOSTNAME: advweb.duckdns.org
+      KC_LOG_LEVEL: info
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://db:5432/advweb
+      KC_DB_USERNAME: advweb_user
+      KC_DB_PASSWORD: admin
+      KC_DB_SCHEMA: public
+    ports:
+      - "8443:8443"
+    depends_on:
+      - db
+    volumes:
+      - keycloak_data:/opt/keycloak/data
+      - /etc/letsencrypt/live/advweb.duckdns.org/keystore.p12:/etc/x509/https/keystore.p12:ro
+    restart: always
 
   app:
     build: .
