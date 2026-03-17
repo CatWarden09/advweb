@@ -5,62 +5,86 @@ services:
     image: postgres:15
     container_name: advweb_db
     environment:
-      POSTGRES_DB: advweb
-      POSTGRES_USER: advweb_user
-      POSTGRES_PASSWORD: admin
-    ports:
-      - "5432:5432"
+      POSTGRES_DB: ${POSTGRES_DB:-advweb}
+      POSTGRES_USER: ${POSTGRES_USER:-advweb_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-admin}
     volumes:
       - advweb_db_data:/var/lib/postgresql/data
-    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-advweb_user} -d ${POSTGRES_DB:-advweb}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
 
   keycloak:
     image: quay.io/keycloak/keycloak:26.1
     container_name: advweb_keycloak
-    command: start
+    command:
+      - start
+      - --http-enabled=true
+      - --proxy-headers=xforwarded
     environment:
-      KC_BOOTSTRAP_ADMIN_USERNAME: admin
-      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
-      KC_HTTPS_CERTIFICATE_FILE: /etc/x509/https/keystore.p12
-      KC_HTTPS_CERTIFICATE_KEY_FILE: /etc/x509/https/keystore.p12    # <-- вот эта строка
-      KC_HTTPS_CERTIFICATE_KEY_STORE_PASSWORD: mypass
-      KC_HTTPS_CERTIFICATE_KEY_STORE_TYPE: PKCS12
-      KC_HTTPS_PORT: 8443
-      KC_PROXY: edge
-      KC_HOSTNAME: advweb.duckdns.org
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN_USERNAME:-admin}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-change_me_admin_password}
+      KC_HOSTNAME: ${APP_PUBLIC_BASE_URL:-https://advweb.duckdns.org}
+      KC_HTTP_RELATIVE_PATH: /auth
+      KC_PROXY_HEADERS: xforwarded
+      KC_HOSTNAME_STRICT: true
       KC_LOG_LEVEL: info
       KC_DB: postgres
-      KC_DB_URL: jdbc:postgresql://db:5432/advweb
-      KC_DB_USERNAME: advweb_user
-      KC_DB_PASSWORD: admin
+      KC_DB_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-advweb}
+      KC_DB_USERNAME: ${POSTGRES_USER:-advweb_user}
+      KC_DB_PASSWORD: ${POSTGRES_PASSWORD:-admin}
       KC_DB_SCHEMA: public
-    ports:
-      - "8443:8443"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    expose:
+      - "8080"
     volumes:
       - keycloak_data:/opt/keycloak/data
-      - /etc/letsencrypt/live/advweb.duckdns.org/keystore.p12:/etc/x509/https/keystore.p12:ro
-    restart: always
+    restart: unless-stopped
 
   app:
     build: .
     container_name: advweb_app
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/advweb
-      SPRING_DATASOURCE_USERNAME: advweb_user
-      SPRING_DATASOURCE_PASSWORD: admin
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-advweb}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-advweb_user}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-admin}
       SPRING_FLYWAY_ENABLED: "true"
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: https://advweb.duckdns.org:8443/realms/advweb
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: https://advweb.duckdns.org:8443/realms/advweb/protocol/openid-connect/certs
+      APP_PUBLIC_BASE_URL: ${APP_PUBLIC_BASE_URL:-https://advweb.duckdns.org}
+      APP_KEYCLOAK_BASE_URL: ${APP_KEYCLOAK_BASE_URL:-https://advweb.duckdns.org/auth}
+      APP_KEYCLOAK_REALM: ${APP_KEYCLOAK_REALM:-advweb}
+      SPRINGDOC_SWAGGER_UI_OAUTH_CLIENT_ID: ${SPRINGDOC_SWAGGER_UI_OAUTH_CLIENT_ID:-advweb-swagger}
     depends_on:
-      - db
-      - keycloak
-    ports:
-      - "8081:8080"
+      db:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+    expose:
+      - "8080"
     volumes:
       - uploads:/app/uploads
-    restart: on-failure
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2.8
+    container_name: advweb_caddy
+    depends_on:
+      - app
+      - keycloak
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      APP_DOMAIN: ${APP_DOMAIN:-advweb.duckdns.org}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    restart: unless-stopped
 
 volumes:
   advweb_db_data:
@@ -69,3 +93,7 @@ volumes:
     name: advweb_keycloak_data
   uploads:
     name: advweb_uploads
+  caddy_data:
+    name: advweb_caddy_data
+  caddy_config:
+    name: advweb_caddy_config
