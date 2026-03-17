@@ -35,7 +35,10 @@ public class User {
 
     private Long avatarId;
 
-    @Column(nullable = false)
+    @Column(unique = true)
+    private String keycloakId;
+
+    @Column
     private String password;
 
 }
