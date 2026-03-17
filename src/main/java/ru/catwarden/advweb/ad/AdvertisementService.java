@@ -79,8 +79,9 @@ public class AdvertisementService {
     // if some operations go wrong, we need to roll back all of them or then part changes will be applied to the DB
     @Transactional
     public Long createAdvertisement(AdvertisementRequest advertisementRequest){
-        User author = userRepository.findById(advertisementRequest.getAuthorId())
-                .orElseThrow(() -> new EntityNotFoundException(User.class, advertisementRequest.getAuthorId()));
+        String currentKeycloakId = ru.catwarden.advweb.security.SecurityUtils.getCurrentUserKeycloakId();
+        User author = userRepository.findByKeycloakId(currentKeycloakId)
+                .orElseThrow(() -> new EntityNotFoundException(User.class, currentKeycloakId));
 
         AdvertisementCategory category = categoryRepository.findById(advertisementRequest.getCategoryId())
                 .orElseThrow(() -> new EntityNotFoundException(AdvertisementCategory.class, advertisementRequest.getCategoryId()));
@@ -127,11 +128,19 @@ public class AdvertisementService {
 
     @Transactional
     public void updateAdvertisement(Long id, AdvertisementUpdateRequest advertisementUpdateRequest){
-        boolean isFieldsChanged = false;
-        boolean isImagesChanged = false;
-
         Advertisement advertisement = advertisementRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(Advertisement.class, id));
+
+        String currentKeycloakId = ru.catwarden.advweb.security.SecurityUtils.getCurrentUserKeycloakId();
+        boolean isAdmin = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication()
+                .getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        if (!isAdmin && !advertisement.getAuthor().getKeycloakId().equals(currentKeycloakId)) {
+            throw new ru.catwarden.advweb.exception.OperationNotAllowedException("You are not allowed to update this advertisement");
+        }
+
+        boolean isFieldsChanged = false;
+        boolean isImagesChanged = false;
 
         if (advertisementUpdateRequest.getImageIds().size() > MAX_IMAGES_PER_AD) {
             throw new LimitExceededException("Limit for advertisement pictures is exceeded");
@@ -195,6 +204,14 @@ public class AdvertisementService {
     public void deleteAdvertisement(Long id){
         Advertisement advertisement = advertisementRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(Advertisement.class, id));
+
+        String currentKeycloakId = ru.catwarden.advweb.security.SecurityUtils.getCurrentUserKeycloakId();
+        boolean isAdmin = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication()
+                .getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        if (!isAdmin && !advertisement.getAuthor().getKeycloakId().equals(currentKeycloakId)) {
+            throw new ru.catwarden.advweb.exception.OperationNotAllowedException("You are not allowed to delete this advertisement");
+        }
 
         advertisementRepository.deleteById(advertisement.getId());
 
