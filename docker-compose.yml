@@ -20,6 +20,7 @@ services:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin
       KC_HTTP_PORT: 8080
+      KC_HOSTNAME: http://92.38.48.50:8082
       KC_HOSTNAME_STRICT: "false"
       KC_HOSTNAME_STRICT_HTTPS: "false"
       KC_LOG_LEVEL: info
@@ -35,7 +36,9 @@ services:
       SPRING_DATASOURCE_USERNAME: advweb_user
       SPRING_DATASOURCE_PASSWORD: admin
       SPRING_FLYWAY_ENABLED: "true"
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8080/realms/advweb
+      # Issuer должен СТРОГО совпадать с тем, что в токене (внешний IP)
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://92.38.48.50:8082/realms/advweb
+      # А ключи скачиваем по внутренней сети Docker
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/advweb/protocol/openid-connect/certs
     depends_on:
       - db
