@@ -26,15 +26,15 @@ jobs:
     - name: Build project with Maven Wrapper
       run: ./mvnw -B package -DskipTests
       
-    - name: Deploy to server via SSH
-      uses: appleboy/ssh-action@v1.0.3
-      with:
-        host: ${{ secrets.SERVER_IP }}
-        username: ${{ secrets.SERVER_USER }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        script: |
-          cd /root/advweb
-          git checkout master
-          git pull
-          #docker compose down
-          #docker compose up --build -d
+    # - name: Deploy to server via SSH
+    #   uses: appleboy/ssh-action@v1.0.3
+    #   with:
+    #     host: ${{ secrets.SERVER_IP }}
+    #     username: ${{ secrets.SERVER_USER }}
+    #     key: ${{ secrets.SSH_PRIVATE_KEY }}
+    #     script: |
+    #       cd /root/advweb
+    #       git checkout master
+    #       git pull
+    #       #docker compose down
+    #       #docker compose up --build -d
