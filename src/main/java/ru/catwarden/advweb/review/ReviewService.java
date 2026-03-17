@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.catwarden.advweb.enums.AdModerationStatus;
 import ru.catwarden.advweb.exception.EntityNotFoundException;
+import ru.catwarden.advweb.exception.InvalidStateException;
 import ru.catwarden.advweb.review.dto.ReviewRequest;
 import ru.catwarden.advweb.review.dto.ReviewResponse;
 import ru.catwarden.advweb.review.dto.ReviewUpdateRequest;
@@ -95,7 +96,7 @@ public class ReviewService {
                 .orElseThrow(() -> new EntityNotFoundException(Review.class, id));
 
         if(review.getModerationStatus() != AdModerationStatus.PENDING){
-            throw new RuntimeException("Cannot change status of a non-pending review");
+            throw new InvalidStateException("Cannot change status of a non-pending review");
         }
 
         review.setModerationStatus(AdModerationStatus.APPROVED);
@@ -108,7 +109,7 @@ public class ReviewService {
                 .orElseThrow(() -> new EntityNotFoundException(Review.class, id));
 
         if(review.getModerationStatus() != AdModerationStatus.PENDING){
-            throw new RuntimeException("Cannot change status of a non-pending review");
+            throw new InvalidStateException("Cannot change status of a non-pending review");
         }
 
         review.setModerationStatus(AdModerationStatus.REJECTED);

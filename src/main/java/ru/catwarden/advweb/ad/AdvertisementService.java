@@ -11,6 +11,7 @@ import ru.catwarden.advweb.ad.dto.AdvertisementResponse;
 import ru.catwarden.advweb.adcategory.AdvertisementCategory;
 import ru.catwarden.advweb.comment.CommentService;
 import ru.catwarden.advweb.exception.EntityNotFoundException;
+import ru.catwarden.advweb.exception.InvalidStateException;
 import ru.catwarden.advweb.user.User;
 import ru.catwarden.advweb.enums.AdModerationStatus;
 import ru.catwarden.advweb.adcategory.CategoryRepository;
@@ -167,7 +168,7 @@ public class AdvertisementService {
                 .orElseThrow(() -> new EntityNotFoundException(Advertisement.class, id));
 
         if(advertisement.getAdModerationStatus() != AdModerationStatus.PENDING){
-            throw new RuntimeException("Cannot change status of a non-pending advertisement");
+            throw new InvalidStateException("Cannot change status of a non-pending advertisement");
         }
 
         advertisement.setAdModerationStatus(AdModerationStatus.APPROVED);
@@ -180,7 +181,7 @@ public class AdvertisementService {
                 .orElseThrow(() -> new EntityNotFoundException(Advertisement.class, id));
 
         if(advertisement.getAdModerationStatus() != AdModerationStatus.PENDING){
-            throw new RuntimeException("Cannot change status of a non-pending advertisement");
+            throw new InvalidStateException("Cannot change status of a non-pending advertisement");
         }
 
         advertisement.setAdModerationStatus(AdModerationStatus.REJECTED);

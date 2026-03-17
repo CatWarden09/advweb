@@ -6,17 +6,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.catwarden.advweb.ad.Advertisement;
 import ru.catwarden.advweb.ad.AdvertisementRepository;
-import ru.catwarden.advweb.avatar.Avatar;
 import ru.catwarden.advweb.comment.dto.CommentRequest;
 import ru.catwarden.advweb.comment.dto.CommentResponse;
 import ru.catwarden.advweb.comment.dto.CommentUpdateRequest;
 import ru.catwarden.advweb.exception.EntityNotFoundException;
-import ru.catwarden.advweb.user.UserRepository;
 import ru.catwarden.advweb.user.User;
 import ru.catwarden.advweb.user.UserMapper;
+import ru.catwarden.advweb.user.UserRepository;
 import ru.catwarden.advweb.user.dto.ShortUserInfoResponse;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
