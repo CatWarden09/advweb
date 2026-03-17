@@ -23,7 +23,9 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/error").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
 
                         .requestMatchers(HttpMethod.GET, "/advertisements/**").permitAll()
 
@@ -33,21 +35,21 @@ public class SecurityConfig {
 
                         .requestMatchers("/moderation/**").hasRole("ADMIN")
 
-                        .requestMatchers("/reviews/**").hasRole("USER")
+                        .requestMatchers("/reviews/**").hasAnyRole("USER", "ADMIN")
 
-                        .requestMatchers("/images/**").hasRole("USER")
+                        .requestMatchers("/images/**").hasAnyRole("USER", "ADMIN")
 
-                        .requestMatchers("/comments/**").hasRole("USER")
+                        .requestMatchers("/comments/**").hasAnyRole("USER", "ADMIN")
 
-                        .requestMatchers("/avatars/**").hasRole("USER")
+                        .requestMatchers("/avatars/**").hasAnyRole("USER", "ADMIN")
 
-                        .requestMatchers(HttpMethod.POST, "/advertisements/**").hasRole("USER")
-                        .requestMatchers(HttpMethod.PATCH, "/advertisements/**").hasRole("USER")
-                        .requestMatchers(HttpMethod.DELETE, "/advertisements/**").hasRole("USER")
+                        .requestMatchers(HttpMethod.POST, "/advertisements/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/advertisements/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/advertisements/**").hasAnyRole("USER", "ADMIN")
 
                         .requestMatchers("/admin/**").hasRole("ADMIN")
 
-                        .requestMatchers("/users/**").hasRole("USER")
+                        .requestMatchers("/users/**").hasAnyRole("USER", "ADMIN")
 
 
                         .anyRequest().authenticated()

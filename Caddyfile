@@ -1,0 +1,8 @@
+{$APP_DOMAIN:advweb.duckdns.org} {
+    encode zstd gzip
+
+    @keycloak path /auth /auth/*
+    reverse_proxy @keycloak keycloak:8080
+
+    reverse_proxy app:8080
+}
