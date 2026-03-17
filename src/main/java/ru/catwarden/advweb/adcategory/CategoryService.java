@@ -8,6 +8,7 @@ import ru.catwarden.advweb.adcategory.dto.AdvertisementCategoryUpdateRequest;
 import ru.catwarden.advweb.adcategory.dto.AdvertisementCategoryResponse;
 import ru.catwarden.advweb.ad.AdvertisementRepository;
 import ru.catwarden.advweb.exception.EntityNotFoundException;
+import ru.catwarden.advweb.exception.InvalidRelationException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,7 +57,7 @@ public class CategoryService {
                 .orElseThrow(() -> new EntityNotFoundException(AdvertisementCategory.class, id));
 
         if (parent.getParent() != null){
-            throw new RuntimeException("Cannot create subcategory for a subcategory");
+            throw new InvalidRelationException("Cannot create subcategory for a subcategory");
         }
 
         // DONE add batch updating

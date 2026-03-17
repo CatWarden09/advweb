@@ -11,6 +11,7 @@ import ru.catwarden.advweb.ad.dto.AdvertisementResponse;
 import ru.catwarden.advweb.adcategory.AdvertisementCategory;
 import ru.catwarden.advweb.comment.CommentService;
 import ru.catwarden.advweb.exception.EntityNotFoundException;
+import ru.catwarden.advweb.exception.InvalidRelationException;
 import ru.catwarden.advweb.exception.InvalidStateException;
 import ru.catwarden.advweb.user.User;
 import ru.catwarden.advweb.enums.AdModerationStatus;
@@ -92,11 +93,11 @@ public class AdvertisementService {
         }
 
         if (subcategory != null && !subcategory.getParent().equals(category)) {
-            throw new RuntimeException("Subcategory is not a child of the given category");
+            throw new InvalidRelationException("Subcategory is not a child of the given category");
         }
 
-        if (subcategory.equals(category)){
-            throw new RuntimeException("Subcategory cannot be the same as the category");
+        if (subcategory != null && subcategory.equals(category)){
+            throw new InvalidRelationException("Subcategory cannot be the same as the category");
         }
 
         if (advertisementRequest.getImageIds().size() > MAX_IMAGES_PER_AD) {

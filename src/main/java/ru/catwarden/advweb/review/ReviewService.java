@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.catwarden.advweb.enums.AdModerationStatus;
 import ru.catwarden.advweb.exception.EntityNotFoundException;
+import ru.catwarden.advweb.exception.InvalidRelationException;
 import ru.catwarden.advweb.exception.InvalidStateException;
 import ru.catwarden.advweb.review.dto.ReviewRequest;
 import ru.catwarden.advweb.review.dto.ReviewResponse;
@@ -67,7 +68,7 @@ public class ReviewService {
                 .orElseThrow(() -> new EntityNotFoundException(User.class, reviewRequest.getAuthorId()));
 
         if (author.equals(recipient)){
-            throw new RuntimeException("Users cannot create reviews for themselves");
+            throw new InvalidRelationException("Users cannot create reviews for themselves");
         }
 
         Review review = reviewMapper.toEntity(reviewRequest);
