@@ -9,6 +9,7 @@ import ru.catwarden.advweb.adcategory.dto.AdvertisementCategoryResponse;
 import ru.catwarden.advweb.ad.AdvertisementRepository;
 import ru.catwarden.advweb.exception.EntityNotFoundException;
 import ru.catwarden.advweb.exception.InvalidRelationException;
+import ru.catwarden.advweb.exception.OperationNowAllowedException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -87,11 +88,11 @@ public class CategoryService {
                 .orElseThrow(() -> new EntityNotFoundException(AdvertisementCategory.class, id));
 
         if(advertisementRepository.existsByCategory(advertisementCategory)){
-            throw new RuntimeException("Cannot delete category with advertisements");
+            throw new OperationNowAllowedException("Cannot delete category with advertisements");
         }
 
         if (!categoryRepository.findByParent(advertisementCategory).isEmpty()) { // .isEmpty > != null (null = [])
-            throw new RuntimeException("Cannot delete category with subcategories");
+            throw new OperationNowAllowedException("Cannot delete category with subcategories");
         }
 
         categoryRepository.delete(advertisementCategory);
