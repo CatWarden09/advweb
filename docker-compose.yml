@@ -21,10 +21,12 @@ services:
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin
-      KC_HTTP_PORT: 8080
+      KC_HTTPS_CERTIFICATE_FILE: /etc/x509/https/keystore.p12
+      KC_HTTPS_CERTIFICATE_KEY_STORE_PASSWORD: mypass
+      KC_HTTPS_CERTIFICATE_KEY_STORE_TYPE: PKCS12
+      KC_HTTPS_PORT: 8443
       KC_PROXY: edge
-      KC_HOSTNAME_STRICT: "false"
-      KC_HOSTNAME_STRICT_HTTPS: "false"
+      KC_HOSTNAME: advweb.duckdns.org
       KC_LOG_LEVEL: info
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://db:5432/advweb
@@ -32,11 +34,12 @@ services:
       KC_DB_PASSWORD: admin
       KC_DB_SCHEMA: public
     ports:
-      - "8082:8080"
+      - "8443:8443"
     depends_on:
       - db
     volumes:
       - keycloak_data:/opt/keycloak/data
+      - /etc/letsencrypt/live/advweb.duckdns.org/keystore.p12:/etc/x509/https/keystore.p12:ro
     restart: always
 
   app:
@@ -47,8 +50,8 @@ services:
       SPRING_DATASOURCE_USERNAME: advweb_user
       SPRING_DATASOURCE_PASSWORD: admin
       SPRING_FLYWAY_ENABLED: "true"
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://92.38.48.50:8082/realms/advweb
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://92.38.48.50:8082/realms/advweb/protocol/openid-connect/certs
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: https://advweb.duckdns.org/realms/advweb
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: https://advweb.duckdns.org/realms/advweb/protocol/openid-connect/certs
     depends_on:
       - db
       - keycloak

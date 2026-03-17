@@ -14,6 +14,7 @@ public class OpenApiConfig {
     @Bean
     public OpenAPI customOpenAPI() {
         final String securitySchemeName = "bearerAuth";
+
         return new OpenAPI()
                 .info(new Info()
                         .title("Advweb API")
@@ -26,6 +27,8 @@ public class OpenApiConfig {
                                         .name(securitySchemeName)
                                         .type(SecurityScheme.Type.HTTP)
                                         .scheme("bearer")
-                                        .bearerFormat("JWT")));
+                                        .bearerFormat("JWT")
+                        )
+                );
     }
 }
