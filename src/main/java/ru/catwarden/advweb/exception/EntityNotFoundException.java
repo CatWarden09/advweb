@@ -1,7 +1,9 @@
 package ru.catwarden.advweb.exception;
 
 public class EntityNotFoundException extends RuntimeException{
-    public EntityNotFoundException(String entity, Long id) {
-        super(String.format("%s with id=%d not found", entity, id));
+    public EntityNotFoundException(Class<?> entityClass, Object id) {
+        super(String.format("%s with id=%s not found",
+                entityClass.getSimpleName(),
+                id));
     }
 }

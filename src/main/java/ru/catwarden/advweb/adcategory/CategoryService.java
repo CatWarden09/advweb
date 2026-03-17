@@ -21,7 +21,7 @@ public class CategoryService {
 
     public AdvertisementCategoryResponse getCategory(Long id){
         AdvertisementCategory advertisementCategory = categoryRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(AdvertisementCategory.class.getName(), id));
+                .orElseThrow(() -> new EntityNotFoundException(AdvertisementCategory.class, id));
 
         return advertisementCategoryMapper.toResponse(advertisementCategory);
     }
@@ -35,7 +35,7 @@ public class CategoryService {
 
     public List<AdvertisementCategoryResponse> getSubcategories(Long id){
         AdvertisementCategory parent = categoryRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(AdvertisementCategory.class.getName(), id));
+                .orElseThrow(() -> new EntityNotFoundException(AdvertisementCategory.class, id));
 
         return categoryRepository.findByParent(parent)
                 .stream()
@@ -53,7 +53,7 @@ public class CategoryService {
     //  need to figure out a solution for deleting such deep tree (like recursively checking the subcategories and forbidding to delete those)
     public void createSubcategories(Long id, List<AdvertisementCategoryRequest> subcategoryList){
         AdvertisementCategory parent = categoryRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(AdvertisementCategory.class.getName(), id));
+                .orElseThrow(() -> new EntityNotFoundException(AdvertisementCategory.class, id));
 
         if (parent.getParent() != null){
             throw new RuntimeException("Cannot create subcategory for a subcategory");
@@ -72,7 +72,7 @@ public class CategoryService {
 
     public void updateCategory(Long id, AdvertisementCategoryUpdateRequest advertisementCategoryUpdateRequest){
         AdvertisementCategory advertisementCategory = categoryRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(AdvertisementCategory.class.getName(), id));
+                .orElseThrow(() -> new EntityNotFoundException(AdvertisementCategory.class, id));
 
         if(!advertisementCategory.getName().equals(advertisementCategoryUpdateRequest.getName())) {
             advertisementCategory.setName(advertisementCategoryUpdateRequest.getName());
@@ -83,7 +83,7 @@ public class CategoryService {
 
     public void deleteCategory(Long id){
         AdvertisementCategory advertisementCategory = categoryRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(AdvertisementCategory.class.getName(), id));
+                .orElseThrow(() -> new EntityNotFoundException(AdvertisementCategory.class, id));
 
         if(advertisementRepository.existsByCategory(advertisementCategory)){
             throw new RuntimeException("Cannot delete category with advertisements");

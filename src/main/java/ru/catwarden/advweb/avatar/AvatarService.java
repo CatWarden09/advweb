@@ -43,14 +43,14 @@ public class AvatarService {
 
     public AvatarDto getUserAvatar(Long userId){
         Avatar avatar = avatarRepository.findByUserId(userId)
-                .orElseThrow(() -> new EntityNotFoundException(Avatar.class.getName(), userId));
+                .orElseThrow(() -> new EntityNotFoundException(Avatar.class, userId));
 
         return avatarMapper.toDto(avatar);
     }
 
     public void setUserAvatar(Long avatarId, Long userId){
         Avatar avatar = avatarRepository.findById(avatarId)
-                .orElseThrow(() -> new EntityNotFoundException(Avatar.class.getName(), userId));
+                .orElseThrow(() -> new EntityNotFoundException(Avatar.class, userId));
 
 
         avatar.setLinkedToUser(true);
@@ -61,7 +61,7 @@ public class AvatarService {
 
     public void unlinkUserAvatar(Long userId){
         Avatar avatar = avatarRepository.findByUserId(userId)
-                .orElseThrow(() -> new EntityNotFoundException(Avatar.class.getName(), userId));
+                .orElseThrow(() -> new EntityNotFoundException(Avatar.class, userId));
 
         avatar.setLinkedToUser(false);
         avatar.setUserId(null);

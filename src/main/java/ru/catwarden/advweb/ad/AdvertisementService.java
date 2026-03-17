@@ -34,11 +34,10 @@ public class AdvertisementService {
     private final int MAX_IMAGES_PER_AD = 10;
 
     // DONE figure out mappers to avoid code repeating
-    // TODO figure out MapStruct for better code
     // DONE moderation status validation
     public AdvertisementResponse getAdvertisement(Long id){
         Advertisement advertisement = advertisementRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(Advertisement.class.getName(), id));
+                .orElseThrow(() -> new EntityNotFoundException(Advertisement.class, id));
 
         return this.mapWithImages(advertisement);
     }
@@ -78,17 +77,17 @@ public class AdvertisementService {
     @Transactional
     public Long createAdvertisement(AdvertisementRequest advertisementRequest){
         User author = userRepository.findById(advertisementRequest.getAuthorId())
-                .orElseThrow(() -> new EntityNotFoundException(User.class.getName(), advertisementRequest.getAuthorId()));
+                .orElseThrow(() -> new EntityNotFoundException(User.class, advertisementRequest.getAuthorId()));
 
         AdvertisementCategory category = categoryRepository.findById(advertisementRequest.getCategoryId())
-                .orElseThrow(() -> new EntityNotFoundException(AdvertisementCategory.class.getName(), advertisementRequest.getCategoryId()));
+                .orElseThrow(() -> new EntityNotFoundException(AdvertisementCategory.class, advertisementRequest.getCategoryId()));
 
         // DONE Updated the flow to keep the mapper more clean (all other fields are set after builder and checked inside the service)
         // DONE add hierarchy validation
         AdvertisementCategory subcategory = null;
         if (advertisementRequest.getSubcategoryId() != null) {
             subcategory = categoryRepository.findById(advertisementRequest.getSubcategoryId())
-                    .orElseThrow(() -> new EntityNotFoundException(AdvertisementCategory.class.getName(), advertisementRequest.getSubcategoryId()));
+                    .orElseThrow(() -> new EntityNotFoundException(AdvertisementCategory.class, advertisementRequest.getSubcategoryId()));
         }
 
         if (subcategory != null && !subcategory.getParent().equals(category)) {
@@ -129,7 +128,7 @@ public class AdvertisementService {
         boolean isImagesChanged = false;
 
         Advertisement advertisement = advertisementRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(Advertisement.class.getName(), id));
+                .orElseThrow(() -> new EntityNotFoundException(Advertisement.class, id));
 
         if (advertisementUpdateRequest.getImageIds().size() > MAX_IMAGES_PER_AD) {
             throw new RuntimeException("Limit for advertisement pictures is exceeded");
@@ -165,7 +164,7 @@ public class AdvertisementService {
     // DONE add status checking (cannot approve/reject not pending)
     public void approveAdvertisement(Long id){
         Advertisement advertisement = advertisementRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(Advertisement.class.getName(), id));
+                .orElseThrow(() -> new EntityNotFoundException(Advertisement.class, id));
 
         if(advertisement.getAdModerationStatus() != AdModerationStatus.PENDING){
             throw new RuntimeException("Cannot change status of a non-pending advertisement");
@@ -178,7 +177,7 @@ public class AdvertisementService {
 
     public void rejectAdvertisement(Long id, String moderationRejectionReason){
         Advertisement advertisement = advertisementRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(Advertisement.class.getName(), id));
+                .orElseThrow(() -> new EntityNotFoundException(Advertisement.class, id));
 
         if(advertisement.getAdModerationStatus() != AdModerationStatus.PENDING){
             throw new RuntimeException("Cannot change status of a non-pending advertisement");
@@ -192,7 +191,7 @@ public class AdvertisementService {
 
     public void deleteAdvertisement(Long id){
         Advertisement advertisement = advertisementRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(Advertisement.class.getName(), id));
+                .orElseThrow(() -> new EntityNotFoundException(Advertisement.class, id));
 
         advertisementRepository.deleteById(advertisement.getId());
 

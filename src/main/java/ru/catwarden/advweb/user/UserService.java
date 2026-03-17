@@ -15,6 +15,6 @@ public class UserService {
     public UserResponse getUser(Long id) {
         return userRepository.findById(id)
                 .map(userMapper::toUserResponse)
-                .orElseThrow(() -> new EntityNotFoundException(User.class.getName(), id));
+                .orElseThrow(() -> new EntityNotFoundException(User.class, id));
     }
 }

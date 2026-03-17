@@ -61,9 +61,9 @@ public class ReviewService {
 
     public void createReview(ReviewRequest reviewRequest) {
         User author = userRepository.findById(reviewRequest.getAuthorId())
-                .orElseThrow(() -> new EntityNotFoundException(User.class.getName(), reviewRequest.getAuthorId()));
+                .orElseThrow(() -> new EntityNotFoundException(User.class, reviewRequest.getAuthorId()));
         User recipient = userRepository.findById(reviewRequest.getRecipientId())
-                .orElseThrow(() -> new EntityNotFoundException(User.class.getName(), reviewRequest.getAuthorId()));
+                .orElseThrow(() -> new EntityNotFoundException(User.class, reviewRequest.getAuthorId()));
 
         if (author.equals(recipient)){
             throw new RuntimeException("Users cannot create reviews for themselves");
@@ -80,7 +80,7 @@ public class ReviewService {
 
     public void updateReview(Long id, ReviewUpdateRequest reviewUpdateRequest) {
         Review review = reviewRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(Review.class.getName(), id));
+                .orElseThrow(() -> new EntityNotFoundException(Review.class, id));
 
         review.setText(reviewUpdateRequest.getText());
         review.setRating(reviewUpdateRequest.getRating());
@@ -92,7 +92,7 @@ public class ReviewService {
     // DONE add status checking (cannot approve not pending)
     public void approveReview(Long id) {
         Review review = reviewRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(Review.class.getName(), id));
+                .orElseThrow(() -> new EntityNotFoundException(Review.class, id));
 
         if(review.getModerationStatus() != AdModerationStatus.PENDING){
             throw new RuntimeException("Cannot change status of a non-pending review");
@@ -105,7 +105,7 @@ public class ReviewService {
 
     public void rejectReview(Long id, String moderationRejectionReason) {
         Review review = reviewRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(Review.class.getName(), id));
+                .orElseThrow(() -> new EntityNotFoundException(Review.class, id));
 
         if(review.getModerationStatus() != AdModerationStatus.PENDING){
             throw new RuntimeException("Cannot change status of a non-pending review");
@@ -119,7 +119,7 @@ public class ReviewService {
 
     public void deleteReview(Long id) {
         if(!reviewRepository.existsById(id)){
-            throw new EntityNotFoundException(Review.class.getName(), id);
+            throw new EntityNotFoundException(Review.class, id);
         }
         reviewRepository.deleteById(id);
     }

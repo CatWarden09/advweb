@@ -57,7 +57,7 @@ public class ImageService {
 
     public List<String> getPreviewImageUrlByAdvertisementId(Long id){
         Image image = imageRepository.findFirstByAdId(id)
-                .orElseThrow(() -> new EntityNotFoundException(Advertisement.class.getName(), id));
+                .orElseThrow(() -> new EntityNotFoundException(Advertisement.class, id));
 
         List<String> images = new ArrayList<>();
         images.add(image.getUrl());

@@ -52,10 +52,10 @@ public class CommentService {
 
     public void createComment(CommentRequest commentRequest){
         User author = userRepository.findById(commentRequest.getAuthorId())
-            .orElseThrow(() -> new EntityNotFoundException(User.class.getName(), commentRequest.getAuthorId()));
+            .orElseThrow(() -> new EntityNotFoundException(User.class, commentRequest.getAuthorId()));
 
         Advertisement advertisement = advertisementRepository.findById(commentRequest.getAdvertisementId())
-            .orElseThrow(() -> new EntityNotFoundException(Advertisement.class.getName(), commentRequest.getAdvertisementId()));
+            .orElseThrow(() -> new EntityNotFoundException(Advertisement.class, commentRequest.getAdvertisementId()));
 
         Comment comment = commentMapper.toEntity(commentRequest);
         comment.setAuthor(author);
@@ -66,7 +66,7 @@ public class CommentService {
 
     public void updateComment(Long id, CommentUpdateRequest commentUpdateRequest){
         Comment comment = commentRepository.findById(id)
-            .orElseThrow(() -> new EntityNotFoundException(Comment.class.getName(), id));
+            .orElseThrow(() -> new EntityNotFoundException(Comment.class, id));
 
         comment.setText(commentUpdateRequest.getText());
         comment.setIsModerated(false);
@@ -76,7 +76,7 @@ public class CommentService {
 
     public void updateCommentOnModeration(Long id, CommentRequest commentRequest){
         Comment comment = commentRepository.findById(id)
-            .orElseThrow(() -> new EntityNotFoundException(Comment.class.getName(), id));
+            .orElseThrow(() -> new EntityNotFoundException(Comment.class, id));
 
         comment.setText(commentRequest.getText());
         comment.setIsModerated(true);
@@ -86,14 +86,14 @@ public class CommentService {
 
     public void deleteComment(Long id){
         if(!commentRepository.existsById(id)){
-            throw new EntityNotFoundException(Comment.class.getName(), id);
+            throw new EntityNotFoundException(Comment.class, id);
         }
         commentRepository.deleteById(id);
     }
 
     public void deleteCommentsByAdId(Long adId){
         if(!advertisementRepository.existsById(adId)){
-            throw new EntityNotFoundException(Advertisement.class.getName(), adId);
+            throw new EntityNotFoundException(Advertisement.class, adId);
         }
 
         commentRepository.deleteAllByAdId(adId);
