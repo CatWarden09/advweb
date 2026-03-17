@@ -24,10 +24,15 @@ services:
       KC_HOSTNAME_STRICT: "false"
       KC_HOSTNAME_STRICT_HTTPS: "false"
       KC_LOG_LEVEL: info
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://db:5432/advweb
+      KC_DB_USERNAME: advweb_user
+      KC_DB_PASSWORD: admin
+      KC_DB_SCHEMA: public
     ports:
       - "8082:8080"
-    volumes:
-      - keycloak_data:/opt/keycloak/data
+    depends_on:
+      - db
     restart: always
 
   app:
@@ -52,7 +57,5 @@ services:
 volumes:
   advweb_db_data:
     name: advweb_db_data
-  keycloak_data:
-    name: advweb_keycloak_data
   uploads:
     name: advweb_uploads
