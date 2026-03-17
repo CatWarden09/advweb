@@ -55,6 +55,7 @@ services:
       APP_PUBLIC_BASE_URL: ${APP_PUBLIC_BASE_URL:-https://advweb.duckdns.org}
       APP_KEYCLOAK_BASE_URL: ${APP_KEYCLOAK_BASE_URL:-https://advweb.duckdns.org/auth}
       APP_KEYCLOAK_REALM: ${APP_KEYCLOAK_REALM:-advweb}
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/auth/realms/${APP_KEYCLOAK_REALM:-advweb}/protocol/openid-connect/certs
       SPRINGDOC_SWAGGER_UI_OAUTH_CLIENT_ID: ${SPRINGDOC_SWAGGER_UI_OAUTH_CLIENT_ID:-advweb-swagger}
     depends_on:
       db:
