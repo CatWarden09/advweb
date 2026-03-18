@@ -1,5 +1,6 @@
 package ru.catwarden.advweb.user;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -11,6 +12,7 @@ import ru.catwarden.advweb.enums.AdModerationStatus;
 import ru.catwarden.advweb.review.ReviewService;
 import ru.catwarden.advweb.review.dto.ReviewResponse;
 import ru.catwarden.advweb.user.dto.UserResponse;
+import ru.catwarden.advweb.user.dto.UserUpdateRequest;
 
 @RestController
 @RequestMapping("/users")
@@ -23,6 +25,12 @@ public class UserController {
     @GetMapping("/{id}")
     public UserResponse getUser(@PathVariable Long id) {
         return userService.getUser(id);
+    }
+
+    @PutMapping("/{id}")
+    public UserResponse updateUser(@PathVariable Long id,
+                                   @Valid @RequestBody UserUpdateRequest userUpdateRequest) {
+        return userService.updateUser(id, userUpdateRequest);
     }
 
     @GetMapping("/{id}/advertisements")

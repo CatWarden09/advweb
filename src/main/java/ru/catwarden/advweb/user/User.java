@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.catwarden.advweb.avatar.Avatar;
 
-// TODO add roles
 @Entity
 @Table(name = "users")
 @NoArgsConstructor

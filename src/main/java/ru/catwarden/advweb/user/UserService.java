@@ -1,13 +1,17 @@
 package ru.catwarden.advweb.user;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.transaction.annotation.Transactional;
 import ru.catwarden.advweb.exception.EntityNotFoundException;
+import ru.catwarden.advweb.exception.OperationNotAllowedException;
 import ru.catwarden.advweb.security.SecurityUtils;
 import ru.catwarden.advweb.user.dto.UserResponse;
+import ru.catwarden.advweb.user.dto.UserUpdateRequest;
 
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -23,6 +27,35 @@ public class UserService {
                 .orElseThrow(() -> new EntityNotFoundException(User.class, id));
     }
 
+    @Transactional
+    public UserResponse updateUser(Long id, UserUpdateRequest userUpdateRequest) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(User.class, id));
+
+        String currentKeycloakId = SecurityUtils.getCurrentUserKeycloakId();
+        validateCurrentUserCanUpdate(user, currentKeycloakId);
+
+        userRepository.findByEmail(userUpdateRequest.getEmail())
+                .filter(existingUser -> !existingUser.getId().equals(id))
+                .ifPresent(existingUser -> {
+                    throw new OperationNotAllowedException("Email is already in use");
+                });
+
+        userRepository.findByPhone(userUpdateRequest.getPhone())
+                .filter(existingUser -> !existingUser.getId().equals(id))
+                .ifPresent(existingUser -> {
+                    throw new OperationNotAllowedException("Phone is already in use");
+                });
+
+        user.setFirstName(userUpdateRequest.getFirstName());
+        user.setLastName(userUpdateRequest.getLastName());
+        user.setPhone(userUpdateRequest.getPhone());
+        user.setEmail(userUpdateRequest.getEmail());
+
+        return userMapper.toUserResponse(user);
+    }
+
+    // this method is used to sync the keycloak user with the local user (for example when registering a new user, we get the jwt token and create a new local user with the given keycloakId)
     @Transactional
     public User syncUser(Jwt jwt) {
         String keycloakId = jwt.getSubject();
@@ -62,5 +95,13 @@ public class UserService {
         return userRepository.findById(userId)
                 .map(u -> currentKeycloakId.equals(u.getKeycloakId()))
                 .orElse(false);
+    }
+
+    private void validateCurrentUserCanUpdate(User user, String currentKeycloakId) {
+        boolean isAdmin = SecurityUtils.isCurrentUserAdmin();
+
+        if (!isAdmin && !Objects.equals(user.getKeycloakId(), currentKeycloakId)) {
+            throw new AccessDeniedException("You are not allowed to update this user");
+        }
     }
 }
