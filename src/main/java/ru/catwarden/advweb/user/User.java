@@ -32,6 +32,8 @@ public class User {
 
     private Double rating;
 
+    private Long ratingCount;
+
     private Long avatarId;
 
     @Column(unique = true)

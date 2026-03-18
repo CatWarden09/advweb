@@ -16,6 +16,7 @@ import ru.catwarden.advweb.security.SecurityUtils;
 import ru.catwarden.advweb.user.User;
 import ru.catwarden.advweb.user.UserMapper;
 import ru.catwarden.advweb.user.UserRepository;
+import ru.catwarden.advweb.user.UserService;
 
 // DONE users cant leave reviews for themselves
 
@@ -24,6 +25,7 @@ import ru.catwarden.advweb.user.UserRepository;
 public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
+    private final UserService userService;
 
     private final ReviewMapper reviewMapper;
     private final UserMapper userMapper;
@@ -80,6 +82,7 @@ public class ReviewService {
     public void updateReview(Long id, ReviewUpdateRequest reviewUpdateRequest) {
         Review review = reviewRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(Review.class, id));
+        boolean wasApproved = review.getModerationStatus() == AdModerationStatus.APPROVED;
 
         String currentKeycloakId = SecurityUtils.getCurrentUserKeycloakId();
 
@@ -94,6 +97,10 @@ public class ReviewService {
         review.setModerationStatus(AdModerationStatus.PENDING);
 
         reviewRepository.save(review);
+
+        if (wasApproved) {
+            userService.recalculateUserRating(review.getRecipient().getId());
+        }
     }
 
     // DONE add status checking (cannot approve not pending)
@@ -108,6 +115,7 @@ public class ReviewService {
         review.setModerationStatus(AdModerationStatus.APPROVED);
 
         reviewRepository.save(review);
+        userService.recalculateUserRating(review.getRecipient().getId());
     }
 
     public void rejectReview(Long id, String moderationRejectionReason) {
@@ -131,6 +139,7 @@ public class ReviewService {
 
         Review review = reviewRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(Review.class, id));
+        boolean wasApproved = review.getModerationStatus() == AdModerationStatus.APPROVED;
 
 
         String currentKeycloakId = SecurityUtils.getCurrentUserKeycloakId();
@@ -142,6 +151,10 @@ public class ReviewService {
         }
 
         reviewRepository.deleteById(id);
+
+        if (wasApproved) {
+            userService.recalculateUserRating(review.getRecipient().getId());
+        }
     }
 
     private void validateCurrentUserOrAdmin(String currentKeycloakId, Long userId) {

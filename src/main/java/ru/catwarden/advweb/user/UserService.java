@@ -5,8 +5,10 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.transaction.annotation.Transactional;
+import ru.catwarden.advweb.enums.AdModerationStatus;
 import ru.catwarden.advweb.exception.EntityNotFoundException;
 import ru.catwarden.advweb.exception.OperationNotAllowedException;
+import ru.catwarden.advweb.review.ReviewRepository;
 import ru.catwarden.advweb.security.SecurityUtils;
 import ru.catwarden.advweb.user.dto.UserResponse;
 import ru.catwarden.advweb.user.dto.UserUpdateRequest;
@@ -18,6 +20,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
+    private final ReviewRepository reviewRepository;
 
     private final UserMapper userMapper;
 
@@ -79,9 +82,26 @@ public class UserService {
                             .lastName(jwt.getClaimAsString("family_name"))
                             .phone(jwt.getClaimAsString("phone_number") != null ? jwt.getClaimAsString("phone_number") : "not_provided_" + keycloakId)
                             .rating(0.0)
+                            .ratingCount(0L)
                             .build();
                     return userRepository.save(newUser);
                 });
+    }
+
+    @Transactional
+    public void recalculateUserRating(Long userId) {
+        if (!userRepository.existsById(userId)) {
+            throw new EntityNotFoundException(User.class, userId);
+        }
+
+        Object[] aggregate = reviewRepository
+                .aggregateRatingByRecipientAndStatus(userId, AdModerationStatus.APPROVED)
+                .orElse(new Object[]{0.0, 0L});
+
+        Double rating = aggregate[0] != null ? ((Number) aggregate[0]).doubleValue() : 0.0;
+        Long ratingCount = aggregate[1] != null ? ((Number) aggregate[1]).longValue() : 0L;
+
+        userRepository.updateUserRatingStats(userId, rating, ratingCount);
     }
 
     public boolean isCurrentUserOrAdmin(Long userId) {
