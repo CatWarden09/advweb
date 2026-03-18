@@ -19,7 +19,7 @@ public class FileUploader {
             "image/webp"
     );
 
-    private static final long MAX_FILE_SIZE = 5 * 1024 * 1024;
+    private static final long MAX_FILE_SIZE = 50 * 1024 * 1024;
 
     public List<StoredFile> uploadFiles(List<MultipartFile> files, Path uploadDir){
         List<StoredFile> uploadedFiles = new ArrayList<>();
