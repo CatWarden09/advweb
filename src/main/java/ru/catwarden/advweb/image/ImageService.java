@@ -35,6 +35,8 @@ public class ImageService {
     private final String fileUrl = "/uploads/adv_photos/";
 
     public List<ImageDto> uploadImage(List<MultipartFile> files){
+        String currentKeycloakId = SecurityUtils.getCurrentUserKeycloakId();
+
         List<StoredFile> uploadedFiles = fileUploader.uploadFiles(files, uploadDir);
 
         List<Image> images = new ArrayList<>();
@@ -44,6 +46,7 @@ public class ImageService {
 
             image.setPath(uploadedImage.getPath());
             image.setUrl(fileUrl + uploadedImage.getFilename());
+            image.setUploaderKeycloakId(currentKeycloakId);
             image.setLinkedToAd(false);
 
             images.add(image);
@@ -116,6 +119,9 @@ public class ImageService {
     }
 
     private void validateImagesCanBeLinked(List<Image> images, List<Long> requestedImageIds, Long advertisementId) {
+        String currentKeycloakId = SecurityUtils.getCurrentUserKeycloakId();
+        boolean isAdmin = SecurityUtils.isCurrentUserAdmin();
+
         Set<Long> foundImageIds = images.stream()
                 .map(Image::getId)
                 .collect(Collectors.toSet());
@@ -132,6 +138,17 @@ public class ImageService {
                         && !advertisementId.equals(image.getAdId()));
         if (hasForeignLinkedImages) {
             throw new AccessDeniedException("One or more images are linked to another advertisement");
+        }
+
+        boolean hasImagesUploadedByOtherUsers = images.stream()
+                .anyMatch(image -> {
+                    boolean isAlreadyInCurrentAd = advertisementId.equals(image.getAdId());
+                    return !isAlreadyInCurrentAd
+                            && !isAdmin
+                            && !currentKeycloakId.equals(image.getUploaderKeycloakId());
+                });
+        if (hasImagesUploadedByOtherUsers) {
+            throw new AccessDeniedException("One or more images were uploaded by another user");
         }
     }
 

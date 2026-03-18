@@ -26,6 +26,9 @@ public class Image {
     @Column(nullable = false, unique = true)
     private String url;
 
+    @Column(name = "uploader_keycloak_id")
+    private String uploaderKeycloakId;
+
     private Boolean linkedToAd;
 
     private Long adId;
