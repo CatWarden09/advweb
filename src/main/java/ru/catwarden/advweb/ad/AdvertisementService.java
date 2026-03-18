@@ -141,7 +141,7 @@ public class AdvertisementService {
         }
 
         boolean isFieldsChanged = false;
-        boolean isImagesChanged = false;
+        boolean isImagesChanged;
 
         if (advertisementUpdateRequest.getImageIds().size() > MAX_IMAGES_PER_AD) {
             throw new LimitExceededException("Limit for advertisement pictures is exceeded");

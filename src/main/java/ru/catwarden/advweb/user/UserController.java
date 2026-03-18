@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import ru.catwarden.advweb.ad.AdvertisementService;
 import ru.catwarden.advweb.ad.dto.AdvertisementResponse;
+import ru.catwarden.advweb.enums.AdModerationStatus;
 import ru.catwarden.advweb.review.ReviewService;
 import ru.catwarden.advweb.review.dto.ReviewResponse;
 import ru.catwarden.advweb.user.dto.UserResponse;
@@ -59,21 +60,19 @@ public class UserController {
     }
 
     @GetMapping("/{id}/reviews/authored/rejected")
-    @org.springframework.security.access.prepost.PreAuthorize("@userService.isCurrentUserOrAdmin(#id)")
     public Page<ReviewResponse> getUserRejectedReviews(@PathVariable Long id,
                                                        @RequestParam(defaultValue = "0") int page,
                                                        @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
-        return reviewService.getUserRejectedReviews(id, pageable);
+        return reviewService.getUserReviews(id, pageable, AdModerationStatus.REJECTED);
     }
 
     @GetMapping("/{id}/reviews/authored/pending")
-    @org.springframework.security.access.prepost.PreAuthorize("@userService.isCurrentUserOrAdmin(#id)")
     public Page<ReviewResponse> getUserPendingReviews(@PathVariable Long id,
                                                       @RequestParam(defaultValue = "0") int page,
                                                       @RequestParam(defaultValue = "10") int size){
         Pageable pageable = PageRequest.of(page, size);
-        return reviewService.getUserPendingReviews(id, pageable);
+        return reviewService.getUserReviews(id, pageable, AdModerationStatus.PENDING);
     }
 
     @GetMapping("/{id}/reviews/authored/approved")
@@ -81,6 +80,7 @@ public class UserController {
                                                        @RequestParam(defaultValue = "0") int page,
                                                        @RequestParam(defaultValue = "10") int size){
         Pageable pageable = PageRequest.of(page, size);
-        return reviewService.getUserApprovedReviews(id, pageable);
+        return reviewService.getUserReviews(id, pageable, AdModerationStatus.APPROVED);
     }
 }
+

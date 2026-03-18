@@ -48,18 +48,11 @@ public class ReviewService {
                 .map(this::mapWithShortUserInfo);
     }
 
-    public Page<ReviewResponse> getUserApprovedReviews(Long userId, Pageable pageable) {
-        return reviewRepository.findByAuthorIdAndModerationStatus(userId, AdModerationStatus.APPROVED, pageable)
-                .map(this::mapWithShortUserInfo);
-    }
+    public Page<ReviewResponse> getUserReviews(Long userId, Pageable pageable, AdModerationStatus status) {
+        String currentKeycloakId = SecurityUtils.getCurrentUserKeycloakId();
+        validateCurrentUserOrAdmin(currentKeycloakId, userId);
 
-    public Page<ReviewResponse> getUserPendingReviews(Long userId, Pageable pageable) {
-        return reviewRepository.findByAuthorIdAndModerationStatus(userId, AdModerationStatus.PENDING, pageable)
-                .map(this::mapWithShortUserInfo);
-    }
-
-    public Page<ReviewResponse> getUserRejectedReviews(Long userId, Pageable pageable) {
-        return reviewRepository.findByAuthorIdAndModerationStatus(userId, AdModerationStatus.REJECTED, pageable)
+        return reviewRepository.findByAuthorIdAndModerationStatus(userId, status, pageable)
                 .map(this::mapWithShortUserInfo);
     }
 
@@ -151,6 +144,21 @@ public class ReviewService {
         reviewRepository.deleteById(id);
     }
 
+    private void validateCurrentUserOrAdmin(String currentKeycloakId, Long userId) {
+        boolean isAdmin = SecurityUtils.isCurrentUserAdmin();
+
+        if (isAdmin) {
+            return;
+        }
+
+        User requestedUser = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException(User.class, userId));
+
+        if (!currentKeycloakId.equals(requestedUser.getKeycloakId())) {
+            throw new AccessDeniedException("You can only view your own reviews");
+        }
+    }
+
     private ReviewResponse mapWithShortUserInfo(Review review){
         ReviewResponse response = reviewMapper.toResponse(review);
         response.setAuthorInfo(userMapper.toShortUserInfoResponse(review.getAuthor()));
@@ -158,3 +166,6 @@ public class ReviewService {
         return response;
     }
 }
+
+
+
