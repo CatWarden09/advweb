@@ -37,7 +37,8 @@ public class Advertisement {
     @Column(nullable = false)
     private Double price;
 
-    private String address;
+    @Embedded
+    private Address address;
 
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = false)

@@ -52,7 +52,7 @@ public class AdvertisementController {
         return advertisementService.createAdvertisement(advertisementRequest);
     }
 
-    @PatchMapping("/{id}")
+    @PutMapping("/{id}")
     public void updateAdvertisement(@PathVariable Long id,
                                     @Valid @RequestBody AdvertisementUpdateRequest advertisementUpdateRequest){
         advertisementService.updateAdvertisement(id, advertisementUpdateRequest);

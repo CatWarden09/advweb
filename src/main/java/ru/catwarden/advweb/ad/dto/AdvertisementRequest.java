@@ -1,5 +1,6 @@
 package ru.catwarden.advweb.ad.dto;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,8 +26,9 @@ public class AdvertisementRequest {
     @Positive
     private Double price;
 
-    @NotBlank
-    private String address; // TODO change to Entity
+    @Valid
+    @NotNull
+    private AddressDto address;
 
     @NotNull
     private Long categoryId;

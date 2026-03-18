@@ -28,7 +28,9 @@ public class AdvertisementService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final AdvertisementRepository advertisementRepository;
+
     private final AdvertisementMapper advertisementMapper;
+    private final AddressMapper addressMapper;
 
     private final ImageService imageService;
     private final CommentService commentService;
@@ -109,6 +111,10 @@ public class AdvertisementService {
         advertisement.setAuthor(author);
         advertisement.setCategory(category);
         advertisement.setSubcategory(subcategory);
+
+        Address address = addressMapper.toEntity(advertisementRequest.getAddress());
+        advertisement.setAddress(address);
+
         advertisement.setAdModerationStatus(AdModerationStatus.PENDING);
 
         Advertisement savedAdvertisement = advertisementRepository.save(advertisement);
@@ -141,10 +147,12 @@ public class AdvertisementService {
             throw new LimitExceededException("Limit for advertisement pictures is exceeded");
         }
 
+        Address requestAddress = addressMapper.toEntity(advertisementUpdateRequest.getAddress());
+
         if(!advertisement.getName().equals(advertisementUpdateRequest.getName())
                 || !advertisement.getDescription().equals(advertisementUpdateRequest.getDescription())
                 || !advertisement.getPrice().equals(advertisementUpdateRequest.getPrice())
-                || !advertisement.getAddress().equals(advertisementUpdateRequest.getAddress())){
+                || !advertisement.getAddress().equals(requestAddress)){
 
             isFieldsChanged = true;
         }
@@ -162,7 +170,7 @@ public class AdvertisementService {
         advertisement.setName(advertisementUpdateRequest.getName());
         advertisement.setDescription(advertisementUpdateRequest.getDescription());
         advertisement.setPrice(advertisementUpdateRequest.getPrice());
-        advertisement.setAddress(advertisementUpdateRequest.getAddress());
+        advertisement.setAddress(requestAddress);
 
         advertisement.setAdModerationStatus(AdModerationStatus.PENDING);
 

@@ -1,0 +1,4 @@
+ALTER TABLE advertisements
+    ADD COLUMN city VARCHAR(255),
+    ADD COLUMN street VARCHAR(255),
+    ADD COLUMN house VARCHAR(255);

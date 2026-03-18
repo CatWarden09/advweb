@@ -1,5 +1,6 @@
 package ru.catwarden.advweb.ad.dto;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,7 +26,9 @@ public class AdvertisementUpdateRequest {
     @Positive
     private Double price;
 
-    private String address;
+    @Valid
+    @NotNull
+    private AddressDto address;
 
     @NotEmpty
     private List<Long> imageIds;

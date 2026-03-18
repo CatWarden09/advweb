@@ -19,7 +19,7 @@ public class AdvertisementResponse {
     private String name;
     private String description;
     private Double price;
-    private String address;
+    private AddressDto address;
     private Long categoryId;
     private Long subcategoryId;
     private LocalDateTime createdAt;
