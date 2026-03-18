@@ -68,10 +68,6 @@ public class ReviewService {
         User currentUser = userRepository.findByKeycloakId(currentKeycloakId)
                 .orElseThrow(() -> new EntityNotFoundException(User.class, currentKeycloakId));
 
-        if (!currentUser.getId().equals(reviewRequest.getAuthorId())) {
-            throw new AccessDeniedException("You can create review only on your own behalf");
-        }
-
         User recipient = userRepository.findById(reviewRequest.getRecipientId())
                 .orElseThrow(() -> new EntityNotFoundException(User.class, reviewRequest.getRecipientId()));
 

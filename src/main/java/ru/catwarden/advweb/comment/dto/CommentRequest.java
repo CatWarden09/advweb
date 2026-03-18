@@ -14,9 +14,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CommentRequest {
     @NotNull
-    private Long authorId;
-
-    @NotNull
     private Long advertisementId;
 
     @NotBlank

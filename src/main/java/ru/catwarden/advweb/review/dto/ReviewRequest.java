@@ -15,9 +15,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ReviewRequest {
     @NotNull
-    private Long authorId;
-
-    @NotNull
     private Long recipientId;
 
     @Size(min = 50, max = 300)

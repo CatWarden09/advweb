@@ -13,9 +13,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AdvertisementRequest {
-    @NotNull
-    private Long authorId;
-
     @NotBlank
     @Size(min = 5, max = 100)
     private String name;

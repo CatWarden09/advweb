@@ -82,26 +82,19 @@ public class AdvertisementService {
         User author = userRepository.findByKeycloakId(currentKeycloakId)
                 .orElseThrow(() -> new EntityNotFoundException(User.class, currentKeycloakId));
 
-        if (!author.getId().equals(advertisementRequest.getAuthorId())) {
-            throw new AccessDeniedException("You can create advertisement only on your own behalf");
-        }
-
         AdvertisementCategory category = categoryRepository.findById(advertisementRequest.getCategoryId())
                 .orElseThrow(() -> new EntityNotFoundException(AdvertisementCategory.class, advertisementRequest.getCategoryId()));
 
         // DONE Updated the flow to keep the mapper more clean (all other fields are set after builder and checked inside the service)
         // DONE add hierarchy validation
-        AdvertisementCategory subcategory = null;
-        if (advertisementRequest.getSubcategoryId() != null) {
-            subcategory = categoryRepository.findById(advertisementRequest.getSubcategoryId())
-                    .orElseThrow(() -> new EntityNotFoundException(AdvertisementCategory.class, advertisementRequest.getSubcategoryId()));
-        }
+        AdvertisementCategory subcategory = categoryRepository.findById(advertisementRequest.getSubcategoryId())
+                .orElseThrow(() -> new EntityNotFoundException(AdvertisementCategory.class, advertisementRequest.getSubcategoryId()));
 
-        if (subcategory != null && !subcategory.getParent().equals(category)) {
+        if (!subcategory.getParent().equals(category)) {
             throw new InvalidRelationException("Subcategory is not a child of the given category");
         }
 
-        if (subcategory != null && subcategory.equals(category)){
+        if (subcategory.equals(category)){
             throw new InvalidRelationException("Subcategory cannot be the same as the category");
         }
 

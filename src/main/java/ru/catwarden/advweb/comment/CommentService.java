@@ -54,10 +54,6 @@ public class CommentService {
         User currentUser = userRepository.findByKeycloakId(currentKeycloakId)
                 .orElseThrow(() -> new EntityNotFoundException(User.class, currentKeycloakId));
 
-        if (!currentUser.getId().equals(commentRequest.getAuthorId())) {
-            throw new AccessDeniedException("You can create comment only on your own behalf");
-        }
-
         Advertisement advertisement = advertisementRepository.findById(commentRequest.getAdvertisementId())
             .orElseThrow(() -> new EntityNotFoundException(Advertisement.class, commentRequest.getAdvertisementId()));
 
