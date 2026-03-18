@@ -2,12 +2,14 @@ package ru.catwarden.advweb.image;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.catwarden.advweb.ad.Advertisement;
 import ru.catwarden.advweb.exception.EntityNotFoundException;
 import ru.catwarden.advweb.exception.FileOperationException;
 import ru.catwarden.advweb.image.dto.ImageDto;
+import ru.catwarden.advweb.security.SecurityUtils;
 import ru.catwarden.advweb.storage.FileUploader;
 import ru.catwarden.advweb.storage.StoredFile;
 
@@ -19,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -73,9 +76,11 @@ public class ImageService {
                 .toList();
     }
 
+    // don't need to add protection here because image setting/syncing methods are called from the Advertisement service, where we already check, if the current user has access to the advertisement editing
     // DONE in FileUploader (add image format validation)
     public void setImagesToAdvertisement(List<Long> imageIds, Long advertisementId){
         List<Image> images = imageRepository.findAllById(imageIds);
+        validateImagesCanBeLinked(images, imageIds, advertisementId);
 
         for(Image image : images){
             image.setAdId(advertisementId);
@@ -108,6 +113,26 @@ public class ImageService {
         setImagesToAdvertisement(requestImageIds, advertisementId);
 
         return true;
+    }
+
+    private void validateImagesCanBeLinked(List<Image> images, List<Long> requestedImageIds, Long advertisementId) {
+        Set<Long> foundImageIds = images.stream()
+                .map(Image::getId)
+                .collect(Collectors.toSet());
+        List<Long> missingIds = requestedImageIds.stream()
+                .filter(id -> !foundImageIds.contains(id))
+                .toList();
+
+        if (!missingIds.isEmpty()) {
+            throw new EntityNotFoundException(Image.class, missingIds.getFirst());
+        }
+
+        boolean hasForeignLinkedImages = images.stream()
+                .anyMatch(image -> Boolean.TRUE.equals(image.getLinkedToAd())
+                        && !advertisementId.equals(image.getAdId()));
+        if (hasForeignLinkedImages) {
+            throw new AccessDeniedException("One or more images are linked to another advertisement");
+        }
     }
 
     public void unlinkAllImagesFromAdvertisement(Long advertisementId){

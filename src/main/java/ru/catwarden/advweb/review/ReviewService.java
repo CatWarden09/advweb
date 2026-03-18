@@ -3,6 +3,7 @@ package ru.catwarden.advweb.review;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import ru.catwarden.advweb.enums.AdModerationStatus;
 import ru.catwarden.advweb.exception.EntityNotFoundException;
@@ -11,6 +12,7 @@ import ru.catwarden.advweb.exception.InvalidStateException;
 import ru.catwarden.advweb.review.dto.ReviewRequest;
 import ru.catwarden.advweb.review.dto.ReviewResponse;
 import ru.catwarden.advweb.review.dto.ReviewUpdateRequest;
+import ru.catwarden.advweb.security.SecurityUtils;
 import ru.catwarden.advweb.user.User;
 import ru.catwarden.advweb.user.UserMapper;
 import ru.catwarden.advweb.user.UserRepository;
@@ -62,18 +64,24 @@ public class ReviewService {
     }
 
     public void createReview(ReviewRequest reviewRequest) {
-        User author = userRepository.findById(reviewRequest.getAuthorId())
-                .orElseThrow(() -> new EntityNotFoundException(User.class, reviewRequest.getAuthorId()));
-        User recipient = userRepository.findById(reviewRequest.getRecipientId())
-                .orElseThrow(() -> new EntityNotFoundException(User.class, reviewRequest.getAuthorId()));
+        String currentKeycloakId = SecurityUtils.getCurrentUserKeycloakId();
+        User currentUser = userRepository.findByKeycloakId(currentKeycloakId)
+                .orElseThrow(() -> new EntityNotFoundException(User.class, currentKeycloakId));
 
-        if (author.equals(recipient)){
+        if (!currentUser.getId().equals(reviewRequest.getAuthorId())) {
+            throw new AccessDeniedException("You can create review only on your own behalf");
+        }
+
+        User recipient = userRepository.findById(reviewRequest.getRecipientId())
+                .orElseThrow(() -> new EntityNotFoundException(User.class, reviewRequest.getRecipientId()));
+
+        if (currentUser.equals(recipient)){
             throw new InvalidRelationException("Users cannot create reviews for themselves");
         }
 
         Review review = reviewMapper.toEntity(reviewRequest);
 
-        review.setAuthor(author);
+        review.setAuthor(currentUser);
         review.setRecipient(recipient);
         review.setModerationStatus(AdModerationStatus.PENDING);
 
@@ -83,6 +91,14 @@ public class ReviewService {
     public void updateReview(Long id, ReviewUpdateRequest reviewUpdateRequest) {
         Review review = reviewRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(Review.class, id));
+
+        String currentKeycloakId = SecurityUtils.getCurrentUserKeycloakId();
+
+        boolean isAdmin = SecurityUtils.isCurrentUserAdmin();
+
+        if (!isAdmin && !review.getAuthor().getKeycloakId().equals(currentKeycloakId)) {
+            throw new AccessDeniedException("You are not allowed to update this review");
+        }
 
         review.setText(reviewUpdateRequest.getText());
         review.setRating(reviewUpdateRequest.getRating());
@@ -123,6 +139,19 @@ public class ReviewService {
         if(!reviewRepository.existsById(id)){
             throw new EntityNotFoundException(Review.class, id);
         }
+
+        Review review = reviewRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(Review.class, id));
+
+
+        String currentKeycloakId = SecurityUtils.getCurrentUserKeycloakId();
+
+        boolean isAdmin = SecurityUtils.isCurrentUserAdmin();
+
+        if (!isAdmin && !review.getAuthor().getKeycloakId().equals(currentKeycloakId)) {
+            throw new AccessDeniedException("You are not allowed to delete this review");
+        }
+
         reviewRepository.deleteById(id);
     }
 

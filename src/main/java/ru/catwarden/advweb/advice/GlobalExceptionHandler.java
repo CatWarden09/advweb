@@ -3,6 +3,7 @@ package ru.catwarden.advweb.advice;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -96,6 +97,15 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(
                 new ValidationResponse(List.of(ex.getMessage())),
                 HttpStatus.CONFLICT
+        );
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    @ResponseBody
+    public ResponseEntity<ValidationResponse> handleAccessDenied(AccessDeniedException ex) {
+        return new ResponseEntity<>(
+                new ValidationResponse(List.of(ex.getMessage())),
+                HttpStatus.FORBIDDEN
         );
     }
 }

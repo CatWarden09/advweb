@@ -3,6 +3,7 @@ package ru.catwarden.advweb.ad;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.catwarden.advweb.ad.dto.AdvertisementRequest;
@@ -10,10 +11,8 @@ import ru.catwarden.advweb.ad.dto.AdvertisementUpdateRequest;
 import ru.catwarden.advweb.ad.dto.AdvertisementResponse;
 import ru.catwarden.advweb.adcategory.AdvertisementCategory;
 import ru.catwarden.advweb.comment.CommentService;
-import ru.catwarden.advweb.exception.EntityNotFoundException;
-import ru.catwarden.advweb.exception.InvalidRelationException;
-import ru.catwarden.advweb.exception.InvalidStateException;
-import ru.catwarden.advweb.exception.LimitExceededException;
+import ru.catwarden.advweb.exception.*;
+import ru.catwarden.advweb.security.SecurityUtils;
 import ru.catwarden.advweb.user.User;
 import ru.catwarden.advweb.enums.AdModerationStatus;
 import ru.catwarden.advweb.adcategory.CategoryRepository;
@@ -79,9 +78,13 @@ public class AdvertisementService {
     // if some operations go wrong, we need to roll back all of them or then part changes will be applied to the DB
     @Transactional
     public Long createAdvertisement(AdvertisementRequest advertisementRequest){
-        String currentKeycloakId = ru.catwarden.advweb.security.SecurityUtils.getCurrentUserKeycloakId();
+        String currentKeycloakId = SecurityUtils.getCurrentUserKeycloakId();
         User author = userRepository.findByKeycloakId(currentKeycloakId)
                 .orElseThrow(() -> new EntityNotFoundException(User.class, currentKeycloakId));
+
+        if (!author.getId().equals(advertisementRequest.getAuthorId())) {
+            throw new AccessDeniedException("You can create advertisement only on your own behalf");
+        }
 
         AdvertisementCategory category = categoryRepository.findById(advertisementRequest.getCategoryId())
                 .orElseThrow(() -> new EntityNotFoundException(AdvertisementCategory.class, advertisementRequest.getCategoryId()));
@@ -131,12 +134,11 @@ public class AdvertisementService {
         Advertisement advertisement = advertisementRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(Advertisement.class, id));
 
-        String currentKeycloakId = ru.catwarden.advweb.security.SecurityUtils.getCurrentUserKeycloakId();
-        boolean isAdmin = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication()
-                .getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        String currentKeycloakId = SecurityUtils.getCurrentUserKeycloakId();
+        boolean isAdmin = SecurityUtils.isCurrentUserAdmin();
 
         if (!isAdmin && !advertisement.getAuthor().getKeycloakId().equals(currentKeycloakId)) {
-            throw new ru.catwarden.advweb.exception.OperationNotAllowedException("You are not allowed to update this advertisement");
+            throw new AccessDeniedException("You are not allowed to update this advertisement");
         }
 
         boolean isFieldsChanged = false;
@@ -205,12 +207,11 @@ public class AdvertisementService {
         Advertisement advertisement = advertisementRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(Advertisement.class, id));
 
-        String currentKeycloakId = ru.catwarden.advweb.security.SecurityUtils.getCurrentUserKeycloakId();
-        boolean isAdmin = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication()
-                .getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        String currentKeycloakId = SecurityUtils.getCurrentUserKeycloakId();
+        boolean isAdmin = SecurityUtils.isCurrentUserAdmin();
 
         if (!isAdmin && !advertisement.getAuthor().getKeycloakId().equals(currentKeycloakId)) {
-            throw new ru.catwarden.advweb.exception.OperationNotAllowedException("You are not allowed to delete this advertisement");
+            throw new AccessDeniedException("You are not allowed to delete this advertisement");
         }
 
         advertisementRepository.deleteById(advertisement.getId());

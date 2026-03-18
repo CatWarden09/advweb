@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.transaction.annotation.Transactional;
 import ru.catwarden.advweb.exception.EntityNotFoundException;
+import ru.catwarden.advweb.security.SecurityUtils;
 import ru.catwarden.advweb.user.dto.UserResponse;
 
 import java.util.Optional;
@@ -50,23 +51,11 @@ public class UserService {
                 });
     }
 
-    public User getByKeycloakId(String keycloakId) {
-        return userRepository.findByKeycloakId(keycloakId)
-                .orElseThrow(() -> new EntityNotFoundException(User.class, keycloakId));
-    }
-
-    public User getCurrentUser() {
-        String keycloakId = ru.catwarden.advweb.security.SecurityUtils.getCurrentUserKeycloakId();
-        if (keycloakId == null) return null;
-        return userRepository.findByKeycloakId(keycloakId).orElse(null);
-    }
-
     public boolean isCurrentUserOrAdmin(Long userId) {
-        String currentKeycloakId = ru.catwarden.advweb.security.SecurityUtils.getCurrentUserKeycloakId();
+        String currentKeycloakId = SecurityUtils.getCurrentUserKeycloakId();
         if (currentKeycloakId == null) return false;
 
-        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
-        if (auth != null && auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
+        if (SecurityUtils.isCurrentUserAdmin()) {
             return true;
         }
 
