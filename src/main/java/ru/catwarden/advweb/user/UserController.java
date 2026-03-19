@@ -42,7 +42,6 @@ public class UserController {
     }
 
     @GetMapping("/{id}/advertisements/pending")
-    @org.springframework.security.access.prepost.PreAuthorize("@userService.isCurrentUserOrAdmin(#id)")
     public Page<AdvertisementResponse> getUserPendingAdvertisements(@PathVariable Long id,
                                                                     @RequestParam(defaultValue = "0") int page,
                                                                     @RequestParam(defaultValue = "10") int size) {
@@ -51,7 +50,6 @@ public class UserController {
     }
 
     @GetMapping("/{id}/advertisements/rejected")
-    @org.springframework.security.access.prepost.PreAuthorize("@userService.isCurrentUserOrAdmin(#id)")
     public Page<AdvertisementResponse> getUserRejectedAdvertisements(@PathVariable Long id,
                                                                      @RequestParam(defaultValue = "0") int page,
                                                                      @RequestParam(defaultValue = "10") int size) {
@@ -89,6 +87,16 @@ public class UserController {
                                                        @RequestParam(defaultValue = "10") int size){
         Pageable pageable = PageRequest.of(page, size);
         return reviewService.getUserReviews(id, pageable, AdModerationStatus.APPROVED);
+    }
+
+    @PutMapping("/{id}/avatar")
+    public void setUserAvatar(@PathVariable Long id, @RequestParam Long avatarId) {
+        userService.setUserAvatar(id, avatarId);
+    }
+
+    @DeleteMapping("/{id}/avatar")
+    public void deleteUserAvatar(@PathVariable Long id) {
+        userService.unlinkUserAvatar(id);
     }
 }
 

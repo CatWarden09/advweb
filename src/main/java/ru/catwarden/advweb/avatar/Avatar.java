@@ -6,9 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.nio.file.Path;
-import java.time.LocalDateTime;
-
 @Entity
 @Table(name = "avatars")
 @NoArgsConstructor
@@ -25,6 +22,8 @@ public class Avatar {
 
     @Column(nullable = false, unique = true)
     private String url;
+
+    private String uploaderKeycloakId;
 
     private Boolean linkedToUser;
 

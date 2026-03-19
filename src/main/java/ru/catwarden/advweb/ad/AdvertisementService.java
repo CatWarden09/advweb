@@ -67,11 +67,13 @@ public class AdvertisementService {
     }
 
     public Page<AdvertisementResponse> getUserPendingAdvertisements(Long userId, Pageable pageable){
+        validateCurrentUserOrAdmin(userId);
         return advertisementRepository.findAllByAuthorIdAndAdModerationStatus(userId, AdModerationStatus.PENDING, pageable)
                 .map(this::mapWithPreviewImage);
     }
 
     public Page<AdvertisementResponse> getUserRejectedAdvertisements(Long userId, Pageable pageable){
+        validateCurrentUserOrAdmin(userId);
         return advertisementRepository.findAllByAuthorIdAndAdModerationStatus(userId, AdModerationStatus.REJECTED, pageable)
                 .map(this::mapWithPreviewImage);
     }
@@ -237,6 +239,20 @@ public class AdvertisementService {
         advertisementResponse.setImageUrls(imageService.getImageUrlsByAdvertisementId(advertisement.getId()));
 
         return advertisementResponse;
+    }
+
+    private void validateCurrentUserOrAdmin(Long userId) {
+        if (SecurityUtils.isCurrentUserAdmin()) {
+            return;
+        }
+
+        String currentKeycloakId = SecurityUtils.getCurrentUserKeycloakId();
+        User requestedUser = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException(User.class, userId));
+
+        if (!currentKeycloakId.equals(requestedUser.getKeycloakId())) {
+            throw new AccessDeniedException("You can only view your own advertisements");
+        }
     }
 }
 

@@ -5,6 +5,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.transaction.annotation.Transactional;
+import ru.catwarden.advweb.avatar.AvatarService;
 import ru.catwarden.advweb.enums.AdModerationStatus;
 import ru.catwarden.advweb.exception.EntityNotFoundException;
 import ru.catwarden.advweb.exception.OperationNotAllowedException;
@@ -21,6 +22,7 @@ import java.util.Optional;
 public class UserService {
     private final UserRepository userRepository;
     private final ReviewRepository reviewRepository;
+    private final AvatarService avatarService;
 
     private final UserMapper userMapper;
 
@@ -56,6 +58,31 @@ public class UserService {
         user.setEmail(userUpdateRequest.getEmail());
 
         return userMapper.toUserResponse(user);
+    }
+
+    @Transactional
+    public void setUserAvatar(Long userId, Long avatarId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException(User.class, userId));
+
+        String currentKeycloakId = SecurityUtils.getCurrentUserKeycloakId();
+        validateCurrentUserCanUpdate(user, currentKeycloakId);
+
+        avatarService.setAvatarToUser(avatarId, userId);
+        user.setAvatarId(avatarId);
+    }
+
+    @Transactional
+    public void unlinkUserAvatar(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException(User.class, userId));
+
+        String currentKeycloakId = SecurityUtils.getCurrentUserKeycloakId();
+        validateCurrentUserCanUpdate(user, currentKeycloakId);
+
+        avatarService.unlinkUserAvatar(userId);
+
+        user.setAvatarId(null);
     }
 
     // this method is used to sync the keycloak user with the local user (for example when registering a new user, we get the jwt token and create a new local user with the given keycloakId)

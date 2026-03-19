@@ -8,14 +8,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.catwarden.advweb.ad.dto.AdvertisementRequest;
-import ru.catwarden.advweb.ad.dto.AdvertisementUpdateRequest;
 import ru.catwarden.advweb.ad.dto.AdvertisementResponse;
-import ru.catwarden.advweb.comment.Comment;
+import ru.catwarden.advweb.ad.dto.AdvertisementUpdateRequest;
 import ru.catwarden.advweb.comment.CommentService;
 import ru.catwarden.advweb.comment.dto.CommentResponse;
-import ru.catwarden.advweb.image.ImageService;
-
-import java.util.List;
 
 
 // TODO add default redirect (@GlobalExceptionHandler...)
