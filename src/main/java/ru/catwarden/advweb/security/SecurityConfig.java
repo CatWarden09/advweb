@@ -32,6 +32,8 @@ public class SecurityConfig {
                         .requestMatchers("/users/*/reviews/received").permitAll()
                         .requestMatchers("/users/*/advertisements").permitAll()
 
+                        .requestMatchers(HttpMethod.GET, "/categories/**").permitAll()
+
 
                         .requestMatchers("/moderation/**").hasRole("ADMIN")
 
@@ -47,10 +49,13 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/advertisements/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/advertisements/**").hasAnyRole("USER", "ADMIN")
 
+                        .requestMatchers(HttpMethod.POST, "/categories/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/categories/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/categories/**").hasRole("ADMIN")
+
                         .requestMatchers("/admin/**").hasRole("ADMIN")
 
                         .requestMatchers("/users/**").hasAnyRole("USER", "ADMIN")
-
 
                         .anyRequest().authenticated()
                 )

@@ -132,19 +132,6 @@ public class UserService {
         userRepository.updateUserRatingStats(userId, rating, ratingCount);
     }
 
-    public boolean isCurrentUserOrAdmin(Long userId) {
-        String currentKeycloakId = SecurityUtils.getCurrentUserKeycloakId();
-        if (currentKeycloakId == null) return false;
-
-        if (SecurityUtils.isCurrentUserAdmin()) {
-            return true;
-        }
-
-        return userRepository.findById(userId)
-                .map(u -> currentKeycloakId.equals(u.getKeycloakId()))
-                .orElse(false);
-    }
-
     private void validateCurrentUserCanUpdate(User user, String currentKeycloakId) {
         boolean isAdmin = SecurityUtils.isCurrentUserAdmin();
 

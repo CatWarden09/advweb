@@ -12,7 +12,7 @@ import ru.catwarden.advweb.adcategory.dto.AdvertisementCategoryResponse;
 import java.util.List;
 
 @RestController
-@RequestMapping("/admin/categories")
+@RequestMapping("/categories")
 @RequiredArgsConstructor
 @Validated
 public class CategoryController {
@@ -44,7 +44,7 @@ public class CategoryController {
         categoryService.createSubcategories(id, subcategoryList);
     }
 
-    @PatchMapping("/{id}")
+    @PutMapping("/{id}")
     public void updateCategory(@PathVariable Long id,
                                @Valid @RequestBody AdvertisementCategoryUpdateRequest advertisementCategoryUpdateRequest){
         categoryService.updateCategory(id, advertisementCategoryUpdateRequest);
