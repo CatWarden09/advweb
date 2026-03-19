@@ -19,4 +19,5 @@ public class UserResponse {
     private Double rating;
     private String phone;
     private String email;
+    private String avatarUrl;
 }

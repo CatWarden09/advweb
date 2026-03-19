@@ -20,4 +20,5 @@ public class ShortUserInfoResponse {
     private Long id;
     private String firstName;
     private String lastName;
+    private String avatarUrl;
 }

@@ -19,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -52,6 +53,11 @@ public class AvatarService {
                 .orElseThrow(() -> new EntityNotFoundException(User.class, userId));
 
         return avatarMapper.toDto(avatar);
+    }
+
+    public Optional<String> findUserAvatarUrl(Long userId) {
+        return avatarRepository.findByUserId(userId)
+                .map(Avatar::getUrl);
     }
 
     @Transactional

@@ -24,12 +24,13 @@ public class UserService {
     private final ReviewRepository reviewRepository;
     private final AvatarService avatarService;
 
-    private final UserMapper userMapper;
+    private final UserResponseAssembler userResponseAssembler;
 
     public UserResponse getUser(Long id) {
-        return userRepository.findById(id)
-                .map(userMapper::toUserResponse)
+        User user = userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(User.class, id));
+
+        return userResponseAssembler.toUserResponse(user);
     }
 
     @Transactional
@@ -57,7 +58,7 @@ public class UserService {
         user.setPhone(userUpdateRequest.getPhone());
         user.setEmail(userUpdateRequest.getEmail());
 
-        return userMapper.toUserResponse(user);
+        return userResponseAssembler.toUserResponse(user);
     }
 
     @Transactional

@@ -14,8 +14,8 @@ import ru.catwarden.advweb.review.dto.ReviewResponse;
 import ru.catwarden.advweb.review.dto.ReviewUpdateRequest;
 import ru.catwarden.advweb.security.SecurityUtils;
 import ru.catwarden.advweb.user.User;
-import ru.catwarden.advweb.user.UserMapper;
 import ru.catwarden.advweb.user.UserRepository;
+import ru.catwarden.advweb.user.UserResponseAssembler;
 import ru.catwarden.advweb.user.UserService;
 
 // DONE users cant leave reviews for themselves
@@ -28,7 +28,7 @@ public class ReviewService {
     private final UserService userService;
 
     private final ReviewMapper reviewMapper;
-    private final UserMapper userMapper;
+    private final UserResponseAssembler userResponseAssembler;
 
     public Page<ReviewResponse> getAllApprovedReviews(Pageable pageable) {
         return reviewRepository.findByModerationStatus(AdModerationStatus.APPROVED, pageable)
@@ -174,7 +174,7 @@ public class ReviewService {
 
     private ReviewResponse mapWithShortUserInfo(Review review){
         ReviewResponse response = reviewMapper.toResponse(review);
-        response.setAuthorInfo(userMapper.toShortUserInfoResponse(review.getAuthor()));
+        response.setAuthorInfo(userResponseAssembler.toShortUserInfoResponse(review.getAuthor()));
 
         return response;
     }

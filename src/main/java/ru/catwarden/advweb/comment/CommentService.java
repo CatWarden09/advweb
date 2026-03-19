@@ -13,7 +13,7 @@ import ru.catwarden.advweb.comment.dto.CommentUpdateRequest;
 import ru.catwarden.advweb.exception.EntityNotFoundException;
 import ru.catwarden.advweb.security.SecurityUtils;
 import ru.catwarden.advweb.user.User;
-import ru.catwarden.advweb.user.UserMapper;
+import ru.catwarden.advweb.user.UserResponseAssembler;
 import ru.catwarden.advweb.user.UserRepository;
 import ru.catwarden.advweb.user.dto.ShortUserInfoResponse;
 
@@ -21,7 +21,7 @@ import ru.catwarden.advweb.user.dto.ShortUserInfoResponse;
 @RequiredArgsConstructor
 public class CommentService {
     private final CommentMapper commentMapper;
-    private final UserMapper userMapper;
+    private final UserResponseAssembler userResponseAssembler;
 
     private final CommentRepository commentRepository;
     private final AdvertisementRepository advertisementRepository;
@@ -31,7 +31,7 @@ public class CommentService {
         return commentRepository.findAllByIsModeratedFalse(pageable).
                 map(comment -> {
                     CommentResponse response = commentMapper.toResponse(comment);
-                    ShortUserInfoResponse authorInfo = userMapper.toShortUserInfoResponse(comment.getAuthor());
+                    ShortUserInfoResponse authorInfo = userResponseAssembler.toShortUserInfoResponse(comment.getAuthor());
                     response.setAuthorInfo(authorInfo);
                     return response;
                 });
@@ -42,7 +42,7 @@ public class CommentService {
                 .map(comment -> {
                     CommentResponse response = commentMapper.toResponse(comment);
 
-                    ShortUserInfoResponse authorInfo = userMapper.toShortUserInfoResponse(comment.getAuthor());
+                    ShortUserInfoResponse authorInfo = userResponseAssembler.toShortUserInfoResponse(comment.getAuthor());
                     response.setAuthorInfo(authorInfo);
 
                     return response;
