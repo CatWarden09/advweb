@@ -58,6 +58,11 @@ public class Advertisement {
 
     private String moderationRejectionReason;
 
+    // builder.default is used to guarantee that views is not null when building the object
+    @Builder.Default
+    @Column(nullable = false)
+    private Long views = 0L;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

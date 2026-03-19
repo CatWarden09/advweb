@@ -44,6 +44,15 @@ services:
       - keycloak_data:/opt/keycloak/data
     restart: unless-stopped
 
+  redis:
+    image: redis:7.2-alpine
+    container_name: advweb_redis
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
   app:
     build: .
     container_name: advweb_app
@@ -52,6 +61,8 @@ services:
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-advweb_user}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-admin}
       SPRING_FLYWAY_ENABLED: "true"
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
       APP_PUBLIC_BASE_URL: ${APP_PUBLIC_BASE_URL:-https://advweb.duckdns.org}
       APP_KEYCLOAK_BASE_URL: ${APP_KEYCLOAK_BASE_URL:-https://advweb.duckdns.org/auth}
       APP_KEYCLOAK_REALM: ${APP_KEYCLOAK_REALM:-advweb}
@@ -61,6 +72,8 @@ services:
       db:
         condition: service_healthy
       keycloak:
+        condition: service_started
+      redis:
         condition: service_started
     ports:
       - "127.0.0.1:8081:8080"
@@ -73,5 +86,7 @@ volumes:
     name: advweb_db_data
   keycloak_data:
     name: advweb_keycloak_data
+  redis_data:
+    name: advweb_redis_data
   uploads:
     name: advweb_uploads

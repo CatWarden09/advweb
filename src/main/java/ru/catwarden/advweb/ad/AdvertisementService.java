@@ -34,14 +34,17 @@ public class AdvertisementService {
 
     private final ImageService imageService;
     private final CommentService commentService;
+    private final ViewCountService viewCountService;
 
     private final int MAX_IMAGES_PER_AD = 10;
 
     // DONE figure out mappers to avoid code repeating
     // DONE moderation status validation
+    // TODO add entitynotfoundexception
     public AdvertisementResponse getAdvertisement(Long id){
         Advertisement advertisement = advertisementRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(Advertisement.class, id));
+        viewCountService.increment(id);
 
         return this.mapWithImages(advertisement);
     }
