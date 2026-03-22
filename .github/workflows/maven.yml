@@ -2,9 +2,9 @@ name: Java CI with Maven and server deployment
 
 on:
   push:
-    branches: [ "master", "dev", "feat/keycloak-final" ]
+    branches: [ "master", "dev", "feat/keycloak-final", "feature/tests-implementation" ]
   pull_request:
-    branches: [ "master", "dev", "feat/keycloak-final" ]
+    branches: [ "master", "dev", "feat/keycloak-final", "feature/tests-implementation" ]
 
 jobs:
   build:
@@ -24,7 +24,7 @@ jobs:
       run: chmod +x ./mvnw
     
     - name: Build project with Maven Wrapper
-      run: ./mvnw -B package -DskipTests
+      run: ./mvnw -B package
       
     - name: Deploy to server via SSH
       uses: appleboy/ssh-action@v1.0.3
