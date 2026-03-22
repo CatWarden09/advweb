@@ -24,6 +24,7 @@ public class AdvertisementMapper {
                 .updatedAt(ad.getUpdatedAt())
                 .adModerationStatus(ad.getAdModerationStatus())
                 .moderationRejectionReason(ad.getModerationRejectionReason())
+                .views(ad.getViews())
                 .build();
     }
 

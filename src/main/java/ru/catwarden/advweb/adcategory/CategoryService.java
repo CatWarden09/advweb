@@ -75,9 +75,10 @@ public class CategoryService {
         AdvertisementCategory advertisementCategory = categoryRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(AdvertisementCategory.class, id));
 
-        if(!advertisementCategory.getName().equals(advertisementCategoryUpdateRequest.getName())) {
-            advertisementCategory.setName(advertisementCategoryUpdateRequest.getName());
+        if(advertisementCategory.getName().equals(advertisementCategoryUpdateRequest.getName())) {
+            throw new OperationNotAllowedException("New category name is the same as the previous one");
         }
+        advertisementCategory.setName(advertisementCategoryUpdateRequest.getName());
         categoryRepository.save(advertisementCategory);
 
     }

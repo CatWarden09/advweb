@@ -27,4 +27,5 @@ public class AdvertisementResponse {
     private AdModerationStatus adModerationStatus;
     private String moderationRejectionReason;
     private List<String> imageUrls;
+    private Long views;
 }
