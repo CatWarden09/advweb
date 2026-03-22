@@ -104,6 +104,30 @@ class AdvertisementServiceTest {
     }
 
     @Test
+    void getAdvertisementsByFilterCoversOtherFilterBranches() {
+        Pageable pageable = PageRequest.of(0, 10);
+        Advertisement advertisement = Advertisement.builder().id(21L).build();
+        AdvertisementResponse response = AdvertisementResponse.builder().id(21L).build();
+        Page<Advertisement> page = new PageImpl<>(List.of(advertisement), pageable, 1);
+
+        when(advertisementRepository.findAll(any(com.querydsl.core.types.Predicate.class), eq(pageable))).thenReturn(page);
+        when(advertisementMapper.toResponse(advertisement)).thenReturn(response);
+        when(imageService.getImageUrlsByAdvertisementId(21L)).thenReturn(List.of("img3.jpg"));
+
+        Page<AdvertisementResponse> result = advertisementService.getAdvertisementsByFilter(
+                pageable,
+                ru.catwarden.advweb.ad.dto.AdvertisementSearchFilter.builder()
+                        .description("good condition")
+                        .categoryId(10L)
+                        .subcategoryId(11L)
+                        .build()
+        );
+
+        assertEquals(1, result.getTotalElements());
+        assertEquals(List.of("img3.jpg"), result.getContent().getFirst().getImageUrls());
+    }
+
+    @Test
     void getAllApprovedAdvertisementsReturnsMappedPage() {
         Pageable pageable = PageRequest.of(0, 10);
         Advertisement advertisement = Advertisement.builder().id(30L).build();
