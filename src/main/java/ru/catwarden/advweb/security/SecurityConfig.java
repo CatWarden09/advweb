@@ -28,6 +28,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
 
                         .requestMatchers(HttpMethod.GET, "/advertisements/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/advertisements/search").permitAll()
 
                         .requestMatchers("/users/*/reviews/received").permitAll()
                         .requestMatchers("/users/*/advertisements").permitAll()
