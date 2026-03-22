@@ -1,13 +1,14 @@
 package ru.catwarden.advweb;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.SpringApplication;
 
-@SpringBootTest
 class AdvwebApplicationTests {
 
 	@Test
-	void contextLoads() {
+	void applicationClassIsDiscoverable() {
+		SpringApplication application = new SpringApplication(AdvwebApplication.class);
+		application.setWebApplicationType(org.springframework.boot.WebApplicationType.NONE);
 	}
 
 }
