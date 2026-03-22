@@ -35,7 +35,6 @@ public class SecurityConfig {
 
                         .requestMatchers(HttpMethod.GET, "/categories/**").permitAll()
 
-
                         .requestMatchers("/moderation/**").hasRole("ADMIN")
 
                         .requestMatchers("/reviews/**").hasAnyRole("USER", "ADMIN")

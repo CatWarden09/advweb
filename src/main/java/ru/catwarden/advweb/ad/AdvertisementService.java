@@ -51,7 +51,7 @@ public class AdvertisementService {
                 .orElseThrow(() -> new EntityNotFoundException(Advertisement.class, id));
         viewCountService.increment(id);
 
-        return this.mapWithImages(advertisement);
+        return this.mapWithPreviewImage(advertisement);
     }
 
     public Page<AdvertisementResponse> getAdvertisementsByFilter(Pageable pageable, AdvertisementSearchFilter filter){
@@ -77,6 +77,7 @@ public class AdvertisementService {
         if(filter.getSubcategoryId() != null){
             builder.and(advertisement.subcategory.id.eq(filter.getSubcategoryId()));
         }
+        builder.and(advertisement.adModerationStatus.eq(AdModerationStatus.APPROVED));
 
         return advertisementRepository.findAll(builder, pageable)
                 .map(this::mapWithImages);
