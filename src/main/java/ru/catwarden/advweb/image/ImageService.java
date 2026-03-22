@@ -8,6 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.catwarden.advweb.ad.Advertisement;
 import ru.catwarden.advweb.exception.EntityNotFoundException;
 import ru.catwarden.advweb.exception.FileOperationException;
+import ru.catwarden.advweb.exception.FileStorageException;
 import ru.catwarden.advweb.image.dto.ImageDto;
 import ru.catwarden.advweb.security.SecurityUtils;
 import ru.catwarden.advweb.storage.FileUploader;
@@ -171,7 +172,7 @@ public class ImageService {
                 Files.deleteIfExists(Paths.get(image.getPath()));
             }
         } catch (IOException e){
-            throw new FileOperationException("Failed to delete unused images");
+            throw new FileStorageException("Failed to delete unused images");
         }
 
         imageRepository.deleteAll(images);
