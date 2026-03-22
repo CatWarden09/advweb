@@ -15,7 +15,7 @@ RUN ./mvnw dependency:go-offline
 
 COPY src ./src
 
-RUN ./mvnw clean package -DskipTests
+RUN ./mvnw clean package
 
 
 EXPOSE 8080
