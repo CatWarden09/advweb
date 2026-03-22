@@ -34,7 +34,7 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         script: |
           cd /root/advweb
-          git checkout master
+          git checkout feature/tests-implementation
           git pull
           docker compose down
           docker compose up --build -d
