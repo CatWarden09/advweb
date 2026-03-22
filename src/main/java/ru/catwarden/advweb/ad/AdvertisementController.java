@@ -37,13 +37,6 @@ public class AdvertisementController {
 
     }
 
-    @GetMapping("/search")
-    public Page<AdvertisementResponse> getAdvertisementsByFilter(@RequestParam(defaultValue = "0") int page,
-                                                                 @RequestParam(defaultValue = "10") int size,
-                                                                 @Valid @RequestBody AdvertisementSearchFilter filter){
-        Pageable pageable = PageRequest.of(page, size);
-        return advertisementService.getAdvertisementsByFilter(pageable, filter);
-    }
 
     @GetMapping("/{id}/comments")
     public Page<CommentResponse> getAdvertisementComments(@PathVariable Long id, @RequestParam(defaultValue = "0") int page,
@@ -52,6 +45,13 @@ public class AdvertisementController {
         return commentService.getAdvertisementModeratedComments(id, pageable);
     }
 
+    @PostMapping("/search")
+    public Page<AdvertisementResponse> getAdvertisementsByFilter(@RequestParam(defaultValue = "0") int page,
+                                                                 @RequestParam(defaultValue = "10") int size,
+                                                                 @Valid @RequestBody AdvertisementSearchFilter filter){
+        Pageable pageable = PageRequest.of(page, size);
+        return advertisementService.getAdvertisementsByFilter(pageable, filter);
+    }
 
     @PostMapping
     public Long createAdvertisement(@Valid @RequestBody AdvertisementRequest advertisementRequest){
