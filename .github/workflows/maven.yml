@@ -2,9 +2,9 @@ name: Java CI with Maven and server deployment
 
 on:
   push:
-    branches: [ "master", "dev", "feat/keycloak-final" ]
+    branches: [ "master", "dev", "feat/keycloak-final", "feature/tests-implementation" ]
   pull_request:
-    branches: [ "master", "dev", "feat/keycloak-final" ]
+    branches: [ "master", "dev", "feat/keycloak-final", "feature/tests-implementation" ]
 
 jobs:
   build:
