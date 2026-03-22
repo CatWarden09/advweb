@@ -71,6 +71,60 @@ class ReviewServiceTest {
     }
 
     @Test
+    void getAllPendingReviewsReturnsMappedPageWithAuthorInfo() {
+        User author = User.builder().id(2L).build();
+        Review review = Review.builder().id(8L).author(author).build();
+        ReviewResponse response = ReviewResponse.builder().id(8L).build();
+        ShortUserInfoResponse authorInfo = ShortUserInfoResponse.builder().id(2L).firstName("Petr").build();
+
+        when(reviewRepository.findByModerationStatus(AdModerationStatus.PENDING, PageRequest.of(0, 10)))
+                .thenReturn(new PageImpl<>(List.of(review), PageRequest.of(0, 10), 1));
+        when(reviewMapper.toResponse(review)).thenReturn(response);
+        when(userResponseAssembler.toShortUserInfoResponse(author)).thenReturn(authorInfo);
+
+        Page<ReviewResponse> result = reviewService.getAllPendingReviews(PageRequest.of(0, 10));
+
+        assertEquals(1, result.getTotalElements());
+        assertEquals(authorInfo, result.getContent().getFirst().getAuthorInfo());
+    }
+
+    @Test
+    void getAllRejectedReviewsReturnsMappedPageWithAuthorInfo() {
+        User author = User.builder().id(3L).build();
+        Review review = Review.builder().id(9L).author(author).build();
+        ReviewResponse response = ReviewResponse.builder().id(9L).build();
+        ShortUserInfoResponse authorInfo = ShortUserInfoResponse.builder().id(3L).firstName("Alex").build();
+
+        when(reviewRepository.findByModerationStatus(AdModerationStatus.REJECTED, PageRequest.of(0, 10)))
+                .thenReturn(new PageImpl<>(List.of(review), PageRequest.of(0, 10), 1));
+        when(reviewMapper.toResponse(review)).thenReturn(response);
+        when(userResponseAssembler.toShortUserInfoResponse(author)).thenReturn(authorInfo);
+
+        Page<ReviewResponse> result = reviewService.getAllRejectedReviews(PageRequest.of(0, 10));
+
+        assertEquals(1, result.getTotalElements());
+        assertEquals(authorInfo, result.getContent().getFirst().getAuthorInfo());
+    }
+
+    @Test
+    void getApprovedReviewsAboutUserReturnsMappedPageWithAuthorInfo() {
+        User author = User.builder().id(4L).build();
+        Review review = Review.builder().id(10L).author(author).build();
+        ReviewResponse response = ReviewResponse.builder().id(10L).build();
+        ShortUserInfoResponse authorInfo = ShortUserInfoResponse.builder().id(4L).firstName("Oleg").build();
+
+        when(reviewRepository.findByRecipientIdAndModerationStatus(55L, AdModerationStatus.APPROVED, PageRequest.of(0, 10)))
+                .thenReturn(new PageImpl<>(List.of(review), PageRequest.of(0, 10), 1));
+        when(reviewMapper.toResponse(review)).thenReturn(response);
+        when(userResponseAssembler.toShortUserInfoResponse(author)).thenReturn(authorInfo);
+
+        Page<ReviewResponse> result = reviewService.getApprovedReviewsAboutUser(55L, PageRequest.of(0, 10));
+
+        assertEquals(1, result.getTotalElements());
+        assertEquals(authorInfo, result.getContent().getFirst().getAuthorInfo());
+    }
+
+    @Test
     void getUserReviewsThrowsWhenCurrentUserIsNotOwnerAndNotAdmin() {
         User requestedUser = User.builder().id(8L).keycloakId("owner-id").build();
         when(userRepository.findById(8L)).thenReturn(Optional.of(requestedUser));
@@ -79,6 +133,66 @@ class ReviewServiceTest {
             securityUtilsMockedStatic.when(SecurityUtils::getCurrentUserKeycloakId).thenReturn("another-user");
             securityUtilsMockedStatic.when(SecurityUtils::isCurrentUserAdmin).thenReturn(false);
             assertThrows(AccessDeniedException.class, () ->
+                    reviewService.getUserReviews(8L, PageRequest.of(0, 10), AdModerationStatus.PENDING));
+        }
+    }
+
+    @Test
+    void getUserReviewsReturnsForOwner() {
+        User requestedUser = User.builder().id(8L).keycloakId("owner-id").build();
+        User author = User.builder().id(8L).keycloakId("owner-id").build();
+        Review review = Review.builder().id(20L).author(author).build();
+        ReviewResponse response = ReviewResponse.builder().id(20L).build();
+        ShortUserInfoResponse authorInfo = ShortUserInfoResponse.builder().id(8L).firstName("Ivan").build();
+
+        when(userRepository.findById(8L)).thenReturn(Optional.of(requestedUser));
+        when(reviewRepository.findByAuthorIdAndModerationStatus(8L, AdModerationStatus.PENDING, PageRequest.of(0, 10)))
+                .thenReturn(new PageImpl<>(List.of(review), PageRequest.of(0, 10), 1));
+        when(reviewMapper.toResponse(review)).thenReturn(response);
+        when(userResponseAssembler.toShortUserInfoResponse(author)).thenReturn(authorInfo);
+
+        Page<ReviewResponse> result;
+        try (MockedStatic<SecurityUtils> securityUtilsMockedStatic = mockStatic(SecurityUtils.class)) {
+            securityUtilsMockedStatic.when(SecurityUtils::getCurrentUserKeycloakId).thenReturn("owner-id");
+            securityUtilsMockedStatic.when(SecurityUtils::isCurrentUserAdmin).thenReturn(false);
+            result = reviewService.getUserReviews(8L, PageRequest.of(0, 10), AdModerationStatus.PENDING);
+        }
+
+        assertEquals(1, result.getTotalElements());
+        assertEquals(authorInfo, result.getContent().getFirst().getAuthorInfo());
+    }
+
+    @Test
+    void getUserReviewsReturnsForAdminWithoutUserLookup() {
+        User author = User.builder().id(99L).build();
+        Review review = Review.builder().id(21L).author(author).build();
+        ReviewResponse response = ReviewResponse.builder().id(21L).build();
+        ShortUserInfoResponse authorInfo = ShortUserInfoResponse.builder().id(99L).firstName("Admin").build();
+
+        when(reviewRepository.findByAuthorIdAndModerationStatus(8L, AdModerationStatus.APPROVED, PageRequest.of(0, 10)))
+                .thenReturn(new PageImpl<>(List.of(review), PageRequest.of(0, 10), 1));
+        when(reviewMapper.toResponse(review)).thenReturn(response);
+        when(userResponseAssembler.toShortUserInfoResponse(author)).thenReturn(authorInfo);
+
+        Page<ReviewResponse> result;
+        try (MockedStatic<SecurityUtils> securityUtilsMockedStatic = mockStatic(SecurityUtils.class)) {
+            securityUtilsMockedStatic.when(SecurityUtils::getCurrentUserKeycloakId).thenReturn("admin-id");
+            securityUtilsMockedStatic.when(SecurityUtils::isCurrentUserAdmin).thenReturn(true);
+            result = reviewService.getUserReviews(8L, PageRequest.of(0, 10), AdModerationStatus.APPROVED);
+        }
+
+        assertEquals(1, result.getTotalElements());
+        verify(userRepository, never()).findById(any(Long.class));
+    }
+
+    @Test
+    void getUserReviewsThrowsWhenRequestedUserNotFound() {
+        when(userRepository.findById(8L)).thenReturn(Optional.empty());
+
+        try (MockedStatic<SecurityUtils> securityUtilsMockedStatic = mockStatic(SecurityUtils.class)) {
+            securityUtilsMockedStatic.when(SecurityUtils::getCurrentUserKeycloakId).thenReturn("owner-id");
+            securityUtilsMockedStatic.when(SecurityUtils::isCurrentUserAdmin).thenReturn(false);
+            assertThrows(EntityNotFoundException.class, () ->
                     reviewService.getUserReviews(8L, PageRequest.of(0, 10), AdModerationStatus.PENDING));
         }
     }
@@ -107,6 +221,38 @@ class ReviewServiceTest {
         assertEquals(recipient, review.getRecipient());
         assertEquals(AdModerationStatus.PENDING, review.getModerationStatus());
         verify(reviewRepository).save(review);
+    }
+
+    @Test
+    void createReviewThrowsWhenCurrentUserNotFound() {
+        ReviewRequest request = ReviewRequest.builder()
+                .recipientId(2L)
+                .text("This review text is long enough and meaningful for current user not found check.")
+                .rating(5)
+                .build();
+        when(userRepository.findByKeycloakId("author-id")).thenReturn(Optional.empty());
+
+        try (MockedStatic<SecurityUtils> securityUtilsMockedStatic = mockStatic(SecurityUtils.class)) {
+            securityUtilsMockedStatic.when(SecurityUtils::getCurrentUserKeycloakId).thenReturn("author-id");
+            assertThrows(EntityNotFoundException.class, () -> reviewService.createReview(request));
+        }
+    }
+
+    @Test
+    void createReviewThrowsWhenRecipientNotFound() {
+        User currentUser = User.builder().id(1L).keycloakId("author-id").build();
+        ReviewRequest request = ReviewRequest.builder()
+                .recipientId(2L)
+                .text("This review text is long enough and meaningful for recipient not found check.")
+                .rating(5)
+                .build();
+        when(userRepository.findByKeycloakId("author-id")).thenReturn(Optional.of(currentUser));
+        when(userRepository.findById(2L)).thenReturn(Optional.empty());
+
+        try (MockedStatic<SecurityUtils> securityUtilsMockedStatic = mockStatic(SecurityUtils.class)) {
+            securityUtilsMockedStatic.when(SecurityUtils::getCurrentUserKeycloakId).thenReturn("author-id");
+            assertThrows(EntityNotFoundException.class, () -> reviewService.createReview(request));
+        }
     }
 
     @Test
@@ -145,6 +291,17 @@ class ReviewServiceTest {
     }
 
     @Test
+    void updateReviewThrowsWhenReviewNotFound() {
+        ReviewUpdateRequest request = ReviewUpdateRequest.builder()
+                .text("This updated text is long enough and meaningful for missing review update check.")
+                .rating(4)
+                .build();
+        when(reviewRepository.findById(404L)).thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () -> reviewService.updateReview(404L, request));
+    }
+
+    @Test
     void updateReviewRecalculatesRatingWhenReviewWasApproved() {
         User author = User.builder().keycloakId("owner-id").build();
         User recipient = User.builder().id(9L).build();
@@ -174,6 +331,57 @@ class ReviewServiceTest {
     }
 
     @Test
+    void updateReviewDoesNotRecalculateWhenReviewWasNotApproved() {
+        User author = User.builder().keycloakId("owner-id").build();
+        User recipient = User.builder().id(9L).build();
+        Review review = Review.builder()
+                .id(4L)
+                .author(author)
+                .recipient(recipient)
+                .moderationStatus(AdModerationStatus.PENDING)
+                .build();
+        ReviewUpdateRequest request = ReviewUpdateRequest.builder()
+                .text("This updated text is long enough and meaningful for pending review update test.")
+                .rating(3)
+                .build();
+        when(reviewRepository.findById(4L)).thenReturn(Optional.of(review));
+
+        try (MockedStatic<SecurityUtils> securityUtilsMockedStatic = mockStatic(SecurityUtils.class)) {
+            securityUtilsMockedStatic.when(SecurityUtils::getCurrentUserKeycloakId).thenReturn("owner-id");
+            securityUtilsMockedStatic.when(SecurityUtils::isCurrentUserAdmin).thenReturn(false);
+            reviewService.updateReview(4L, request);
+        }
+
+        verify(reviewRepository).save(review);
+        verify(userService, never()).recalculateUserRating(any(Long.class));
+    }
+
+    @Test
+    void updateReviewAllowsAdminEvenIfNotAuthor() {
+        User author = User.builder().keycloakId("owner-id").build();
+        User recipient = User.builder().id(9L).build();
+        Review review = Review.builder()
+                .id(4L)
+                .author(author)
+                .recipient(recipient)
+                .moderationStatus(AdModerationStatus.PENDING)
+                .build();
+        ReviewUpdateRequest request = ReviewUpdateRequest.builder()
+                .text("This updated text is long enough and meaningful for admin update path coverage.")
+                .rating(4)
+                .build();
+        when(reviewRepository.findById(4L)).thenReturn(Optional.of(review));
+
+        try (MockedStatic<SecurityUtils> securityUtilsMockedStatic = mockStatic(SecurityUtils.class)) {
+            securityUtilsMockedStatic.when(SecurityUtils::getCurrentUserKeycloakId).thenReturn("admin-id");
+            securityUtilsMockedStatic.when(SecurityUtils::isCurrentUserAdmin).thenReturn(true);
+            reviewService.updateReview(4L, request);
+        }
+
+        verify(reviewRepository).save(review);
+    }
+
+    @Test
     void approveReviewChangesStatusAndRecalculatesRating() {
         User recipient = User.builder().id(11L).build();
         Review review = Review.builder().id(3L).moderationStatus(AdModerationStatus.PENDING).recipient(recipient).build();
@@ -184,6 +392,13 @@ class ReviewServiceTest {
         assertEquals(AdModerationStatus.APPROVED, review.getModerationStatus());
         verify(reviewRepository).save(review);
         verify(userService).recalculateUserRating(11L);
+    }
+
+    @Test
+    void approveReviewThrowsWhenReviewNotFound() {
+        when(reviewRepository.findById(3L)).thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () -> reviewService.approveReview(3L));
     }
 
     @Test
@@ -208,10 +423,98 @@ class ReviewServiceTest {
     }
 
     @Test
+    void rejectReviewThrowsWhenReviewNotFound() {
+        when(reviewRepository.findById(3L)).thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () -> reviewService.rejectReview(3L, "Bad language"));
+    }
+
+    @Test
+    void rejectReviewThrowsWhenStatusIsNotPending() {
+        Review review = Review.builder().id(3L).moderationStatus(AdModerationStatus.APPROVED).build();
+        when(reviewRepository.findById(3L)).thenReturn(Optional.of(review));
+
+        assertThrows(InvalidStateException.class, () -> reviewService.rejectReview(3L, "Bad language"));
+    }
+
+    @Test
     void deleteReviewThrowsWhenReviewNotExists() {
         when(reviewRepository.existsById(5L)).thenReturn(false);
 
         assertThrows(EntityNotFoundException.class, () -> reviewService.deleteReview(5L));
+    }
+
+    @Test
+    void deleteReviewThrowsWhenReviewMissingAfterExistsCheck() {
+        when(reviewRepository.existsById(5L)).thenReturn(true);
+        when(reviewRepository.findById(5L)).thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () -> reviewService.deleteReview(5L));
+    }
+
+    @Test
+    void deleteReviewThrowsWhenCurrentUserHasNoAccess() {
+        User author = User.builder().keycloakId("owner-id").build();
+        Review review = Review.builder()
+                .id(5L)
+                .author(author)
+                .moderationStatus(AdModerationStatus.PENDING)
+                .build();
+        when(reviewRepository.existsById(5L)).thenReturn(true);
+        when(reviewRepository.findById(5L)).thenReturn(Optional.of(review));
+
+        try (MockedStatic<SecurityUtils> securityUtilsMockedStatic = mockStatic(SecurityUtils.class)) {
+            securityUtilsMockedStatic.when(SecurityUtils::getCurrentUserKeycloakId).thenReturn("another-user");
+            securityUtilsMockedStatic.when(SecurityUtils::isCurrentUserAdmin).thenReturn(false);
+            assertThrows(AccessDeniedException.class, () -> reviewService.deleteReview(5L));
+        }
+
+        verify(reviewRepository, never()).deleteById(any(Long.class));
+    }
+
+    @Test
+    void deleteReviewDoesNotRecalculateForNotApprovedReview() {
+        User author = User.builder().keycloakId("owner-id").build();
+        User recipient = User.builder().id(20L).build();
+        Review review = Review.builder()
+                .id(5L)
+                .author(author)
+                .recipient(recipient)
+                .moderationStatus(AdModerationStatus.PENDING)
+                .build();
+        when(reviewRepository.existsById(5L)).thenReturn(true);
+        when(reviewRepository.findById(5L)).thenReturn(Optional.of(review));
+
+        try (MockedStatic<SecurityUtils> securityUtilsMockedStatic = mockStatic(SecurityUtils.class)) {
+            securityUtilsMockedStatic.when(SecurityUtils::getCurrentUserKeycloakId).thenReturn("owner-id");
+            securityUtilsMockedStatic.when(SecurityUtils::isCurrentUserAdmin).thenReturn(false);
+            reviewService.deleteReview(5L);
+        }
+
+        verify(reviewRepository).deleteById(5L);
+        verify(userService, never()).recalculateUserRating(any(Long.class));
+    }
+
+    @Test
+    void deleteReviewAllowsAdminEvenIfNotAuthor() {
+        User author = User.builder().keycloakId("owner-id").build();
+        User recipient = User.builder().id(20L).build();
+        Review review = Review.builder()
+                .id(5L)
+                .author(author)
+                .recipient(recipient)
+                .moderationStatus(AdModerationStatus.PENDING)
+                .build();
+        when(reviewRepository.existsById(5L)).thenReturn(true);
+        when(reviewRepository.findById(5L)).thenReturn(Optional.of(review));
+
+        try (MockedStatic<SecurityUtils> securityUtilsMockedStatic = mockStatic(SecurityUtils.class)) {
+            securityUtilsMockedStatic.when(SecurityUtils::getCurrentUserKeycloakId).thenReturn("admin-id");
+            securityUtilsMockedStatic.when(SecurityUtils::isCurrentUserAdmin).thenReturn(true);
+            reviewService.deleteReview(5L);
+        }
+
+        verify(reviewRepository).deleteById(5L);
     }
 
     @Test
@@ -237,4 +540,3 @@ class ReviewServiceTest {
         verify(userService).recalculateUserRating(20L);
     }
 }
-
