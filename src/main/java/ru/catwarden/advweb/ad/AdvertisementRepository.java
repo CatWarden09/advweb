@@ -5,11 +5,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.transaction.annotation.Transactional;
 import ru.catwarden.advweb.adcategory.AdvertisementCategory;
 import ru.catwarden.advweb.enums.AdModerationStatus;
 
-public interface AdvertisementRepository extends JpaRepository<Advertisement, Long> {
+public interface AdvertisementRepository extends JpaRepository<Advertisement, Long>, QuerydslPredicateExecutor<Advertisement> {
 
     @Modifying
     @Transactional

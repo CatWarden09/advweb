@@ -103,6 +103,19 @@
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
             <version>3.0.2</version>
         </dependency>
+		<dependency>
+			<groupId>com.querydsl</groupId>
+			<artifactId>querydsl-jpa</artifactId>
+			<version>5.1.0</version>
+			<classifier>jakarta</classifier>
+		</dependency>
+		<dependency>
+			<groupId>com.querydsl</groupId>
+			<artifactId>querydsl-apt</artifactId>
+			<version>5.1.0</version>
+			<classifier>jakarta</classifier>
+			<scope>provided</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -115,6 +128,22 @@
 						<path>
 							<groupId>org.projectlombok</groupId>
 							<artifactId>lombok</artifactId>
+						</path>
+						<path>
+							<groupId>com.querydsl</groupId>
+							<artifactId>querydsl-apt</artifactId>
+							<version>5.1.0</version>
+							<classifier>jakarta</classifier>
+						</path>
+						<path>
+							<groupId>jakarta.persistence</groupId>
+							<artifactId>jakarta.persistence-api</artifactId>
+							<version>3.1.0</version>
+						</path>
+						<path>
+							<groupId>jakarta.annotation</groupId>
+							<artifactId>jakarta.annotation-api</artifactId>
+							<version>3.0.0</version>
 						</path>
 					</annotationProcessorPaths>
 				</configuration>

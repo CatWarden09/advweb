@@ -1,5 +1,6 @@
 package ru.catwarden.advweb.ad;
 
+import com.querydsl.core.BooleanBuilder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -7,16 +8,20 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.catwarden.advweb.ad.dto.AdvertisementRequest;
-import ru.catwarden.advweb.ad.dto.AdvertisementUpdateRequest;
 import ru.catwarden.advweb.ad.dto.AdvertisementResponse;
+import ru.catwarden.advweb.ad.dto.AdvertisementSearchFilter;
+import ru.catwarden.advweb.ad.dto.AdvertisementUpdateRequest;
 import ru.catwarden.advweb.adcategory.AdvertisementCategory;
+import ru.catwarden.advweb.adcategory.CategoryRepository;
 import ru.catwarden.advweb.comment.CommentService;
-import ru.catwarden.advweb.exception.*;
+import ru.catwarden.advweb.enums.AdModerationStatus;
+import ru.catwarden.advweb.exception.EntityNotFoundException;
+import ru.catwarden.advweb.exception.InvalidRelationException;
+import ru.catwarden.advweb.exception.InvalidStateException;
+import ru.catwarden.advweb.exception.LimitExceededException;
+import ru.catwarden.advweb.image.ImageService;
 import ru.catwarden.advweb.security.SecurityUtils;
 import ru.catwarden.advweb.user.User;
-import ru.catwarden.advweb.enums.AdModerationStatus;
-import ru.catwarden.advweb.adcategory.CategoryRepository;
-import ru.catwarden.advweb.image.ImageService;
 import ru.catwarden.advweb.user.UserRepository;
 
 import java.util.List;
@@ -47,6 +52,34 @@ public class AdvertisementService {
         viewCountService.increment(id);
 
         return this.mapWithImages(advertisement);
+    }
+
+    public Page<AdvertisementResponse> getAdvertisementsByFilter(Pageable pageable, AdvertisementSearchFilter filter){
+        QAdvertisement advertisement = QAdvertisement.advertisement;
+
+        BooleanBuilder builder = new BooleanBuilder();
+
+        if(filter.getName() != null){
+            builder.and(advertisement.name.containsIgnoreCase(filter.getName()));
+        }
+        if(filter.getDescription() != null){
+            builder.and(advertisement.description.containsIgnoreCase(filter.getDescription()));
+        }
+        if(filter.getPriceMin() != null)
+            builder.and(advertisement.price.goe(filter.getPriceMin()));
+
+        if(filter.getPriceMax() != null)
+            builder.and(advertisement.price.loe(filter.getPriceMax()));
+
+        if(filter.getCategoryId() != null){
+            builder.and(advertisement.category.id.eq(filter.getCategoryId()));
+        }
+        if(filter.getSubcategoryId() != null){
+            builder.and(advertisement.subcategory.id.eq(filter.getSubcategoryId()));
+        }
+
+        return advertisementRepository.findAll(builder, pageable)
+                .map(this::mapWithImages);
     }
 
     public Page<AdvertisementResponse> getAllApprovedAdvertisements(Pageable pageable){

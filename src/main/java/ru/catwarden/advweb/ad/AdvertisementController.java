@@ -9,6 +9,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.catwarden.advweb.ad.dto.AdvertisementRequest;
 import ru.catwarden.advweb.ad.dto.AdvertisementResponse;
+import ru.catwarden.advweb.ad.dto.AdvertisementSearchFilter;
 import ru.catwarden.advweb.ad.dto.AdvertisementUpdateRequest;
 import ru.catwarden.advweb.comment.CommentService;
 import ru.catwarden.advweb.comment.dto.CommentResponse;
@@ -36,12 +37,21 @@ public class AdvertisementController {
 
     }
 
+    @GetMapping("/search")
+    public Page<AdvertisementResponse> getAdvertisementsByFilter(@RequestParam(defaultValue = "0") int page,
+                                                                 @RequestParam(defaultValue = "10") int size,
+                                                                 @Valid @RequestBody AdvertisementSearchFilter filter){
+        Pageable pageable = PageRequest.of(page, size);
+        return advertisementService.getAdvertisementsByFilter(pageable, filter);
+    }
+
     @GetMapping("/{id}/comments")
     public Page<CommentResponse> getAdvertisementComments(@PathVariable Long id, @RequestParam(defaultValue = "0") int page,
                                                             @RequestParam(defaultValue = "10") int size){
         Pageable pageable = PageRequest.of(page, size);
         return commentService.getAdvertisementModeratedComments(id, pageable);
     }
+
 
     @PostMapping
     public Long createAdvertisement(@Valid @RequestBody AdvertisementRequest advertisementRequest){
