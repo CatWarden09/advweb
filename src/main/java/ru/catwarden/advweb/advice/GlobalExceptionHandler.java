@@ -55,7 +55,25 @@ public class GlobalExceptionHandler {
         );
     }
 
-    @ExceptionHandler(FileOperationException.class)
+    @ExceptionHandler(InvalidFileTypeException.class)
+    @ResponseBody
+    public ResponseEntity<ValidationResponse> handleInvalidFileType(InvalidFileTypeException ex) {
+        return new ResponseEntity<>(
+                new ValidationResponse(List.of(ex.getMessage())),
+                HttpStatus.BAD_REQUEST
+        );
+    }
+
+    @ExceptionHandler(FileTooLargeException.class)
+    @ResponseBody
+    public ResponseEntity<ValidationResponse> handleFileTooLarge(FileTooLargeException ex) {
+        return new ResponseEntity<>(
+                new ValidationResponse(List.of(ex.getMessage())),
+                HttpStatus.PAYLOAD_TOO_LARGE
+        );
+    }
+
+    @ExceptionHandler({FileStorageException.class, FileOperationException.class})
     @ResponseBody
     public ResponseEntity<ValidationResponse> handleFileOperation(FileOperationException ex) {
         return new ResponseEntity<>(

@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.catwarden.advweb.avatar.dto.AvatarDto;
 import ru.catwarden.advweb.exception.EntityNotFoundException;
 import ru.catwarden.advweb.exception.FileOperationException;
+import ru.catwarden.advweb.exception.FileStorageException;
 import ru.catwarden.advweb.security.SecurityUtils;
 import ru.catwarden.advweb.storage.FileUploader;
 import ru.catwarden.advweb.storage.StoredFile;
@@ -119,7 +120,7 @@ public class AvatarService {
                 Files.deleteIfExists(Paths.get(avatar.getPath()));
             }
         } catch (IOException e){
-            throw new FileOperationException("Failed to delete unused images");
+            throw new FileStorageException("Failed to delete unused images");
         }
 
         avatarRepository.deleteAll(avatars);
