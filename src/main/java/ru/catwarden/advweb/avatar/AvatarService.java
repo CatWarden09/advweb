@@ -2,11 +2,11 @@ package ru.catwarden.advweb.avatar;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ru.catwarden.advweb.avatar.dto.AvatarDto;
+import ru.catwarden.advweb.exception.DetailedAccessDeniedException;
 import ru.catwarden.advweb.exception.EntityNotFoundException;
 import ru.catwarden.advweb.exception.FileOperationException;
 import ru.catwarden.advweb.exception.FileStorageException;
@@ -20,6 +20,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -100,14 +101,25 @@ public class AvatarService {
         boolean isLinkedToAnotherUser = Boolean.TRUE.equals(avatar.getLinkedToUser())
                 && !userId.equals(avatar.getUserId());
         if (isLinkedToAnotherUser) {
-            throw new AccessDeniedException("Avatar is linked to another user");
+            throw new DetailedAccessDeniedException("Avatar is linked to another user",
+                    Map.of(
+                            "Avatar id:", avatar.getId(),
+                            "Requested user id:", userId,
+                            "Avatar is already linked:", true
+                    ));
         }
 
         boolean isUploadedByAnotherUser = !isAdmin
                 && !currentKeycloakId.equals(avatar.getUploaderKeycloakId())
                 && !userId.equals(avatar.getUserId());
         if (isUploadedByAnotherUser) {
-            throw new AccessDeniedException("Avatar was uploaded by another user");
+            throw new DetailedAccessDeniedException("Avatar was uploaded by another user",
+                    Map.of(
+                            "Avatar id:", avatar.getId(),
+                            "Avatar uploader keycloak id:", String.valueOf(avatar.getUploaderKeycloakId()),
+                            "Current user keycloak id:", String.valueOf(currentKeycloakId),
+                            "Requested user id:", userId
+                    ));
         }
     }
 

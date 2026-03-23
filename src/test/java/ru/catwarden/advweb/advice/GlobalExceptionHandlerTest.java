@@ -8,11 +8,11 @@ import org.mockito.Mockito;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import ru.catwarden.advweb.enums.AdModerationStatus;
+import ru.catwarden.advweb.exception.DetailedAccessDeniedException;
 import ru.catwarden.advweb.exception.EntityNotFoundException;
 import ru.catwarden.advweb.exception.FileOperationException;
 import ru.catwarden.advweb.exception.FileStorageException;
@@ -166,7 +166,8 @@ class GlobalExceptionHandlerTest {
 
     @Test
     void handleAccessDeniedReturnsForbidden() {
-        AccessDeniedException exception = new AccessDeniedException("Access is denied");
+        DetailedAccessDeniedException exception = new DetailedAccessDeniedException("Access is denied",
+                Map.of("Resource type:", "advertisement", "Resource id:", 7L));
 
         ResponseEntity<ValidationResponse> response = handler.handleAccessDenied(exception);
 

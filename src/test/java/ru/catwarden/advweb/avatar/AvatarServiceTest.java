@@ -7,14 +7,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.multipart.MultipartFile;
 import ru.catwarden.advweb.avatar.dto.AvatarDto;
+import ru.catwarden.advweb.exception.DetailedAccessDeniedException;
 import ru.catwarden.advweb.exception.EntityNotFoundException;
 import ru.catwarden.advweb.security.SecurityUtils;
 import ru.catwarden.advweb.storage.FileUploader;
 import ru.catwarden.advweb.storage.StoredFile;
 
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -145,7 +146,13 @@ class AvatarServiceTest {
             securityUtilsMockedStatic.when(SecurityUtils::getCurrentUserKeycloakId).thenReturn("owner-id");
             securityUtilsMockedStatic.when(SecurityUtils::isCurrentUserAdmin).thenReturn(false);
 
-            assertThrows(AccessDeniedException.class, () -> avatarService.setAvatarToUser(10L, 5L));
+            DetailedAccessDeniedException exception = assertThrows(DetailedAccessDeniedException.class,
+                    () -> avatarService.setAvatarToUser(10L, 5L));
+            assertEquals("Avatar is linked to another user", exception.getMessage());
+            assertEquals(
+                    Map.of("Avatar id:", 10L, "Requested user id:", 5L, "Avatar is already linked:", true),
+                    exception.getDetails()
+            );
         }
 
         verify(avatarRepository, never()).save(any(Avatar.class));
@@ -165,7 +172,18 @@ class AvatarServiceTest {
             securityUtilsMockedStatic.when(SecurityUtils::getCurrentUserKeycloakId).thenReturn("owner-id");
             securityUtilsMockedStatic.when(SecurityUtils::isCurrentUserAdmin).thenReturn(false);
 
-            assertThrows(AccessDeniedException.class, () -> avatarService.setAvatarToUser(10L, 5L));
+            DetailedAccessDeniedException exception = assertThrows(DetailedAccessDeniedException.class,
+                    () -> avatarService.setAvatarToUser(10L, 5L));
+            assertEquals("Avatar was uploaded by another user", exception.getMessage());
+            assertEquals(
+                    Map.of(
+                            "Avatar id:", 10L,
+                            "Avatar uploader keycloak id:", "another-user",
+                            "Current user keycloak id:", "owner-id",
+                            "Requested user id:", 5L
+                    ),
+                    exception.getDetails()
+            );
         }
 
         verify(avatarRepository, never()).save(any(Avatar.class));

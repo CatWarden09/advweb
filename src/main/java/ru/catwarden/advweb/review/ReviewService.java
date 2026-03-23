@@ -3,9 +3,9 @@ package ru.catwarden.advweb.review;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import ru.catwarden.advweb.enums.AdModerationStatus;
+import ru.catwarden.advweb.exception.DetailedAccessDeniedException;
 import ru.catwarden.advweb.exception.EntityNotFoundException;
 import ru.catwarden.advweb.exception.InvalidRelationException;
 import ru.catwarden.advweb.exception.InvalidStateException;
@@ -92,7 +92,12 @@ public class ReviewService {
         boolean isAdmin = SecurityUtils.isCurrentUserAdmin();
 
         if (!isAdmin && !review.getAuthor().getKeycloakId().equals(currentKeycloakId)) {
-            throw new AccessDeniedException("You are not allowed to update this review");
+            throw new DetailedAccessDeniedException("You are not allowed to update this review",
+                    Map.of(
+                            "Review id:", review.getId(),
+                            "Review author keycloak id:", String.valueOf(review.getAuthor().getKeycloakId()),
+                            "Current user keycloak id:", String.valueOf(currentKeycloakId)
+                    ));
         }
 
         review.setText(reviewUpdateRequest.getText());
@@ -152,7 +157,12 @@ public class ReviewService {
         boolean isAdmin = SecurityUtils.isCurrentUserAdmin();
 
         if (!isAdmin && !review.getAuthor().getKeycloakId().equals(currentKeycloakId)) {
-            throw new AccessDeniedException("You are not allowed to delete this review");
+            throw new DetailedAccessDeniedException("You are not allowed to delete this review",
+                    Map.of(
+                            "Review id:", review.getId(),
+                            "Review author keycloak id:", String.valueOf(review.getAuthor().getKeycloakId()),
+                            "Current user keycloak id:", String.valueOf(currentKeycloakId)
+                    ));
         }
 
         reviewRepository.deleteById(id);
@@ -173,7 +183,12 @@ public class ReviewService {
                 .orElseThrow(() -> new EntityNotFoundException(User.class, userId));
 
         if (!currentKeycloakId.equals(requestedUser.getKeycloakId())) {
-            throw new AccessDeniedException("You can only view your own reviews");
+            throw new DetailedAccessDeniedException("You can only view your own reviews",
+                    Map.of(
+                            "Requested user id:", userId,
+                            "Requested user keycloak id:", String.valueOf(requestedUser.getKeycloakId()),
+                            "Current user keycloak id:", String.valueOf(currentKeycloakId)
+                    ));
         }
     }
 

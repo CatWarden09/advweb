@@ -139,7 +139,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     @ResponseBody
     public ResponseEntity<ValidationResponse> handleAccessDenied(AccessDeniedException ex) {
-        log.warn("ACCESS DENIED: {}", ex.getMessage());
+        if (ex instanceof DetailedAccessDeniedException detailedAccessDeniedException) {
+            log.warn("ACCESS DENIED: {} | details: {}", ex.getMessage(), detailedAccessDeniedException.getDetails());
+        } else {
+            log.warn("ACCESS DENIED: {}", ex.getMessage());
+        }
 
         return new ResponseEntity<>(
                 new ValidationResponse(List.of(ex.getMessage())),

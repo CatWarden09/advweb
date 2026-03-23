@@ -11,7 +11,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.access.AccessDeniedException;
 import ru.catwarden.advweb.ad.dto.AddressDto;
 import ru.catwarden.advweb.ad.dto.AdvertisementRequest;
 import ru.catwarden.advweb.ad.dto.AdvertisementResponse;
@@ -20,6 +19,7 @@ import ru.catwarden.advweb.adcategory.AdvertisementCategory;
 import ru.catwarden.advweb.adcategory.CategoryRepository;
 import ru.catwarden.advweb.comment.CommentService;
 import ru.catwarden.advweb.enums.AdModerationStatus;
+import ru.catwarden.advweb.exception.DetailedAccessDeniedException;
 import ru.catwarden.advweb.exception.InvalidRelationException;
 import ru.catwarden.advweb.exception.InvalidStateException;
 import ru.catwarden.advweb.exception.LimitExceededException;
@@ -339,7 +339,17 @@ class AdvertisementServiceTest {
             securityUtilsMockedStatic.when(SecurityUtils::getCurrentUserKeycloakId).thenReturn("another-user");
             securityUtilsMockedStatic.when(SecurityUtils::isCurrentUserAdmin).thenReturn(false);
 
-            assertThrows(AccessDeniedException.class, () -> advertisementService.updateAdvertisement(7L, request));
+            DetailedAccessDeniedException exception = assertThrows(DetailedAccessDeniedException.class,
+                    () -> advertisementService.updateAdvertisement(7L, request));
+            assertEquals("You are not allowed to update this advertisement", exception.getMessage());
+            assertEquals(
+                    Map.of(
+                            "Advertisement id:", 7L,
+                            "Advertisement author keycloak id:", "owner-id",
+                            "Current user keycloak id:", "another-user"
+                    ),
+                    exception.getDetails()
+            );
         }
 
         verify(imageService, never()).syncImagesInAdvertisement(any(), any());
@@ -523,7 +533,17 @@ class AdvertisementServiceTest {
             securityUtilsMockedStatic.when(SecurityUtils::getCurrentUserKeycloakId).thenReturn("another-user");
             securityUtilsMockedStatic.when(SecurityUtils::isCurrentUserAdmin).thenReturn(false);
 
-            assertThrows(AccessDeniedException.class, () -> advertisementService.deleteAdvertisement(12L));
+            DetailedAccessDeniedException exception = assertThrows(DetailedAccessDeniedException.class,
+                    () -> advertisementService.deleteAdvertisement(12L));
+            assertEquals("You are not allowed to delete this advertisement", exception.getMessage());
+            assertEquals(
+                    Map.of(
+                            "Advertisement id:", 12L,
+                            "Advertisement author keycloak id:", "owner-id",
+                            "Current user keycloak id:", "another-user"
+                    ),
+                    exception.getDetails()
+            );
         }
 
         verify(advertisementRepository, never()).deleteById(any());
@@ -560,8 +580,17 @@ class AdvertisementServiceTest {
             securityUtilsMockedStatic.when(SecurityUtils::isCurrentUserAdmin).thenReturn(false);
             securityUtilsMockedStatic.when(SecurityUtils::getCurrentUserKeycloakId).thenReturn("another-user");
 
-            assertThrows(AccessDeniedException.class, () ->
+            DetailedAccessDeniedException exception = assertThrows(DetailedAccessDeniedException.class, () ->
                     advertisementService.getUserPendingAdvertisements(44L, PageRequest.of(0, 10)));
+            assertEquals("You can only view your own advertisements", exception.getMessage());
+            assertEquals(
+                    Map.of(
+                            "Requested user id:", 44L,
+                            "Requested user keycloak id:", "owner-id",
+                            "Current user keycloak id:", "another-user"
+                    ),
+                    exception.getDetails()
+            );
         }
 
         verify(advertisementRepository, never())

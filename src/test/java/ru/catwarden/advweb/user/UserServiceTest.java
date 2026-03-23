@@ -6,10 +6,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.oauth2.jwt.Jwt;
 import ru.catwarden.advweb.avatar.AvatarService;
 import ru.catwarden.advweb.enums.AdModerationStatus;
+import ru.catwarden.advweb.exception.DetailedAccessDeniedException;
 import ru.catwarden.advweb.exception.EntityNotFoundException;
 import ru.catwarden.advweb.exception.OperationNotAllowedException;
 import ru.catwarden.advweb.review.ReviewRepository;
@@ -64,7 +64,17 @@ class UserServiceTest {
         try (MockedStatic<SecurityUtils> securityUtilsMockedStatic = mockStatic(SecurityUtils.class)) {
             securityUtilsMockedStatic.when(SecurityUtils::getCurrentUserKeycloakId).thenReturn("another-user");
             securityUtilsMockedStatic.when(SecurityUtils::isCurrentUserAdmin).thenReturn(false);
-            assertThrows(AccessDeniedException.class, () -> userService.updateUser(1L, request));
+            DetailedAccessDeniedException exception = assertThrows(DetailedAccessDeniedException.class,
+                    () -> userService.updateUser(1L, request));
+            assertEquals("You are not allowed to update this user", exception.getMessage());
+            assertEquals(
+                    Map.of(
+                            "User id:", 1L,
+                            "User keycloak id:", "owner-id",
+                            "Current user keycloak id:", "another-user"
+                    ),
+                    exception.getDetails()
+            );
         }
     }
 

@@ -9,8 +9,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.security.access.AccessDeniedException;
 import ru.catwarden.advweb.enums.AdModerationStatus;
+import ru.catwarden.advweb.exception.DetailedAccessDeniedException;
 import ru.catwarden.advweb.exception.EntityNotFoundException;
 import ru.catwarden.advweb.exception.InvalidRelationException;
 import ru.catwarden.advweb.exception.InvalidStateException;
@@ -133,8 +133,17 @@ class ReviewServiceTest {
         try (MockedStatic<SecurityUtils> securityUtilsMockedStatic = mockStatic(SecurityUtils.class)) {
             securityUtilsMockedStatic.when(SecurityUtils::getCurrentUserKeycloakId).thenReturn("another-user");
             securityUtilsMockedStatic.when(SecurityUtils::isCurrentUserAdmin).thenReturn(false);
-            assertThrows(AccessDeniedException.class, () ->
+            DetailedAccessDeniedException exception = assertThrows(DetailedAccessDeniedException.class, () ->
                     reviewService.getUserReviews(8L, PageRequest.of(0, 10), AdModerationStatus.PENDING));
+            assertEquals("You can only view your own reviews", exception.getMessage());
+            assertEquals(
+                    Map.of(
+                            "Requested user id:", 8L,
+                            "Requested user keycloak id:", "owner-id",
+                            "Current user keycloak id:", "another-user"
+                    ),
+                    exception.getDetails()
+            );
         }
     }
 
@@ -290,7 +299,17 @@ class ReviewServiceTest {
         try (MockedStatic<SecurityUtils> securityUtilsMockedStatic = mockStatic(SecurityUtils.class)) {
             securityUtilsMockedStatic.when(SecurityUtils::getCurrentUserKeycloakId).thenReturn("another-user");
             securityUtilsMockedStatic.when(SecurityUtils::isCurrentUserAdmin).thenReturn(false);
-            assertThrows(AccessDeniedException.class, () -> reviewService.updateReview(4L, request));
+            DetailedAccessDeniedException exception = assertThrows(DetailedAccessDeniedException.class,
+                    () -> reviewService.updateReview(4L, request));
+            assertEquals("You are not allowed to update this review", exception.getMessage());
+            assertEquals(
+                    Map.of(
+                            "Review id:", 4L,
+                            "Review author keycloak id:", "owner-id",
+                            "Current user keycloak id:", "another-user"
+                    ),
+                    exception.getDetails()
+            );
         }
     }
 
@@ -476,7 +495,17 @@ class ReviewServiceTest {
         try (MockedStatic<SecurityUtils> securityUtilsMockedStatic = mockStatic(SecurityUtils.class)) {
             securityUtilsMockedStatic.when(SecurityUtils::getCurrentUserKeycloakId).thenReturn("another-user");
             securityUtilsMockedStatic.when(SecurityUtils::isCurrentUserAdmin).thenReturn(false);
-            assertThrows(AccessDeniedException.class, () -> reviewService.deleteReview(5L));
+            DetailedAccessDeniedException exception = assertThrows(DetailedAccessDeniedException.class,
+                    () -> reviewService.deleteReview(5L));
+            assertEquals("You are not allowed to delete this review", exception.getMessage());
+            assertEquals(
+                    Map.of(
+                            "Review id:", 5L,
+                            "Review author keycloak id:", "owner-id",
+                            "Current user keycloak id:", "another-user"
+                    ),
+                    exception.getDetails()
+            );
         }
 
         verify(reviewRepository, never()).deleteById(any(Long.class));
