@@ -51,7 +51,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(EntityNotFoundException.class)
     @ResponseBody
     public ResponseEntity<ValidationResponse> handleEntityNotFound(EntityNotFoundException ex) {
-        log.error("ENTITY NOT FOUND: {}", ex.getMessage());
+        log.warn("ENTITY NOT FOUND: {}", ex.getMessage());
 
         return new ResponseEntity<>(
                 new ValidationResponse(List.of(ex.getMessage())),
@@ -95,7 +95,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidRelationException.class)
     @ResponseBody
     public ResponseEntity<ValidationResponse> handleInvalidRelation(InvalidRelationException ex) {
-        log.error("INVALID ENTITY RELATION: {} | details: {}", ex.getMessage(), ex.getDetails());
+        log.warn("INVALID ENTITY RELATION: {} | details: {}", ex.getMessage(), ex.getDetails());
 
         return new ResponseEntity<>(
                 new ValidationResponse(List.of(ex.getMessage())),
@@ -106,7 +106,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidStateException.class)
     @ResponseBody
     public ResponseEntity<ValidationResponse> handleInvalidState(InvalidStateException ex) {
-        log.error("INVALID ENTITY STATE: {} | details: {}", ex.getMessage(), ex.getDetails());
+        log.warn("INVALID ENTITY STATE: {} | details: {}", ex.getMessage(), ex.getDetails());
 
         return new ResponseEntity<>(
                 new ValidationResponse(List.of(ex.getMessage())),
@@ -117,7 +117,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(LimitExceededException.class)
     @ResponseBody
     public ResponseEntity<ValidationResponse> handleLimitExceeded(LimitExceededException ex) {
-        log.error("LIMIT EXCEEDED: {} | details: {}", ex.getMessage(), ex.getDetails());
+        log.warn("LIMIT EXCEEDED: {} | details: {}", ex.getMessage(), ex.getDetails());
 
         return new ResponseEntity<>(
                 new ValidationResponse(List.of(ex.getMessage())),
@@ -128,7 +128,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(OperationNotAllowedException.class)
     @ResponseBody
     public ResponseEntity<ValidationResponse> handleOperationNotAllowed(OperationNotAllowedException ex) {
-        log.error("OPERATION NOT ALLOWED: {} | details: {}", ex.getMessage(), ex.getDetails());
+        log.warn("OPERATION NOT ALLOWED: {} | details: {}", ex.getMessage(), ex.getDetails());
 
         return new ResponseEntity<>(
                 new ValidationResponse(List.of(ex.getMessage())),
