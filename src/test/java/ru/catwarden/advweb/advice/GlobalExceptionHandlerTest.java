@@ -156,7 +156,8 @@ class GlobalExceptionHandlerTest {
 
     @Test
     void handleOperationNotAllowedReturnsConflict() {
-        OperationNotAllowedException exception = new OperationNotAllowedException("Operation is not allowed in current state");
+        OperationNotAllowedException exception = new OperationNotAllowedException("Operation is not allowed in current state",
+                Map.of("Some id", 1L));
 
         ResponseEntity<ValidationResponse> response = handler.handleOperationNotAllowed(exception);
 

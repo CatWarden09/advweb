@@ -14,6 +14,7 @@ import ru.catwarden.advweb.security.SecurityUtils;
 import ru.catwarden.advweb.user.dto.UserResponse;
 import ru.catwarden.advweb.user.dto.UserUpdateRequest;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -44,13 +45,15 @@ public class UserService {
         userRepository.findByEmail(userUpdateRequest.getEmail())
                 .filter(existingUser -> !existingUser.getId().equals(id))
                 .ifPresent(existingUser -> {
-                    throw new OperationNotAllowedException("Email is already in use");
+                    throw new OperationNotAllowedException("Email is already in use",
+                            Map.of("Current user id:", id, "Passed email:", userUpdateRequest.getEmail() ,"User with existing email id", existingUser.getId()));
                 });
 
         userRepository.findByPhone(userUpdateRequest.getPhone())
                 .filter(existingUser -> !existingUser.getId().equals(id))
                 .ifPresent(existingUser -> {
-                    throw new OperationNotAllowedException("Phone is already in use");
+                    throw new OperationNotAllowedException("Phone is already in use",
+                            Map.of("Current user id:", id, "Passed phone:", userUpdateRequest.getPhone() ,"User with existing phone id", existingUser.getId()));
                 });
 
         user.setFirstName(userUpdateRequest.getFirstName());

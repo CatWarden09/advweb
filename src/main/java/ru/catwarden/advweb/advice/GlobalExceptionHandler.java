@@ -128,7 +128,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(OperationNotAllowedException.class)
     @ResponseBody
     public ResponseEntity<ValidationResponse> handleOperationNotAllowed(OperationNotAllowedException ex) {
-        log.error("OPERATION NOT ALLOWED: {}", ex.getMessage());
+        log.error("OPERATION NOT ALLOWED: {} | details: {}", ex.getMessage(), ex.getDetails());
 
         return new ResponseEntity<>(
                 new ValidationResponse(List.of(ex.getMessage())),
