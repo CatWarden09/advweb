@@ -29,6 +29,7 @@ import ru.catwarden.advweb.user.User;
 import ru.catwarden.advweb.user.UserRepository;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -259,7 +260,10 @@ class AdvertisementServiceTest {
         try (MockedStatic<SecurityUtils> securityUtilsMockedStatic = mockStatic(SecurityUtils.class)) {
             securityUtilsMockedStatic.when(SecurityUtils::getCurrentUserKeycloakId).thenReturn("kc-user");
 
-            assertThrows(InvalidRelationException.class, () -> advertisementService.createAdvertisement(request));
+            InvalidRelationException exception = assertThrows(InvalidRelationException.class,
+                    () -> advertisementService.createAdvertisement(request));
+            assertEquals("Subcategory is not a child of the given category", exception.getMessage());
+            assertEquals(Map.of("Subcategory id:", 101L, "Parent category id:", 100L), exception.getDetails());
         }
 
         verify(advertisementRepository, never()).save(any());
@@ -280,7 +284,10 @@ class AdvertisementServiceTest {
         try (MockedStatic<SecurityUtils> securityUtilsMockedStatic = mockStatic(SecurityUtils.class)) {
             securityUtilsMockedStatic.when(SecurityUtils::getCurrentUserKeycloakId).thenReturn("kc-user");
 
-            assertThrows(InvalidRelationException.class, () -> advertisementService.createAdvertisement(request));
+            InvalidRelationException exception = assertThrows(InvalidRelationException.class,
+                    () -> advertisementService.createAdvertisement(request));
+            assertEquals("Subcategory cannot be the same as the category", exception.getMessage());
+            assertEquals(Map.of("Subcategory id:", 100L, "Parent category id:", 100L), exception.getDetails());
         }
 
         verify(advertisementRepository, never()).save(any());

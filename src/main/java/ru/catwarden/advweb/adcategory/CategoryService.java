@@ -12,6 +12,7 @@ import ru.catwarden.advweb.exception.OperationNotAllowedException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -57,7 +58,8 @@ public class CategoryService {
                 .orElseThrow(() -> new EntityNotFoundException(AdvertisementCategory.class, id));
 
         if (parent.getParent() != null){
-            throw new InvalidRelationException("Cannot create subcategory for a subcategory");
+            throw new InvalidRelationException("Cannot create subcategory for a subcategory",
+                    Map.of("Parent id:", parent.getId()));
         }
 
         // DONE add batch updating

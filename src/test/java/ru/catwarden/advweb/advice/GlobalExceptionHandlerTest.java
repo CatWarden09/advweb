@@ -24,6 +24,7 @@ import ru.catwarden.advweb.exception.OperationNotAllowedException;
 import ru.catwarden.advweb.validation.dto.ValidationResponse;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -124,7 +125,8 @@ class GlobalExceptionHandlerTest {
 
     @Test
     void handleInvalidRelationReturnsBadRequest() {
-        InvalidRelationException exception = new InvalidRelationException("User cannot review himself");
+        InvalidRelationException exception = new InvalidRelationException("User cannot review himself",
+                Map.of("Current user id:", 1, "Recipient user id:", 1));
 
         ResponseEntity<ValidationResponse> response = handler.handleInvalidRelation(exception);
 

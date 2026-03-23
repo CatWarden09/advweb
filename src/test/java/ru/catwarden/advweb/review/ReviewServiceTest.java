@@ -25,6 +25,7 @@ import ru.catwarden.advweb.user.UserService;
 import ru.catwarden.advweb.user.dto.ShortUserInfoResponse;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -269,7 +270,10 @@ class ReviewServiceTest {
 
         try (MockedStatic<SecurityUtils> securityUtilsMockedStatic = mockStatic(SecurityUtils.class)) {
             securityUtilsMockedStatic.when(SecurityUtils::getCurrentUserKeycloakId).thenReturn("author-id");
-            assertThrows(InvalidRelationException.class, () -> reviewService.createReview(request));
+            InvalidRelationException exception = assertThrows(InvalidRelationException.class,
+                    () -> reviewService.createReview(request));
+            assertEquals("Users cannot create reviews for themselves", exception.getMessage());
+            assertEquals(Map.of("Current user id:", 1L, "Recipient user id:", 1L), exception.getDetails());
         }
     }
 

@@ -18,6 +18,8 @@ import ru.catwarden.advweb.user.UserRepository;
 import ru.catwarden.advweb.user.UserResponseAssembler;
 import ru.catwarden.advweb.user.UserService;
 
+import java.util.Map;
+
 // DONE users cant leave reviews for themselves
 
 @Service
@@ -67,7 +69,8 @@ public class ReviewService {
                 .orElseThrow(() -> new EntityNotFoundException(User.class, reviewRequest.getRecipientId()));
 
         if (currentUser.equals(recipient)){
-            throw new InvalidRelationException("Users cannot create reviews for themselves");
+            throw new InvalidRelationException("Users cannot create reviews for themselves",
+                    Map.of("Current user id:", currentUser.getId(), "Recipient user id:", recipient.getId()));
         }
 
         Review review = reviewMapper.toEntity(reviewRequest);

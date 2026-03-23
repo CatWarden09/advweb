@@ -25,6 +25,7 @@ import ru.catwarden.advweb.user.User;
 import ru.catwarden.advweb.user.UserRepository;
 
 import java.util.List;
+import java.util.Map;
 
 
 @Service
@@ -132,11 +133,13 @@ public class AdvertisementService {
                 .orElseThrow(() -> new EntityNotFoundException(AdvertisementCategory.class, advertisementRequest.getSubcategoryId()));
 
         if (!subcategory.getParent().equals(category)) {
-            throw new InvalidRelationException("Subcategory is not a child of the given category");
+            throw new InvalidRelationException("Subcategory is not a child of the given category",
+                    Map.of("Subcategory id:", subcategory.getId(), "Parent category id:", category.getId()));
         }
 
         if (subcategory.equals(category)){
-            throw new InvalidRelationException("Subcategory cannot be the same as the category");
+            throw new InvalidRelationException("Subcategory cannot be the same as the category",
+                    Map.of("Subcategory id:", subcategory.getId(), "Parent category id:", category.getId()));
         }
 
         if (advertisementRequest.getImageIds().size() > MAX_IMAGES_PER_AD) {
