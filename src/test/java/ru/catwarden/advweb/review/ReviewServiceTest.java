@@ -410,7 +410,9 @@ class ReviewServiceTest {
         Review review = Review.builder().id(3L).moderationStatus(AdModerationStatus.REJECTED).build();
         when(reviewRepository.findById(3L)).thenReturn(Optional.of(review));
 
-        assertThrows(InvalidStateException.class, () -> reviewService.approveReview(3L));
+        InvalidStateException exception = assertThrows(InvalidStateException.class, () -> reviewService.approveReview(3L));
+        assertEquals("Cannot change status of a non-pending review", exception.getMessage());
+        assertEquals(Map.of("Review id:", 3L, "Current status:", AdModerationStatus.REJECTED), exception.getDetails());
         verify(reviewRepository, never()).save(any(Review.class));
     }
 
@@ -438,7 +440,11 @@ class ReviewServiceTest {
         Review review = Review.builder().id(3L).moderationStatus(AdModerationStatus.APPROVED).build();
         when(reviewRepository.findById(3L)).thenReturn(Optional.of(review));
 
-        assertThrows(InvalidStateException.class, () -> reviewService.rejectReview(3L, "Bad language"));
+        InvalidStateException exception = assertThrows(InvalidStateException.class,
+                () -> reviewService.rejectReview(3L, "Bad language"));
+        assertEquals("Cannot change status of a non-pending review", exception.getMessage());
+        assertEquals(Map.of("Review id:", 3L, "Current status:", AdModerationStatus.APPROVED), exception.getDetails());
+        verify(reviewRepository, never()).save(any(Review.class));
     }
 
     @Test

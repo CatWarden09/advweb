@@ -112,7 +112,8 @@ public class ReviewService {
                 .orElseThrow(() -> new EntityNotFoundException(Review.class, id));
 
         if(review.getModerationStatus() != AdModerationStatus.PENDING){
-            throw new InvalidStateException("Cannot change status of a non-pending review");
+            throw new InvalidStateException("Cannot change status of a non-pending review",
+                    Map.of("Review id:", review.getId(), "Current status:", review.getModerationStatus()));
         }
 
         review.setModerationStatus(AdModerationStatus.APPROVED);
@@ -126,7 +127,8 @@ public class ReviewService {
                 .orElseThrow(() -> new EntityNotFoundException(Review.class, id));
 
         if(review.getModerationStatus() != AdModerationStatus.PENDING){
-            throw new InvalidStateException("Cannot change status of a non-pending review");
+            throw new InvalidStateException("Cannot change status of a non-pending review",
+                    Map.of("Review id:", review.getId(), "Current status:", review.getModerationStatus()));
         }
 
         review.setModerationStatus(AdModerationStatus.REJECTED);

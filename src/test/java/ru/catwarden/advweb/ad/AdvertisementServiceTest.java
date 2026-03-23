@@ -458,7 +458,10 @@ class AdvertisementServiceTest {
 
         when(advertisementRepository.findById(50L)).thenReturn(Optional.of(advertisement));
 
-        assertThrows(InvalidStateException.class, () -> advertisementService.approveAdvertisement(50L));
+        InvalidStateException exception = assertThrows(InvalidStateException.class,
+                () -> advertisementService.approveAdvertisement(50L));
+        assertEquals("Cannot change status of a non-pending advertisement", exception.getMessage());
+        assertEquals(Map.of("Advertisement id:", 50L, "Current status:", AdModerationStatus.REJECTED), exception.getDetails());
         verify(advertisementRepository, never()).save(any());
     }
 
@@ -487,8 +490,10 @@ class AdvertisementServiceTest {
 
         when(advertisementRepository.findById(51L)).thenReturn(Optional.of(advertisement));
 
-        assertThrows(InvalidStateException.class, () ->
+        InvalidStateException exception = assertThrows(InvalidStateException.class, () ->
                 advertisementService.rejectAdvertisement(51L, "Reason"));
+        assertEquals("Cannot change status of a non-pending advertisement", exception.getMessage());
+        assertEquals(Map.of("Advertisement id:", 51L, "Current status:", AdModerationStatus.APPROVED), exception.getDetails());
         verify(advertisementRepository, never()).save(any());
     }
 

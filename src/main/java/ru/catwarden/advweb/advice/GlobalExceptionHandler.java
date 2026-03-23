@@ -106,7 +106,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidStateException.class)
     @ResponseBody
     public ResponseEntity<ValidationResponse> handleInvalidState(InvalidStateException ex) {
-        log.error("INVALID ENTITY STATE: {}", ex.getMessage());
+        log.error("INVALID ENTITY STATE: {} | details: {}", ex.getMessage(), ex.getDetails());
 
         return new ResponseEntity<>(
                 new ValidationResponse(List.of(ex.getMessage())),
