@@ -146,7 +146,8 @@ class GlobalExceptionHandlerTest {
 
     @Test
     void handleLimitExceededReturnsBadRequest() {
-        LimitExceededException exception = new LimitExceededException("Daily request limit exceeded");
+        LimitExceededException exception = new LimitExceededException("Daily request limit exceeded",
+                Map.of("First id", 1, "Second id", 5));
 
         ResponseEntity<ValidationResponse> response = handler.handleLimitExceeded(exception);
 

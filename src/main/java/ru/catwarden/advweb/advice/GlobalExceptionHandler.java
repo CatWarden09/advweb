@@ -117,7 +117,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(LimitExceededException.class)
     @ResponseBody
     public ResponseEntity<ValidationResponse> handleLimitExceeded(LimitExceededException ex) {
-        log.error("LIMIT EXCEEDED: {}", ex.getMessage());
+        log.error("LIMIT EXCEEDED: {} | details: {}", ex.getMessage(), ex.getDetails());
 
         return new ResponseEntity<>(
                 new ValidationResponse(List.of(ex.getMessage())),

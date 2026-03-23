@@ -308,7 +308,13 @@ class AdvertisementServiceTest {
         try (MockedStatic<SecurityUtils> securityUtilsMockedStatic = mockStatic(SecurityUtils.class)) {
             securityUtilsMockedStatic.when(SecurityUtils::getCurrentUserKeycloakId).thenReturn("kc-user");
 
-            assertThrows(LimitExceededException.class, () -> advertisementService.createAdvertisement(request));
+            LimitExceededException exception = assertThrows(LimitExceededException.class,
+                    () -> advertisementService.createAdvertisement(request));
+            assertEquals("Limit for advertisement pictures is exceeded", exception.getMessage());
+            assertEquals(
+                    Map.of("User id:", 5L, "Number of pictures passed:", 11),
+                    exception.getDetails()
+            );
         }
 
         verify(advertisementRepository, never()).save(any());
@@ -406,7 +412,7 @@ class AdvertisementServiceTest {
 
     @Test
     void updateAdvertisementThrowsWhenImageLimitExceeded() {
-        User author = User.builder().keycloakId("owner-id").build();
+        User author = User.builder().id(6L).keycloakId("owner-id").build();
         Advertisement advertisement = Advertisement.builder()
                 .id(7L)
                 .author(author)
@@ -428,7 +434,13 @@ class AdvertisementServiceTest {
             securityUtilsMockedStatic.when(SecurityUtils::getCurrentUserKeycloakId).thenReturn("owner-id");
             securityUtilsMockedStatic.when(SecurityUtils::isCurrentUserAdmin).thenReturn(false);
 
-            assertThrows(LimitExceededException.class, () -> advertisementService.updateAdvertisement(7L, request));
+            LimitExceededException exception = assertThrows(LimitExceededException.class,
+                    () -> advertisementService.updateAdvertisement(7L, request));
+            assertEquals("Limit for advertisement pictures is exceeded", exception.getMessage());
+            assertEquals(
+                    Map.of("User id:", 6L, "Advertisement id:", 7L, "Number of pictures passed:", 11),
+                    exception.getDetails()
+            );
         }
 
         verify(imageService, never()).syncImagesInAdvertisement(any(), any());
