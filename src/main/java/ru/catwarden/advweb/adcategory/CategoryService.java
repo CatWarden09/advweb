@@ -78,7 +78,8 @@ public class CategoryService {
                 .orElseThrow(() -> new EntityNotFoundException(AdvertisementCategory.class, id));
 
         if(advertisementCategory.getName().equals(advertisementCategoryUpdateRequest.getName())) {
-            throw new OperationNotAllowedException("New category name is the same as the previous one");
+            throw new OperationNotAllowedException("New category name is the same as the previous one",
+                    Map.of("Category id", advertisementCategory.getId(), "Current name:", advertisementCategory.getName(), "Passed name:", advertisementCategoryUpdateRequest.getName()));
         }
         advertisementCategory.setName(advertisementCategoryUpdateRequest.getName());
         categoryRepository.save(advertisementCategory);
@@ -90,11 +91,13 @@ public class CategoryService {
                 .orElseThrow(() -> new EntityNotFoundException(AdvertisementCategory.class, id));
 
         if(advertisementRepository.existsByCategory(advertisementCategory)){
-            throw new OperationNotAllowedException("Cannot delete category with advertisements");
+            throw new OperationNotAllowedException("Cannot delete category with advertisements",
+                    Map.of("Category id:", id));
         }
 
         if (!categoryRepository.findByParent(advertisementCategory).isEmpty()) { // .isEmpty > != null (null = [])
-            throw new OperationNotAllowedException("Cannot delete category with subcategories");
+            throw new OperationNotAllowedException("Cannot delete category with subcategories",
+                    Map.of("Category id:", id));
         }
 
         categoryRepository.delete(advertisementCategory);

@@ -196,7 +196,13 @@ class CategoryServiceTest {
 
         when(categoryRepository.findById(5L)).thenReturn(Optional.of(category));
 
-        assertThrows(OperationNotAllowedException.class, () -> categoryService.updateCategory(5L, request));
+        OperationNotAllowedException exception = assertThrows(OperationNotAllowedException.class,
+                () -> categoryService.updateCategory(5L, request));
+        assertEquals("New category name is the same as the previous one", exception.getMessage());
+        assertEquals(
+                Map.of("Category id", 5L, "Current name:", "Same", "Passed name:", "Same"),
+                exception.getDetails()
+        );
         verify(categoryRepository, never()).save(any());
     }
 
@@ -226,7 +232,10 @@ class CategoryServiceTest {
         when(categoryRepository.findById(8L)).thenReturn(Optional.of(category));
         when(advertisementRepository.existsByCategory(category)).thenReturn(true);
 
-        assertThrows(OperationNotAllowedException.class, () -> categoryService.deleteCategory(8L));
+        OperationNotAllowedException exception = assertThrows(OperationNotAllowedException.class,
+                () -> categoryService.deleteCategory(8L));
+        assertEquals("Cannot delete category with advertisements", exception.getMessage());
+        assertEquals(Map.of("Category id:", 8L), exception.getDetails());
         verify(categoryRepository, never()).delete(any());
     }
 
@@ -246,7 +255,10 @@ class CategoryServiceTest {
         when(advertisementRepository.existsByCategory(category)).thenReturn(false);
         when(categoryRepository.findByParent(category)).thenReturn(List.of(child));
 
-        assertThrows(OperationNotAllowedException.class, () -> categoryService.deleteCategory(9L));
+        OperationNotAllowedException exception = assertThrows(OperationNotAllowedException.class,
+                () -> categoryService.deleteCategory(9L));
+        assertEquals("Cannot delete category with subcategories", exception.getMessage());
+        assertEquals(Map.of("Category id:", 9L), exception.getDetails());
         verify(categoryRepository, never()).delete(any());
     }
 }

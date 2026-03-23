@@ -17,6 +17,7 @@ import ru.catwarden.advweb.security.SecurityUtils;
 import ru.catwarden.advweb.user.dto.UserResponse;
 import ru.catwarden.advweb.user.dto.UserUpdateRequest;
 
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -79,7 +80,13 @@ class UserServiceTest {
         try (MockedStatic<SecurityUtils> securityUtilsMockedStatic = mockStatic(SecurityUtils.class)) {
             securityUtilsMockedStatic.when(SecurityUtils::getCurrentUserKeycloakId).thenReturn("owner-id");
             securityUtilsMockedStatic.when(SecurityUtils::isCurrentUserAdmin).thenReturn(false);
-            assertThrows(OperationNotAllowedException.class, () -> userService.updateUser(1L, request));
+            OperationNotAllowedException exception = assertThrows(OperationNotAllowedException.class,
+                    () -> userService.updateUser(1L, request));
+            assertEquals("Email is already in use", exception.getMessage());
+            assertEquals(
+                    Map.of("Current user id:", 1L, "Passed email:", "taken@mail.com", "User with existing email id", 2L),
+                    exception.getDetails()
+            );
         }
     }
 
@@ -96,7 +103,13 @@ class UserServiceTest {
         try (MockedStatic<SecurityUtils> securityUtilsMockedStatic = mockStatic(SecurityUtils.class)) {
             securityUtilsMockedStatic.when(SecurityUtils::getCurrentUserKeycloakId).thenReturn("owner-id");
             securityUtilsMockedStatic.when(SecurityUtils::isCurrentUserAdmin).thenReturn(false);
-            assertThrows(OperationNotAllowedException.class, () -> userService.updateUser(1L, request));
+            OperationNotAllowedException exception = assertThrows(OperationNotAllowedException.class,
+                    () -> userService.updateUser(1L, request));
+            assertEquals("Phone is already in use", exception.getMessage());
+            assertEquals(
+                    Map.of("Current user id:", 1L, "Passed phone:", "+7111", "User with existing phone id", 2L),
+                    exception.getDetails()
+            );
         }
     }
 
