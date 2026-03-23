@@ -79,6 +79,7 @@ services:
       - "127.0.0.1:8081:8080"
     volumes:
       - uploads:/app/uploads
+      - logs:/app/logs
     restart: unless-stopped
 
 volumes:
@@ -90,3 +91,5 @@ volumes:
     name: advweb_redis_data
   uploads:
     name: advweb_uploads
+  logs:
+    name: advweb_logs
