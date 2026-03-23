@@ -15,6 +15,7 @@ import ru.catwarden.advweb.exception.InvalidRelationException;
 import ru.catwarden.advweb.exception.OperationNotAllowedException;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -158,8 +159,10 @@ class CategoryServiceTest {
 
         when(categoryRepository.findById(2L)).thenReturn(Optional.of(subcategoryParent));
 
-        assertThrows(InvalidRelationException.class, () ->
+        InvalidRelationException exception = assertThrows(InvalidRelationException.class, () ->
                 categoryService.createSubcategories(2L, List.of(AdvertisementCategoryRequest.builder().name("Sedan").build())));
+        assertEquals("Cannot create subcategory for a subcategory", exception.getMessage());
+        assertEquals(Map.of("Parent id:", 2L), exception.getDetails());
         verify(categoryRepository, never()).saveAll(any());
     }
 
