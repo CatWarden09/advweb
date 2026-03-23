@@ -7,8 +7,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.multipart.MultipartFile;
+import ru.catwarden.advweb.exception.DetailedAccessDeniedException;
 import ru.catwarden.advweb.exception.EntityNotFoundException;
 import ru.catwarden.advweb.image.dto.ImageDto;
 import ru.catwarden.advweb.security.SecurityUtils;
@@ -16,6 +16,7 @@ import ru.catwarden.advweb.storage.FileUploader;
 import ru.catwarden.advweb.storage.StoredFile;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -158,7 +159,17 @@ class ImageServiceTest {
         try (MockedStatic<SecurityUtils> securityUtilsMockedStatic = mockStatic(SecurityUtils.class)) {
             securityUtilsMockedStatic.when(SecurityUtils::getCurrentUserKeycloakId).thenReturn("owner");
             securityUtilsMockedStatic.when(SecurityUtils::isCurrentUserAdmin).thenReturn(false);
-            assertThrows(AccessDeniedException.class, () -> imageService.setImagesToAdvertisement(requestIds, 10L));
+            DetailedAccessDeniedException exception = assertThrows(DetailedAccessDeniedException.class,
+                    () -> imageService.setImagesToAdvertisement(requestIds, 10L));
+            assertEquals("One or more images are linked to another advertisement", exception.getMessage());
+            assertEquals(
+                    Map.of(
+                            "Requested advertisement id:", 10L,
+                            "Conflicting image id:", 1L,
+                            "Conflicting image advertisement id:", "999"
+                    ),
+                    exception.getDetails()
+            );
         }
     }
 
@@ -176,7 +187,18 @@ class ImageServiceTest {
         try (MockedStatic<SecurityUtils> securityUtilsMockedStatic = mockStatic(SecurityUtils.class)) {
             securityUtilsMockedStatic.when(SecurityUtils::getCurrentUserKeycloakId).thenReturn("owner");
             securityUtilsMockedStatic.when(SecurityUtils::isCurrentUserAdmin).thenReturn(false);
-            assertThrows(AccessDeniedException.class, () -> imageService.setImagesToAdvertisement(requestIds, 10L));
+            DetailedAccessDeniedException exception = assertThrows(DetailedAccessDeniedException.class,
+                    () -> imageService.setImagesToAdvertisement(requestIds, 10L));
+            assertEquals("One or more images were uploaded by another user", exception.getMessage());
+            assertEquals(
+                    Map.of(
+                            "Requested advertisement id:", 10L,
+                            "Conflicting image id:", 1L,
+                            "Conflicting image uploader keycloak id:", "another-user",
+                            "Current user keycloak id:", "owner"
+                    ),
+                    exception.getDetails()
+            );
         }
     }
 

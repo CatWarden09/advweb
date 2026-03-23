@@ -4,7 +4,6 @@ import com.querydsl.core.BooleanBuilder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.catwarden.advweb.ad.dto.AdvertisementRequest;
@@ -15,6 +14,7 @@ import ru.catwarden.advweb.adcategory.AdvertisementCategory;
 import ru.catwarden.advweb.adcategory.CategoryRepository;
 import ru.catwarden.advweb.comment.CommentService;
 import ru.catwarden.advweb.enums.AdModerationStatus;
+import ru.catwarden.advweb.exception.DetailedAccessDeniedException;
 import ru.catwarden.advweb.exception.EntityNotFoundException;
 import ru.catwarden.advweb.exception.InvalidRelationException;
 import ru.catwarden.advweb.exception.InvalidStateException;
@@ -180,7 +180,12 @@ public class AdvertisementService {
         boolean isAdmin = SecurityUtils.isCurrentUserAdmin();
 
         if (!isAdmin && !advertisement.getAuthor().getKeycloakId().equals(currentKeycloakId)) {
-            throw new AccessDeniedException("You are not allowed to update this advertisement");
+            throw new DetailedAccessDeniedException("You are not allowed to update this advertisement",
+                    Map.of(
+                            "Advertisement id:", advertisement.getId(),
+                            "Advertisement author keycloak id:", String.valueOf(advertisement.getAuthor().getKeycloakId()),
+                            "Current user keycloak id:", String.valueOf(currentKeycloakId)
+                    ));
         }
 
         boolean isFieldsChanged = false;
@@ -258,7 +263,12 @@ public class AdvertisementService {
         boolean isAdmin = SecurityUtils.isCurrentUserAdmin();
 
         if (!isAdmin && !advertisement.getAuthor().getKeycloakId().equals(currentKeycloakId)) {
-            throw new AccessDeniedException("You are not allowed to delete this advertisement");
+            throw new DetailedAccessDeniedException("You are not allowed to delete this advertisement",
+                    Map.of(
+                            "Advertisement id:", advertisement.getId(),
+                            "Advertisement author keycloak id:", String.valueOf(advertisement.getAuthor().getKeycloakId()),
+                            "Current user keycloak id:", String.valueOf(currentKeycloakId)
+                    ));
         }
 
         advertisementRepository.deleteById(advertisement.getId());
@@ -295,7 +305,12 @@ public class AdvertisementService {
                 .orElseThrow(() -> new EntityNotFoundException(User.class, userId));
 
         if (!currentKeycloakId.equals(requestedUser.getKeycloakId())) {
-            throw new AccessDeniedException("You can only view your own advertisements");
+            throw new DetailedAccessDeniedException("You can only view your own advertisements",
+                    Map.of(
+                            "Requested user id:", userId,
+                            "Requested user keycloak id:", String.valueOf(requestedUser.getKeycloakId()),
+                            "Current user keycloak id:", String.valueOf(currentKeycloakId)
+                    ));
         }
     }
 }

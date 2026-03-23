@@ -3,19 +3,21 @@ package ru.catwarden.advweb.comment;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import ru.catwarden.advweb.ad.Advertisement;
 import ru.catwarden.advweb.ad.AdvertisementRepository;
 import ru.catwarden.advweb.comment.dto.CommentRequest;
 import ru.catwarden.advweb.comment.dto.CommentResponse;
 import ru.catwarden.advweb.comment.dto.CommentUpdateRequest;
+import ru.catwarden.advweb.exception.DetailedAccessDeniedException;
 import ru.catwarden.advweb.exception.EntityNotFoundException;
 import ru.catwarden.advweb.security.SecurityUtils;
 import ru.catwarden.advweb.user.User;
 import ru.catwarden.advweb.user.UserResponseAssembler;
 import ru.catwarden.advweb.user.UserRepository;
 import ru.catwarden.advweb.user.dto.ShortUserInfoResponse;
+
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -72,7 +74,12 @@ public class CommentService {
         boolean isAdmin = SecurityUtils.isCurrentUserAdmin();
 
         if (!isAdmin && !comment.getAuthor().getKeycloakId().equals(currentKeycloakId)) {
-            throw new AccessDeniedException("You are not allowed to update this comment");
+            throw new DetailedAccessDeniedException("You are not allowed to update this comment",
+                    Map.of(
+                            "Comment id:", comment.getId(),
+                            "Comment author keycloak id:", String.valueOf(comment.getAuthor().getKeycloakId()),
+                            "Current user keycloak id:", String.valueOf(currentKeycloakId)
+                    ));
         }
 
         comment.setText(commentUpdateRequest.getText());
@@ -103,7 +110,12 @@ public class CommentService {
         boolean isAdmin = SecurityUtils.isCurrentUserAdmin();
 
         if (!isAdmin && !comment.getAuthor().getKeycloakId().equals(currentKeycloakId)) {
-            throw new AccessDeniedException("You are not allowed to delete this comment");
+            throw new DetailedAccessDeniedException("You are not allowed to delete this comment",
+                    Map.of(
+                            "Comment id:", comment.getId(),
+                            "Comment author keycloak id:", String.valueOf(comment.getAuthor().getKeycloakId()),
+                            "Current user keycloak id:", String.valueOf(currentKeycloakId)
+                    ));
         }
 
         commentRepository.deleteById(id);

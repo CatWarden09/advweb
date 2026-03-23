@@ -1,12 +1,12 @@
 package ru.catwarden.advweb.user;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.transaction.annotation.Transactional;
 import ru.catwarden.advweb.avatar.AvatarService;
 import ru.catwarden.advweb.enums.AdModerationStatus;
+import ru.catwarden.advweb.exception.DetailedAccessDeniedException;
 import ru.catwarden.advweb.exception.EntityNotFoundException;
 import ru.catwarden.advweb.exception.OperationNotAllowedException;
 import ru.catwarden.advweb.review.ReviewRepository;
@@ -139,7 +139,12 @@ public class UserService {
         boolean isAdmin = SecurityUtils.isCurrentUserAdmin();
 
         if (!isAdmin && !Objects.equals(user.getKeycloakId(), currentKeycloakId)) {
-            throw new AccessDeniedException("You are not allowed to update this user");
+            throw new DetailedAccessDeniedException("You are not allowed to update this user",
+                    Map.of(
+                            "User id:", user.getId(),
+                            "User keycloak id:", String.valueOf(user.getKeycloakId()),
+                            "Current user keycloak id:", String.valueOf(currentKeycloakId)
+                    ));
         }
     }
 }
