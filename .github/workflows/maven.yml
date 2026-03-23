@@ -2,9 +2,9 @@ name: Java CI with Maven and server deployment
 
 on:
   push:
-    branches: [ "master", "dev" ]
+    branches: [ "master", "dev", "feature/logging-level-files" ]
   pull_request:
-    branches: [ "master", "dev" ]
+    branches: [ "master", "dev", "feature/logging-level-files" ]
 
 jobs:
   build:
@@ -36,5 +36,5 @@ jobs:
           cd /root/advweb
           git checkout master
           git pull
-          docker compose down
-          docker compose up --build -d
+          # docker compose down
+          # docker compose up --build -d
