@@ -143,7 +143,8 @@ public class AdvertisementService {
         }
 
         if (advertisementRequest.getImageIds().size() > MAX_IMAGES_PER_AD) {
-            throw new LimitExceededException("Limit for advertisement pictures is exceeded");
+            throw new LimitExceededException("Limit for advertisement pictures is exceeded",
+                    Map.of("User id:", author.getId(), "Number of pictures passed:", advertisementRequest.getImageIds().size()));
         }
 
 
@@ -186,7 +187,8 @@ public class AdvertisementService {
         boolean isImagesChanged;
 
         if (advertisementUpdateRequest.getImageIds().size() > MAX_IMAGES_PER_AD) {
-            throw new LimitExceededException("Limit for advertisement pictures is exceeded");
+            throw new LimitExceededException("Limit for advertisement pictures is exceeded",
+                    Map.of("User id:", advertisement.getAuthor().getId(), "Advertisement id:", advertisement.getId(), "Number of pictures passed:", advertisementUpdateRequest.getImageIds().size()));
         }
 
         Address requestAddress = addressMapper.toEntity(advertisementUpdateRequest.getAddress());
