@@ -2,6 +2,7 @@ package ru.catwarden.advweb.ad;
 
 import com.querydsl.core.BooleanBuilder;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,7 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AdvertisementService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
@@ -167,6 +169,15 @@ public class AdvertisementService {
                 savedAdvertisement.getId()
         );
 
+        log.info(
+                "AUDIT advertisement created: adId={}, authorId={}, categoryId={}, subcategoryId={}, imageCount={}",
+                savedAdvertisement.getId(),
+                author.getId(),
+                category.getId(),
+                subcategory.getId(),
+                advertisementRequest.getImageIds().size()
+        );
+
         return savedAdvertisement.getId();
 
     }
@@ -223,6 +234,15 @@ public class AdvertisementService {
 
         advertisement.setAdModerationStatus(AdModerationStatus.PENDING);
 
+        log.info(
+                "AUDIT advertisement updated: adId={}, authorId={}, fieldsChanged={}, imagesChanged={}, status={}",
+                advertisement.getId(),
+                getAuthorId(advertisement),
+                isFieldsChanged,
+                isImagesChanged,
+                advertisement.getAdModerationStatus()
+        );
+
     }
 
     // DONE add status checking (cannot approve/reject not pending)
@@ -238,6 +258,13 @@ public class AdvertisementService {
         advertisement.setAdModerationStatus(AdModerationStatus.APPROVED);
 
         advertisementRepository.save(advertisement);
+
+        log.info(
+                "AUDIT advertisement approved: adId={}, authorId={}, status={}",
+                advertisement.getId(),
+                getAuthorId(advertisement),
+                advertisement.getAdModerationStatus()
+        );
     }
 
     public void rejectAdvertisement(Long id, String moderationRejectionReason){
@@ -253,6 +280,13 @@ public class AdvertisementService {
         advertisement.setModerationRejectionReason(moderationRejectionReason);
 
         advertisementRepository.save(advertisement);
+
+        log.info(
+                "AUDIT advertisement rejected: adId={}, authorId={}, status={}",
+                advertisement.getId(),
+                getAuthorId(advertisement),
+                advertisement.getAdModerationStatus()
+        );
     }
 
     public void deleteAdvertisement(Long id){
@@ -276,6 +310,12 @@ public class AdvertisementService {
         commentService.deleteCommentsByAdId(advertisement.getId());
 
         imageService.unlinkAllImagesFromAdvertisement(advertisement.getId());
+
+        log.info(
+                "AUDIT advertisement deleted: adId={}, authorId={}",
+                advertisement.getId(),
+                getAuthorId(advertisement)
+        );
     }
 
     // use private mapper to avoid code repeating in get ads methods and not to overload Ad entity with all the images
@@ -312,6 +352,10 @@ public class AdvertisementService {
                             "Current user keycloak id:", String.valueOf(currentKeycloakId)
                     ));
         }
+    }
+
+    private Long getAuthorId(Advertisement advertisement) {
+        return advertisement.getAuthor() != null ? advertisement.getAuthor().getId() : null;
     }
 }
 
