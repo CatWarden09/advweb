@@ -1,6 +1,7 @@
 package ru.catwarden.advweb.adcategory;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.catwarden.advweb.adcategory.dto.AdvertisementCategoryRequest;
 import ru.catwarden.advweb.adcategory.dto.AdvertisementCategoryUpdateRequest;
@@ -16,6 +17,7 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CategoryService {
     private final CategoryRepository categoryRepository;
     private final AdvertisementRepository advertisementRepository;
@@ -48,6 +50,13 @@ public class CategoryService {
     public void createCategory(AdvertisementCategoryRequest advertisementCategoryRequest){
         AdvertisementCategory advertisementCategory = advertisementCategoryMapper.toEntity(advertisementCategoryRequest);
         categoryRepository.save(advertisementCategory);
+
+        log.info(
+                "AUDIT category created: categoryId={}, name={}, parentId={}",
+                advertisementCategory.getId(),
+                advertisementCategory.getName(),
+                getParentId(advertisementCategory)
+        );
     }
 
     // FIXED - forbid to create more than 2 levels of hierarchy
@@ -71,6 +80,12 @@ public class CategoryService {
             advertisementSubcategories.add(advertisementSubcategory);
         }
         categoryRepository.saveAll(advertisementSubcategories);
+
+        log.info(
+                "AUDIT category subcategories created: parentId={}, createdCount={}",
+                parent.getId(),
+                advertisementSubcategories.size()
+        );
     }
 
     public void updateCategory(Long id, AdvertisementCategoryUpdateRequest advertisementCategoryUpdateRequest){
@@ -81,8 +96,16 @@ public class CategoryService {
             throw new OperationNotAllowedException("New category name is the same as the previous one",
                     Map.of("Category id", advertisementCategory.getId(), "Current name:", advertisementCategory.getName(), "Passed name:", advertisementCategoryUpdateRequest.getName()));
         }
+        String previousName = advertisementCategory.getName();
         advertisementCategory.setName(advertisementCategoryUpdateRequest.getName());
         categoryRepository.save(advertisementCategory);
+
+        log.info(
+                "AUDIT category updated: categoryId={}, previousName={}, newName={}",
+                advertisementCategory.getId(),
+                previousName,
+                advertisementCategory.getName()
+        );
 
     }
 
@@ -101,5 +124,16 @@ public class CategoryService {
         }
 
         categoryRepository.delete(advertisementCategory);
+
+        log.info(
+                "AUDIT category deleted: categoryId={}, name={}, parentId={}",
+                advertisementCategory.getId(),
+                advertisementCategory.getName(),
+                getParentId(advertisementCategory)
+        );
+    }
+
+    private Long getParentId(AdvertisementCategory category) {
+        return category.getParent() != null ? category.getParent().getId() : null;
     }
 }
