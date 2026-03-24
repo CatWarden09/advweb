@@ -1,6 +1,7 @@
 package ru.catwarden.advweb.review;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
@@ -80,6 +82,15 @@ public class ReviewService {
         review.setModerationStatus(AdModerationStatus.PENDING);
 
         reviewRepository.save(review);
+
+        log.info(
+                "AUDIT review created: reviewId={}, authorId={}, recipientId={}, status={}, rating={}",
+                review.getId(),
+                getAuthorId(review),
+                getRecipientId(review),
+                review.getModerationStatus(),
+                review.getRating()
+        );
     }
 
     public void updateReview(Long id, ReviewUpdateRequest reviewUpdateRequest) {
@@ -109,6 +120,16 @@ public class ReviewService {
         if (wasApproved) {
             userService.recalculateUserRating(review.getRecipient().getId());
         }
+
+        log.info(
+                "AUDIT review updated: reviewId={}, authorId={}, recipientId={}, status={}, rating={}, wasApproved={}",
+                review.getId(),
+                getAuthorId(review),
+                getRecipientId(review),
+                review.getModerationStatus(),
+                review.getRating(),
+                wasApproved
+        );
     }
 
     // DONE add status checking (cannot approve not pending)
@@ -125,6 +146,14 @@ public class ReviewService {
 
         reviewRepository.save(review);
         userService.recalculateUserRating(review.getRecipient().getId());
+
+        log.info(
+                "AUDIT review approved: reviewId={}, authorId={}, recipientId={}, status={}",
+                review.getId(),
+                getAuthorId(review),
+                getRecipientId(review),
+                review.getModerationStatus()
+        );
     }
 
     public void rejectReview(Long id, String moderationRejectionReason) {
@@ -140,6 +169,14 @@ public class ReviewService {
         review.setModerationRejectionReason(moderationRejectionReason);
 
         reviewRepository.save(review);
+
+        log.info(
+                "AUDIT review rejected: reviewId={}, authorId={}, recipientId={}, status={}",
+                review.getId(),
+                getAuthorId(review),
+                getRecipientId(review),
+                review.getModerationStatus()
+        );
     }
 
     public void deleteReview(Long id) {
@@ -170,6 +207,14 @@ public class ReviewService {
         if (wasApproved) {
             userService.recalculateUserRating(review.getRecipient().getId());
         }
+
+        log.info(
+                "AUDIT review deleted: reviewId={}, authorId={}, recipientId={}, wasApproved={}",
+                review.getId(),
+                getAuthorId(review),
+                getRecipientId(review),
+                wasApproved
+        );
     }
 
     private void validateCurrentUserOrAdmin(String currentKeycloakId, Long userId) {
@@ -197,6 +242,14 @@ public class ReviewService {
         response.setAuthorInfo(userResponseAssembler.toShortUserInfoResponse(review.getAuthor()));
 
         return response;
+    }
+
+    private Long getAuthorId(Review review) {
+        return review.getAuthor() != null ? review.getAuthor().getId() : null;
+    }
+
+    private Long getRecipientId(Review review) {
+        return review.getRecipient() != null ? review.getRecipient().getId() : null;
     }
 }
 
