@@ -1,6 +1,7 @@
 package ru.catwarden.advweb.comment;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CommentService {
     private final CommentMapper commentMapper;
     private final UserResponseAssembler userResponseAssembler;
@@ -64,6 +66,14 @@ public class CommentService {
         comment.setAd(advertisement);
 
         commentRepository.save(comment);
+
+        log.info(
+                "AUDIT comment created: commentId={}, adId={}, authorId={}, isModerated={}",
+                comment.getId(),
+                getAdvertisementId(comment),
+                getAuthorId(comment),
+                comment.getIsModerated()
+        );
     }
 
     public void updateComment(Long id, CommentUpdateRequest commentUpdateRequest){
@@ -86,6 +96,14 @@ public class CommentService {
         comment.setIsModerated(false);
 
         commentRepository.save(comment);
+
+        log.info(
+                "AUDIT comment updated: commentId={}, adId={}, authorId={}, isModerated={}",
+                comment.getId(),
+                getAdvertisementId(comment),
+                getAuthorId(comment),
+                comment.getIsModerated()
+        );
     }
 
     public void updateCommentOnModeration(Long id, CommentRequest commentRequest){
@@ -96,6 +114,14 @@ public class CommentService {
         comment.setIsModerated(true);
 
         commentRepository.save(comment);
+
+        log.info(
+                "AUDIT comment moderation-updated: commentId={}, adId={}, authorId={}, isModerated={}",
+                comment.getId(),
+                getAdvertisementId(comment),
+                getAuthorId(comment),
+                comment.getIsModerated()
+        );
     }
 
     public void deleteComment(Long id){
@@ -119,6 +145,13 @@ public class CommentService {
         }
 
         commentRepository.deleteById(id);
+
+        log.info(
+                "AUDIT comment deleted: commentId={}, adId={}, authorId={}",
+                comment.getId(),
+                getAdvertisementId(comment),
+                getAuthorId(comment)
+        );
     }
 
     public void deleteCommentsByAdId(Long adId){
@@ -129,5 +162,12 @@ public class CommentService {
         commentRepository.deleteAllByAdId(adId);
     }
 
+    private Long getAuthorId(Comment comment) {
+        return comment.getAuthor() != null ? comment.getAuthor().getId() : null;
+    }
+
+    private Long getAdvertisementId(Comment comment) {
+        return comment.getAd() != null ? comment.getAd().getId() : null;
+    }
 
 }

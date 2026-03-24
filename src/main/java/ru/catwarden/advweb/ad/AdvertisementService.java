@@ -354,6 +354,7 @@ public class AdvertisementService {
         }
     }
 
+    // protection from NLP in case author is null in order not to break logging (can't call getId() on null if author == null)
     private Long getAuthorId(Advertisement advertisement) {
         return advertisement.getAuthor() != null ? advertisement.getAuthor().getId() : null;
     }
