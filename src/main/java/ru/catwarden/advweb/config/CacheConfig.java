@@ -28,6 +28,7 @@ public class CacheConfig {
                 .cacheDefaults(config)
                 .withCacheConfiguration("categories", config.entryTtl(Duration.ofDays(1)))
                 .withCacheConfiguration("advertisements", config.entryTtl(Duration.ofMinutes(30)))
+                .withCacheConfiguration("users", config.entryTtl(Duration.ofHours(1)))
                 .build();
     }
 }
