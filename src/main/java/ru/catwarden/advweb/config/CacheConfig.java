@@ -6,9 +6,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.GenericJacksonJsonRedisSerializer;
+import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import tools.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
+import tools.jackson.databind.jsontype.PolymorphicTypeValidator;
 
 import java.time.Duration;
 
@@ -19,10 +21,18 @@ public class CacheConfig {
     @Bean
     public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory) {
 
+        PolymorphicTypeValidator cacheTypeValidator = BasicPolymorphicTypeValidator.builder()
+                .allowIfSubType("ru.catwarden.advweb.")
+                .allowIfSubType("org.springframework.data.domain.")
+                .allowIfSubType("java.lang.")
+                .allowIfSubType("java.time.")
+                .allowIfSubType("java.util.")
+                .build();
+
         GenericJacksonJsonRedisSerializer genericSerializer =
                 GenericJacksonJsonRedisSerializer.builder()
                         .enableSpringCacheNullValueSupport()
-                        .enableUnsafeDefaultTyping()
+                        .enableDefaultTyping(cacheTypeValidator)
                         .build();
 
         RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
