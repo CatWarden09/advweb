@@ -89,6 +89,24 @@ public class UserController {
         return reviewService.getUserReviews(id, pageable, AdModerationStatus.APPROVED);
     }
 
+    @GetMapping("/{id}/favorites")
+    public Page<AdvertisementResponse> getUserFavoriteAdvertisements(@PathVariable Long id,
+                                                                     @RequestParam(defaultValue = "0") int page,
+                                                                     @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return advertisementService.getUserFavoriteAdvertisements(id, pageable);
+    }
+
+    @PutMapping("/{id}/favorites/{advertisementId}")
+    public void addAdvertisementToFavorites(@PathVariable Long id, @PathVariable Long advertisementId) {
+        advertisementService.addAdvertisementToFavorites(id, advertisementId);
+    }
+
+    @DeleteMapping("/{id}/favorites/{advertisementId}")
+    public void removeAdvertisementFromFavorites(@PathVariable Long id, @PathVariable Long advertisementId) {
+        advertisementService.removeAdvertisementFromFavorites(id, advertisementId);
+    }
+
     @PutMapping("/{id}/avatar")
     public void setUserAvatar(@PathVariable Long id, @RequestParam Long avatarId) {
         userService.setUserAvatar(id, avatarId);

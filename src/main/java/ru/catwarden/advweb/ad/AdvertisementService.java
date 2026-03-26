@@ -22,6 +22,7 @@ import ru.catwarden.advweb.exception.EntityNotFoundException;
 import ru.catwarden.advweb.exception.InvalidRelationException;
 import ru.catwarden.advweb.exception.InvalidStateException;
 import ru.catwarden.advweb.exception.LimitExceededException;
+import ru.catwarden.advweb.exception.OperationNotAllowedException;
 import ru.catwarden.advweb.image.ImageService;
 import ru.catwarden.advweb.security.SecurityUtils;
 import ru.catwarden.advweb.user.User;
@@ -29,6 +30,7 @@ import ru.catwarden.advweb.user.UserRepository;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 
 @Service
@@ -126,6 +128,61 @@ public class AdvertisementService {
         validateCurrentUserOrAdmin(userId);
         return advertisementRepository.findAllByAuthorIdAndAdModerationStatus(userId, AdModerationStatus.REJECTED, pageable)
                 .map(this::mapWithPreviewImage);
+    }
+
+
+    public Page<AdvertisementResponse> getUserFavoriteAdvertisements(Long userId, Pageable pageable){
+        validateCurrentUserOrAdmin(userId);
+        return advertisementRepository.findFavoritesByUserIdAndAdModerationStatus(userId, AdModerationStatus.APPROVED, pageable)
+                .map(this::mapWithPreviewImage);
+    }
+
+    @Transactional
+    public void addAdvertisementToFavorites(Long userId, Long advertisementId) {
+        validateCurrentUserOrAdmin(userId);
+
+        Advertisement advertisement = advertisementRepository.findById(advertisementId)
+                .orElseThrow(() -> new EntityNotFoundException(Advertisement.class, advertisementId));
+
+        if (advertisement.getAdModerationStatus() != AdModerationStatus.APPROVED) {
+            throw new OperationNotAllowedException("Only approved advertisements can be added to favorites",
+                    Map.of(
+                            "Advertisement id:", advertisementId,
+                            "Current status:", advertisement.getAdModerationStatus()
+                    ));
+        }
+
+        User currentUser = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException(User.class, userId));
+
+        boolean alreadyFavorite = currentUser.getFavoriteAdvertisements()
+                .stream()
+                .anyMatch(favoriteAd -> Objects.equals(favoriteAd.getId(), advertisementId));
+
+        if (alreadyFavorite) {
+            return;
+        }
+
+        currentUser.getFavoriteAdvertisements().add(advertisement);
+
+        log.info("AUDIT advertisement added to favorites: adId={}, userId={}", advertisementId, currentUser.getId());
+    }
+
+    @Transactional
+    public void removeAdvertisementFromFavorites(Long userId, Long advertisementId) {
+        validateCurrentUserOrAdmin(userId);
+
+        User currentUser = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException(User.class, userId));
+
+        boolean removed = currentUser.getFavoriteAdvertisements()
+                .removeIf(favoriteAd -> Objects.equals(favoriteAd.getId(), advertisementId));
+
+        if (!removed) {
+            return;
+        }
+
+        log.info("AUDIT advertisement removed from favorites: adId={}, userId={}", advertisementId, currentUser.getId());
     }
 
     // need to use @Transactional because there are multiple DB operations in single method
