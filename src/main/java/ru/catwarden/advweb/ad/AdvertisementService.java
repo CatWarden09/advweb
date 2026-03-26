@@ -90,6 +90,9 @@ public class AdvertisementService {
                 .map(this::mapWithImages);
     }
 
+    @Cacheable(value = "advertisements-list", 
+            key = "'approved-p-' + #pageable.pageNumber + '-s-' + #pageable.pageSize", 
+            condition = "#pageable.pageNumber == 0")
     public Page<AdvertisementResponse> getAllApprovedAdvertisements(Pageable pageable){
         return advertisementRepository.findAllByAdModerationStatus(AdModerationStatus.APPROVED, pageable)
                 .map(this::mapWithPreviewImage);
@@ -187,7 +190,7 @@ public class AdvertisementService {
     }
 
     @Transactional
-    @CacheEvict(value = "advertisements", key = "#id")
+    @CacheEvict(value = {"advertisements", "advertisements-list"}, allEntries = true)
     public void updateAdvertisement(Long id, AdvertisementUpdateRequest advertisementUpdateRequest){
         Advertisement advertisement = advertisementRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(Advertisement.class, id));
@@ -251,7 +254,7 @@ public class AdvertisementService {
     }
 
     // DONE add status checking (cannot approve/reject not pending)
-    @CacheEvict(value = "advertisements", key = "#id")
+    @CacheEvict(value = {"advertisements", "advertisements-list"}, allEntries = true)
     public void approveAdvertisement(Long id){
         Advertisement advertisement = advertisementRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(Advertisement.class, id));
@@ -273,7 +276,7 @@ public class AdvertisementService {
         );
     }
 
-    @CacheEvict(value = "advertisements", key = "#id")
+    @CacheEvict(value = {"advertisements", "advertisements-list"}, allEntries = true)
     public void rejectAdvertisement(Long id, String moderationRejectionReason){
         Advertisement advertisement = advertisementRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(Advertisement.class, id));
@@ -296,7 +299,7 @@ public class AdvertisementService {
         );
     }
 
-    @CacheEvict(value = "advertisements", key = "#id")
+    @CacheEvict(value = {"advertisements", "advertisements-list"}, allEntries = true)
     public void deleteAdvertisement(Long id){
         Advertisement advertisement = advertisementRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(Advertisement.class, id));
