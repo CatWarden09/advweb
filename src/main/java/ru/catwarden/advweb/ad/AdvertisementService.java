@@ -3,6 +3,8 @@ package ru.catwarden.advweb.ad;
 import com.querydsl.core.BooleanBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -49,6 +51,7 @@ public class AdvertisementService {
     // DONE figure out mappers to avoid code repeating
     // DONE moderation status validation
     // TODO add entitynotfoundexception
+    @Cacheable(value = "advertisements", key = "#id")
     public AdvertisementResponse getAdvertisement(Long id){
         Advertisement advertisement = advertisementRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(Advertisement.class, id));
@@ -87,6 +90,9 @@ public class AdvertisementService {
                 .map(this::mapWithImages);
     }
 
+    @Cacheable(value = "advertisements-list", 
+            key = "'approved-p-' + #pageable.pageNumber + '-s-' + #pageable.pageSize", 
+            condition = "#pageable.pageNumber == 0")
     public Page<AdvertisementResponse> getAllApprovedAdvertisements(Pageable pageable){
         return advertisementRepository.findAllByAdModerationStatus(AdModerationStatus.APPROVED, pageable)
                 .map(this::mapWithPreviewImage);
@@ -184,6 +190,7 @@ public class AdvertisementService {
     }
 
     @Transactional
+    @CacheEvict(value = {"advertisements", "advertisements-list"}, allEntries = true)
     public void updateAdvertisement(Long id, AdvertisementUpdateRequest advertisementUpdateRequest){
         Advertisement advertisement = advertisementRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(Advertisement.class, id));
@@ -247,6 +254,7 @@ public class AdvertisementService {
     }
 
     // DONE add status checking (cannot approve/reject not pending)
+    @CacheEvict(value = {"advertisements", "advertisements-list"}, allEntries = true)
     public void approveAdvertisement(Long id){
         Advertisement advertisement = advertisementRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(Advertisement.class, id));
@@ -268,6 +276,7 @@ public class AdvertisementService {
         );
     }
 
+    @CacheEvict(value = {"advertisements", "advertisements-list"}, allEntries = true)
     public void rejectAdvertisement(Long id, String moderationRejectionReason){
         Advertisement advertisement = advertisementRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(Advertisement.class, id));
@@ -290,6 +299,7 @@ public class AdvertisementService {
         );
     }
 
+    @CacheEvict(value = {"advertisements", "advertisements-list"}, allEntries = true)
     public void deleteAdvertisement(Long id){
         Advertisement advertisement = advertisementRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(Advertisement.class, id));
