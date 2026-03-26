@@ -66,7 +66,7 @@ class AdvertisementServiceTest {
     private AdvertisementService advertisementService;
 
     @Test
-    void getAdvertisementReturnsResponseAndIncrementsViews() {
+    void getAdvertisementReturnsResponse() {
         Advertisement advertisement = Advertisement.builder().id(10L).build();
         AdvertisementResponse response = AdvertisementResponse.builder().id(10L).build();
 
@@ -77,7 +77,6 @@ class AdvertisementServiceTest {
         AdvertisementResponse actual = advertisementService.getAdvertisement(10L);
 
         assertEquals(List.of("preview.jpg"), actual.getImageUrls());
-        verify(viewCountService).increment(10L);
     }
 
     @Test

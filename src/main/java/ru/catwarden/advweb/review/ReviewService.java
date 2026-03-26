@@ -2,6 +2,8 @@ package ru.catwarden.advweb.review;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -34,6 +36,11 @@ public class ReviewService {
     private final ReviewMapper reviewMapper;
     private final UserResponseAssembler userResponseAssembler;
 
+    @Cacheable(
+            value = "reviews-approved-list",
+            key = "'approved-p-' + #pageable.pageNumber + '-s-' + #pageable.pageSize + '-sort-' + #pageable.sort",
+            condition = "#pageable.pageNumber == 0"
+    )
     public Page<ReviewResponse> getAllApprovedReviews(Pageable pageable) {
         return reviewRepository.findByModerationStatus(AdModerationStatus.APPROVED, pageable)
                 .map(this::mapWithShortUserInfo);
@@ -49,6 +56,11 @@ public class ReviewService {
                 .map(this::mapWithShortUserInfo);
     }
 
+    @Cacheable(
+            value = "reviews-approved-user-list",
+            key = "'recipient-' + #userId + '-p-' + #pageable.pageNumber + '-s-' + #pageable.pageSize + '-sort-' + #pageable.sort",
+            condition = "#pageable.pageNumber == 0"
+    )
     public Page<ReviewResponse> getApprovedReviewsAboutUser(Long userId, Pageable pageable) {
         return reviewRepository.findByRecipientIdAndModerationStatus(userId, AdModerationStatus.APPROVED, pageable)
                 .map(this::mapWithShortUserInfo);
@@ -62,6 +74,7 @@ public class ReviewService {
                 .map(this::mapWithShortUserInfo);
     }
 
+    @CacheEvict(value = {"reviews-approved-list", "reviews-approved-user-list"}, allEntries = true)
     public void createReview(ReviewRequest reviewRequest) {
         String currentKeycloakId = SecurityUtils.getCurrentUserKeycloakId();
         User currentUser = userRepository.findByKeycloakId(currentKeycloakId)
@@ -93,6 +106,7 @@ public class ReviewService {
         );
     }
 
+    @CacheEvict(value = {"reviews-approved-list", "reviews-approved-user-list"}, allEntries = true)
     public void updateReview(Long id, ReviewUpdateRequest reviewUpdateRequest) {
         Review review = reviewRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(Review.class, id));
@@ -134,6 +148,7 @@ public class ReviewService {
     }
 
     // DONE add status checking (cannot approve not pending)
+    @CacheEvict(value = {"reviews-approved-list", "reviews-approved-user-list"}, allEntries = true)
     public void approveReview(Long id) {
         Review review = reviewRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(Review.class, id));
@@ -157,6 +172,7 @@ public class ReviewService {
         );
     }
 
+    @CacheEvict(value = {"reviews-approved-list", "reviews-approved-user-list"}, allEntries = true)
     public void rejectReview(Long id, String moderationRejectionReason) {
         Review review = reviewRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(Review.class, id));
@@ -180,6 +196,7 @@ public class ReviewService {
         );
     }
 
+    @CacheEvict(value = {"reviews-approved-list", "reviews-approved-user-list"}, allEntries = true)
     public void deleteReview(Long id) {
         if(!reviewRepository.existsById(id)){
             throw new EntityNotFoundException(Review.class, id);

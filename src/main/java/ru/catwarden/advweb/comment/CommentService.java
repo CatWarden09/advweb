@@ -2,6 +2,8 @@ package ru.catwarden.advweb.comment;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -41,6 +43,11 @@ public class CommentService {
                 });
     }
 
+    @Cacheable(
+            value = "comments-list",
+            key = "'ad-' + #advertisementId + '-p-' + #pageable.pageNumber + '-s-' + #pageable.pageSize",
+            condition = "#pageable.pageNumber == 0"
+    )
     public Page<CommentResponse> getAdvertisementModeratedComments(Long advertisementId, Pageable pageable){
         return commentRepository.findAllByAdIdAndIsModeratedTrue(advertisementId, pageable)
                 .map(comment -> {
@@ -53,6 +60,7 @@ public class CommentService {
                 });
     }
 
+    @CacheEvict(value = "comments-list", allEntries = true)
     public void createComment(CommentRequest commentRequest){
         String currentKeycloakId = SecurityUtils.getCurrentUserKeycloakId();
         User currentUser = userRepository.findByKeycloakId(currentKeycloakId)
@@ -76,6 +84,7 @@ public class CommentService {
         );
     }
 
+    @CacheEvict(value = "comments-list", allEntries = true)
     public void updateComment(Long id, CommentUpdateRequest commentUpdateRequest){
         Comment comment = commentRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(Comment.class, id));
@@ -106,6 +115,7 @@ public class CommentService {
         );
     }
 
+    @CacheEvict(value = "comments-list", allEntries = true)
     public void updateCommentOnModeration(Long id, CommentRequest commentRequest){
         Comment comment = commentRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException(Comment.class, id));
@@ -124,6 +134,7 @@ public class CommentService {
         );
     }
 
+    @CacheEvict(value = "comments-list", allEntries = true)
     public void deleteComment(Long id){
         if(!commentRepository.existsById(id)){
             throw new EntityNotFoundException(Comment.class, id);
@@ -154,6 +165,7 @@ public class CommentService {
         );
     }
 
+    @CacheEvict(value = "comments-list", allEntries = true)
     public void deleteCommentsByAdId(Long adId){
         if(!advertisementRepository.existsById(adId)){
             throw new EntityNotFoundException(Advertisement.class, adId);

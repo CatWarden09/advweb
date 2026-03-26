@@ -26,6 +26,18 @@ public class CacheConfig {
                 Caffeine.newBuilder().expireAfterWrite(Duration.ofMinutes(10)).maximumSize(1_000).build()
         );
         cacheManager.registerCustomCache(
+                "comments-list",
+                Caffeine.newBuilder().expireAfterWrite(Duration.ofMinutes(5)).maximumSize(3_000).build()
+        );
+        cacheManager.registerCustomCache(
+                "reviews-approved-list",
+                Caffeine.newBuilder().expireAfterWrite(Duration.ofMinutes(10)).maximumSize(1_000).build()
+        );
+        cacheManager.registerCustomCache(
+                "reviews-approved-user-list",
+                Caffeine.newBuilder().expireAfterWrite(Duration.ofMinutes(10)).maximumSize(3_000).build()
+        );
+        cacheManager.registerCustomCache(
                 "users",
                 Caffeine.newBuilder().expireAfterWrite(Duration.ofHours(1)).maximumSize(10_000).build()
         );

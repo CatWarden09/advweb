@@ -41,6 +41,7 @@ public class CategoryService {
                 .toList();
     }
 
+    @Cacheable(value = "categories", key = "'sub-' + #id")
     public List<AdvertisementCategoryResponse> getSubcategories(Long id){
         AdvertisementCategory parent = categoryRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(AdvertisementCategory.class, id));
