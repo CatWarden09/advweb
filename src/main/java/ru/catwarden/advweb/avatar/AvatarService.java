@@ -1,6 +1,7 @@
 package ru.catwarden.advweb.avatar;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +26,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AvatarService {
     private final AvatarRepository avatarRepository;
     private final AvatarMapper avatarMapper;
@@ -46,6 +48,15 @@ public class AvatarService {
         avatar.setLinkedToUser(false);
 
         avatarRepository.save(avatar);
+
+        log.info(
+                "AUDIT new avatar uploaded: url={}, name={}, uploaderKeycloakId={}",
+                avatar.getUrl(),
+                uploadedFile.getFilename(),
+                currentKeycloakId
+        );
+
+
 
         return avatarMapper.toDto(avatar);
     }
@@ -74,10 +85,13 @@ public class AvatarService {
                     currentAvatar.setLinkedToUser(false);
                     currentAvatar.setUserId(null);
                     avatarRepository.save(currentAvatar);
+                    log.info("AUDIT current avatar unlinked: avatarId={}, userId={}", avatarId, userId);
                 });
 
         avatar.setLinkedToUser(true);
         avatar.setUserId(userId);
+
+        log.info("AUDIT new avatar linked: avatarId={}, userId={}", avatarId, userId);
 
         avatarRepository.save(avatar);
     }
@@ -90,6 +104,8 @@ public class AvatarService {
 
         avatar.setLinkedToUser(false);
         avatar.setUserId(null);
+
+        log.info("AUDIT avatar unlinked: avatarId={}, userId={}", avatar.getId(), userId);
 
         avatarRepository.save(avatar);
     }
@@ -123,18 +139,18 @@ public class AvatarService {
         }
     }
 
-    @Scheduled(cron = "0 0 5 * * *", zone = "Europe/Moscow")
-    public void deleteUnusedAvatars(){
-        List<Avatar> avatars = avatarRepository.findAllByLinkedToUserFalse();
+@Scheduled(cron = "0 0 5 * * *", zone = "Europe/Moscow")
+public void deleteUnusedAvatars(){
+    List<Avatar> avatars = avatarRepository.findAllByLinkedToUserFalse();
 
-        try{
-            for(Avatar avatar : avatars){
-                Files.deleteIfExists(Paths.get(avatar.getPath()));
-            }
-        } catch (IOException e){
-            throw new FileStorageException("Failed to delete unused images");
+    try{
+        for(Avatar avatar : avatars){
+            Files.deleteIfExists(Paths.get(avatar.getPath()));
         }
-
-        avatarRepository.deleteAll(avatars);
+    } catch (IOException e){
+        throw new FileStorageException("Failed to delete unused images");
     }
+
+    avatarRepository.deleteAll(avatars);
+}
 }

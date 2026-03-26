@@ -26,7 +26,7 @@ public class ViewCountService {
         redisTemplate.opsForValue().increment(VIEW_COUNT_PREFIX + idStr);
     }
 
-    @Scheduled(fixedDelay = 60000) // Run every minute
+    @Scheduled(fixedDelay = 60000)
     public void syncViewsToDatabase() {
         // Pop up to 1000 IDs to update in one batch
         List<String> idsToUpdate = redisTemplate.opsForSet().pop(UPDATE_SET_KEY, 1000);
