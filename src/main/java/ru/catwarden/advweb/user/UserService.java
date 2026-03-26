@@ -1,6 +1,7 @@
 package ru.catwarden.advweb.user;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,8 +19,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+import static ru.catwarden.advweb.ad.QAdvertisement.advertisement;
+
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserService {
     private final UserRepository userRepository;
     private final ReviewRepository reviewRepository;
@@ -36,11 +40,27 @@ public class UserService {
 
     @Transactional
     public UserResponse updateUser(Long id, UserUpdateRequest userUpdateRequest) {
+        boolean isFieldsChanged = false;
+
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(User.class, id));
 
+
         String currentKeycloakId = SecurityUtils.getCurrentUserKeycloakId();
         validateCurrentUserCanUpdate(user, currentKeycloakId);
+
+        // protection from NLP
+        if (!Objects.equals(user.getFirstName(), userUpdateRequest.getFirstName())
+                || !Objects.equals(user.getLastName(), userUpdateRequest.getLastName())
+                || !Objects.equals(user.getEmail(), userUpdateRequest.getEmail())
+                || !Objects.equals(user.getPhone(), userUpdateRequest.getPhone())) {
+
+            isFieldsChanged = true;
+        }
+
+        if (!isFieldsChanged){
+            return userResponseAssembler.toUserResponse(user);
+        }
 
         userRepository.findByEmail(userUpdateRequest.getEmail())
                 .filter(existingUser -> !existingUser.getId().equals(id))
@@ -61,6 +81,8 @@ public class UserService {
         user.setPhone(userUpdateRequest.getPhone());
         user.setEmail(userUpdateRequest.getEmail());
 
+        log.info("AUDIT User updated: userId={}", id);
+
         return userResponseAssembler.toUserResponse(user);
     }
 
@@ -74,6 +96,8 @@ public class UserService {
 
         avatarService.setAvatarToUser(avatarId, userId);
         user.setAvatarId(avatarId);
+
+        log.info("AUDIT User avatar set: userId={}, avatarId={}", userId, avatarId);
     }
 
     @Transactional
@@ -87,6 +111,8 @@ public class UserService {
         avatarService.unlinkUserAvatar(userId);
 
         user.setAvatarId(null);
+
+        log.info("AUDIT User avatar unlinked: userId={}", userId);
     }
 
     // this method is used to sync the keycloak user with the local user (for example when registering a new user, we get the jwt token and create a new local user with the given keycloakId)
@@ -133,6 +159,8 @@ public class UserService {
         Long ratingCount = aggregate[1] != null ? ((Number) aggregate[1]).longValue() : 0L;
 
         userRepository.updateUserRatingStats(userId, rating, ratingCount);
+
+        log.info("AUDIT User rating recalculated: userId={}, rating={}, ratingCount={}", userId, rating, ratingCount);
     }
 
     private void validateCurrentUserCanUpdate(User user, String currentKeycloakId) {

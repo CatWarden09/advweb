@@ -1,6 +1,7 @@
 package ru.catwarden.advweb.image;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,15 +19,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ImageService {
     private final ImageRepository imageRepository;
     private final ImageMapper imageMapper;
@@ -61,6 +59,8 @@ public class ImageService {
                 .map(imageMapper::toDto)
                 .toList();
 
+        log.info("AUDIT images uploaded: userId={}, images={}", currentKeycloakId, imageDtoList.stream().map(ImageDto::getId).toList());
+
         return imageDtoList;
     }
 
@@ -92,6 +92,8 @@ public class ImageService {
             image.setLinkedToAd(true);
         }
         imageRepository.saveAll(images);
+
+        log.info("AUDIT images set to advertisement: advertisementId={}, images={}", advertisementId, imageIds);
     }
 
     public boolean syncImagesInAdvertisement(Long advertisementId, List<Long> requestImageIds){
@@ -176,6 +178,8 @@ public class ImageService {
             image.setLinkedToAd(false);
         }
         imageRepository.saveAll(images);
+
+        log.info("AUDIT all images unlinked from advertisement: advertisementId={}", advertisementId);
     }
 
     @Scheduled(cron = "0 0 4 * * *", zone = "Europe/Moscow")
