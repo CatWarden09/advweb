@@ -2,6 +2,8 @@ package ru.catwarden.advweb.adcategory;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import ru.catwarden.advweb.adcategory.dto.AdvertisementCategoryRequest;
 import ru.catwarden.advweb.adcategory.dto.AdvertisementCategoryUpdateRequest;
@@ -23,6 +25,7 @@ public class CategoryService {
     private final AdvertisementRepository advertisementRepository;
     private final AdvertisementCategoryMapper advertisementCategoryMapper;
 
+    @Cacheable(value = "categories", key = "#id")
     public AdvertisementCategoryResponse getCategory(Long id){
         AdvertisementCategory advertisementCategory = categoryRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(AdvertisementCategory.class, id));
@@ -30,6 +33,7 @@ public class CategoryService {
         return advertisementCategoryMapper.toResponse(advertisementCategory);
     }
 
+    @Cacheable(value = "categories", key = "'all'")
     public List<AdvertisementCategoryResponse> getAllCategories(){
         return categoryRepository.findByParentIsNull()
                 .stream()
@@ -37,6 +41,7 @@ public class CategoryService {
                 .toList();
     }
 
+    @Cacheable(value = "categories", key = "'sub-' + #id")
     public List<AdvertisementCategoryResponse> getSubcategories(Long id){
         AdvertisementCategory parent = categoryRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(AdvertisementCategory.class, id));
@@ -47,6 +52,7 @@ public class CategoryService {
                 .toList();
     }
 
+    @CacheEvict(value = "categories", allEntries = true)
     public void createCategory(AdvertisementCategoryRequest advertisementCategoryRequest){
         AdvertisementCategory advertisementCategory = advertisementCategoryMapper.toEntity(advertisementCategoryRequest);
         categoryRepository.save(advertisementCategory);
@@ -59,9 +65,7 @@ public class CategoryService {
         );
     }
 
-    // FIXED - forbid to create more than 2 levels of hierarchy
-    //  if the front passes the subcategory id, then we create a deeper hierarchy than 2 levels intended
-    //  need to figure out a solution for deleting such deep tree (like recursively checking the subcategories and forbidding to delete those)
+    @CacheEvict(value = "categories", allEntries = true)
     public void createSubcategories(Long id, List<AdvertisementCategoryRequest> subcategoryList){
         AdvertisementCategory parent = categoryRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(AdvertisementCategory.class, id));
@@ -88,6 +92,7 @@ public class CategoryService {
         );
     }
 
+    @CacheEvict(value = "categories", allEntries = true)
     public void updateCategory(Long id, AdvertisementCategoryUpdateRequest advertisementCategoryUpdateRequest){
         AdvertisementCategory advertisementCategory = categoryRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(AdvertisementCategory.class, id));
@@ -109,6 +114,7 @@ public class CategoryService {
 
     }
 
+    @CacheEvict(value = "categories", allEntries = true)
     public void deleteCategory(Long id){
         AdvertisementCategory advertisementCategory = categoryRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(AdvertisementCategory.class, id));
