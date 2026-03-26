@@ -2,9 +2,9 @@ name: Java CI with Maven and server deployment
 
 on:
   push:
-    branches: [ "master", "dev", "feature/logging-level-files" ]
+    branches: [ "master", "dev", "feature/caching" ]
   pull_request:
-    branches: [ "master", "dev", "feature/logging-level-files" ]
+    branches: [ "master", "dev", "feature/caching" ]
 
 jobs:
   build:
@@ -34,7 +34,7 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         script: |
           cd /root/advweb
-          git checkout feature/logging-level-files
+          git checkout feature/caching
           git pull
           # docker compose down
           # docker compose up --build -d
