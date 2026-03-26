@@ -96,6 +96,7 @@ public class ReviewService {
     public void updateReview(Long id, ReviewUpdateRequest reviewUpdateRequest) {
         Review review = reviewRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(Review.class, id));
+
         boolean wasApproved = review.getModerationStatus() == AdModerationStatus.APPROVED;
 
         String currentKeycloakId = SecurityUtils.getCurrentUserKeycloakId();

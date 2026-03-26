@@ -80,8 +80,16 @@ class UserServiceTest {
 
     @Test
     void updateUserThrowsWhenEmailAlreadyUsed() {
-        User user = User.builder().id(1L).keycloakId("owner-id").email("old@mail.com").build();
+        User user = User.builder()
+                .id(1L)
+                .keycloakId("owner-id")
+                .firstName("OldFirstName")
+                .lastName("OldLastName")
+                .email("old@mail.com")
+                .phone("+7000")
+                .build();
         User otherUser = User.builder().id(2L).email("taken@mail.com").build();
+
         UserUpdateRequest request = validUpdateRequest();
         request.setEmail("taken@mail.com");
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
@@ -102,7 +110,14 @@ class UserServiceTest {
 
     @Test
     void updateUserThrowsWhenPhoneAlreadyUsed() {
-        User user = User.builder().id(1L).keycloakId("owner-id").phone("+7000").build();
+        User user = User.builder()
+                .id(1L)
+                .keycloakId("owner-id")
+                .firstName("OldFirstName")
+                .lastName("OldLastName")
+                .email("old@mail.com")
+                .phone("+7000")
+                .build();
         User otherUser = User.builder().id(2L).phone("+7111").build();
         UserUpdateRequest request = validUpdateRequest();
         request.setPhone("+7111");
@@ -125,7 +140,14 @@ class UserServiceTest {
 
     @Test
     void updateUserUpdatesFieldsAndReturnsResponse() {
-        User user = User.builder().id(1L).keycloakId("owner-id").build();
+        User user = User.builder()
+                .id(1L)
+                .keycloakId("owner-id")
+                .firstName("OldFirstName")
+                .lastName("OldLastName")
+                .email("old@mail.com")
+                .phone("+7000")
+                .build();
         UserUpdateRequest request = validUpdateRequest();
         UserResponse response = UserResponse.builder().id(1L).firstName("Ivan").build();
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));

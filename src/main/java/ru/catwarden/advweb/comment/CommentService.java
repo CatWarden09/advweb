@@ -116,7 +116,7 @@ public class CommentService {
         commentRepository.save(comment);
 
         log.info(
-                "AUDIT comment moderation-updated: commentId={}, adId={}, authorId={}, isModerated={}",
+                "AUDIT comment on moderation updated: commentId={}, adId={}, authorId={}, isModerated={}",
                 comment.getId(),
                 getAdvertisementId(comment),
                 getAuthorId(comment),
@@ -160,6 +160,8 @@ public class CommentService {
         }
 
         commentRepository.deleteAllByAdId(adId);
+
+        log.info("AUDIT all comments deleted: adId={}", adId);
     }
 
     private Long getAuthorId(Comment comment) {
