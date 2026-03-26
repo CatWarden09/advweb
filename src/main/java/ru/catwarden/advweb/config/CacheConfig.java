@@ -9,6 +9,8 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.serializer.GenericJacksonJsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import tools.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
+import tools.jackson.databind.jsontype.PolymorphicTypeValidator;
 
 import java.time.Duration;
 
@@ -18,6 +20,18 @@ public class CacheConfig {
 
     @Bean
     public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory) {
+        PolymorphicTypeValidator typeValidator = BasicPolymorphicTypeValidator.builder()
+                .allowIfSubType("ru.catwarden.advweb.")
+                .allowIfSubType("org.springframework.data.domain.")
+                .allowIfSubType("java.lang.")
+                .allowIfSubType("java.time.")
+                .allowIfSubType("java.util.")
+                .build();
+
+        GenericJacksonJsonRedisSerializer valueSerializer = GenericJacksonJsonRedisSerializer.builder()
+                .enableDefaultTyping(typeValidator)
+                .build();
+
         RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
                 .entryTtl(Duration.ofHours(1))
                 .disableCachingNullValues()
@@ -25,17 +39,15 @@ public class CacheConfig {
                         RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer())
                 )
                 .serializeValuesWith(
-                        RedisSerializationContext.SerializationPair.fromSerializer(
-                                GenericJacksonJsonRedisSerializer.builder().build()
-                        )
+                        RedisSerializationContext.SerializationPair.fromSerializer(valueSerializer)
                 );
 
         return RedisCacheManager.builder(connectionFactory)
                 .cacheDefaults(config)
-                .withCacheConfiguration("categories", config.entryTtl(Duration.ofDays(1)))
-                .withCacheConfiguration("advertisements", config.entryTtl(Duration.ofMinutes(30)))
-                .withCacheConfiguration("users", config.entryTtl(Duration.ofHours(1)))
-                .withCacheConfiguration("advertisements-list", config.entryTtl(Duration.ofMinutes(10)))
+                .withCacheConfiguration("categories-v2", config.entryTtl(Duration.ofDays(1)))
+                .withCacheConfiguration("advertisements-v2", config.entryTtl(Duration.ofMinutes(30)))
+                .withCacheConfiguration("users-v2", config.entryTtl(Duration.ofHours(1)))
+                .withCacheConfiguration("advertisements-list-v2", config.entryTtl(Duration.ofMinutes(10)))
                 .build();
     }
 }

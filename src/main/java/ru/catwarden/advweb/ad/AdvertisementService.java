@@ -51,7 +51,7 @@ public class AdvertisementService {
     // DONE figure out mappers to avoid code repeating
     // DONE moderation status validation
     // TODO add entitynotfoundexception
-    @Cacheable(value = "advertisements", key = "#id")
+    @Cacheable(value = "advertisements-v2", key = "#id")
     public AdvertisementResponse getAdvertisement(Long id){
         Advertisement advertisement = advertisementRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(Advertisement.class, id));
@@ -90,7 +90,7 @@ public class AdvertisementService {
                 .map(this::mapWithImages);
     }
 
-    @Cacheable(value = "advertisements-list", 
+    @Cacheable(value = "advertisements-list-v2", 
             key = "'approved-p-' + #pageable.pageNumber + '-s-' + #pageable.pageSize", 
             condition = "#pageable.pageNumber == 0")
     public Page<AdvertisementResponse> getAllApprovedAdvertisements(Pageable pageable){
@@ -190,7 +190,7 @@ public class AdvertisementService {
     }
 
     @Transactional
-    @CacheEvict(value = {"advertisements", "advertisements-list"}, allEntries = true)
+    @CacheEvict(value = {"advertisements-v2", "advertisements-list-v2"}, allEntries = true)
     public void updateAdvertisement(Long id, AdvertisementUpdateRequest advertisementUpdateRequest){
         Advertisement advertisement = advertisementRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(Advertisement.class, id));
@@ -254,7 +254,7 @@ public class AdvertisementService {
     }
 
     // DONE add status checking (cannot approve/reject not pending)
-    @CacheEvict(value = {"advertisements", "advertisements-list"}, allEntries = true)
+    @CacheEvict(value = {"advertisements-v2", "advertisements-list-v2"}, allEntries = true)
     public void approveAdvertisement(Long id){
         Advertisement advertisement = advertisementRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(Advertisement.class, id));
@@ -276,7 +276,7 @@ public class AdvertisementService {
         );
     }
 
-    @CacheEvict(value = {"advertisements", "advertisements-list"}, allEntries = true)
+    @CacheEvict(value = {"advertisements-v2", "advertisements-list-v2"}, allEntries = true)
     public void rejectAdvertisement(Long id, String moderationRejectionReason){
         Advertisement advertisement = advertisementRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(Advertisement.class, id));
@@ -299,7 +299,7 @@ public class AdvertisementService {
         );
     }
 
-    @CacheEvict(value = {"advertisements", "advertisements-list"}, allEntries = true)
+    @CacheEvict(value = {"advertisements-v2", "advertisements-list-v2"}, allEntries = true)
     public void deleteAdvertisement(Long id){
         Advertisement advertisement = advertisementRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(Advertisement.class, id));
