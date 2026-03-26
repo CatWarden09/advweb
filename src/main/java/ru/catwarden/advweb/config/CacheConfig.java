@@ -1,16 +1,11 @@
 package ru.catwarden.advweb.config;
 
+import com.github.benmanes.caffeine.cache.Caffeine;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.cache.RedisCacheConfiguration;
-import org.springframework.data.redis.cache.RedisCacheManager;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.serializer.GenericJacksonJsonRedisSerializer;
-import org.springframework.data.redis.serializer.RedisSerializationContext;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
-import tools.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
-import tools.jackson.databind.jsontype.PolymorphicTypeValidator;
 
 import java.time.Duration;
 
@@ -19,35 +14,25 @@ import java.time.Duration;
 public class CacheConfig {
 
     @Bean
-    public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory) {
-        PolymorphicTypeValidator typeValidator = BasicPolymorphicTypeValidator.builder()
-                .allowIfSubType("ru.catwarden.advweb.")
-                .allowIfSubType("org.springframework.data.domain.")
-                .allowIfSubType("java.lang.")
-                .allowIfSubType("java.time.")
-                .allowIfSubType("java.util.")
-                .build();
-
-        GenericJacksonJsonRedisSerializer valueSerializer = GenericJacksonJsonRedisSerializer.builder()
-                .enableDefaultTyping(typeValidator)
-                .build();
-
-        RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
-                .entryTtl(Duration.ofHours(1))
-                .disableCachingNullValues()
-                .serializeKeysWith(
-                        RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer())
-                )
-                .serializeValuesWith(
-                        RedisSerializationContext.SerializationPair.fromSerializer(valueSerializer)
-                );
-
-        return RedisCacheManager.builder(connectionFactory)
-                .cacheDefaults(config)
-                .withCacheConfiguration("categories-v2", config.entryTtl(Duration.ofDays(1)))
-                .withCacheConfiguration("advertisements-v2", config.entryTtl(Duration.ofMinutes(30)))
-                .withCacheConfiguration("users-v2", config.entryTtl(Duration.ofHours(1)))
-                .withCacheConfiguration("advertisements-list-v2", config.entryTtl(Duration.ofMinutes(10)))
-                .build();
+    public CacheManager cacheManager() {
+        CaffeineCacheManager cacheManager = new CaffeineCacheManager();
+        cacheManager.setAllowNullValues(false);
+        cacheManager.registerCustomCache(
+                "categories",
+                Caffeine.newBuilder().expireAfterWrite(Duration.ofDays(1)).maximumSize(1_000).build()
+        );
+        cacheManager.registerCustomCache(
+                "advertisements",
+                Caffeine.newBuilder().expireAfterWrite(Duration.ofMinutes(30)).maximumSize(10_000).build()
+        );
+        cacheManager.registerCustomCache(
+                "advertisements-list",
+                Caffeine.newBuilder().expireAfterWrite(Duration.ofMinutes(10)).maximumSize(1_000).build()
+        );
+        cacheManager.registerCustomCache(
+                "users",
+                Caffeine.newBuilder().expireAfterWrite(Duration.ofHours(1)).maximumSize(10_000).build()
+        );
+        return cacheManager;
     }
 }

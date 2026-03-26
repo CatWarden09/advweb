@@ -33,7 +33,7 @@ public class UserService {
 
     private final UserResponseAssembler userResponseAssembler;
 
-    @Cacheable(value = "users-v2", key = "#id")
+    @Cacheable(value = "users", key = "#id")
     public UserResponse getUser(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(User.class, id));
@@ -42,7 +42,7 @@ public class UserService {
     }
 
     @Transactional
-    @CacheEvict(value = "users-v2", key = "#id")
+    @CacheEvict(value = "users", key = "#id")
     public UserResponse updateUser(Long id, UserUpdateRequest userUpdateRequest) {
         boolean isFieldsChanged = false;
 
@@ -91,7 +91,7 @@ public class UserService {
     }
 
     @Transactional
-    @CacheEvict(value = "users-v2", key = "#userId")
+    @CacheEvict(value = "users", key = "#userId")
     public void setUserAvatar(Long userId, Long avatarId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException(User.class, userId));
@@ -106,7 +106,7 @@ public class UserService {
     }
 
     @Transactional
-    @CacheEvict(value = "users-v2", key = "#userId")
+    @CacheEvict(value = "users", key = "#userId")
     public void unlinkUserAvatar(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException(User.class, userId));
@@ -152,7 +152,7 @@ public class UserService {
     }
 
     @Transactional
-    @CacheEvict(value = "users-v2", key = "#userId")
+    @CacheEvict(value = "users", key = "#userId")
     public void recalculateUserRating(Long userId) {
         if (!userRepository.existsById(userId)) {
             throw new EntityNotFoundException(User.class, userId);
