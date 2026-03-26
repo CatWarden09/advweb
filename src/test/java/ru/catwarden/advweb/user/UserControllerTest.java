@@ -108,6 +108,33 @@ class UserControllerTest {
     }
 
     @Test
+    void getUserFavoriteAdvertisementsPassesPageable() {
+        Page<AdvertisementResponse> page = new PageImpl<>(List.of());
+        when(advertisementService.getUserFavoriteAdvertisements(any(Long.class), any(Pageable.class))).thenReturn(page);
+
+        userController.getUserFavoriteAdvertisements(5L, 4, 12);
+
+        ArgumentCaptor<Pageable> captor = ArgumentCaptor.forClass(Pageable.class);
+        verify(advertisementService).getUserFavoriteAdvertisements(org.mockito.ArgumentMatchers.eq(5L), captor.capture());
+        assertEquals(4, captor.getValue().getPageNumber());
+        assertEquals(12, captor.getValue().getPageSize());
+    }
+
+    @Test
+    void addAdvertisementToFavoritesDelegatesToService() {
+        userController.addAdvertisementToFavorites(5L, 99L);
+
+        verify(advertisementService).addAdvertisementToFavorites(5L, 99L);
+    }
+
+    @Test
+    void removeAdvertisementFromFavoritesDelegatesToService() {
+        userController.removeAdvertisementFromFavorites(5L, 99L);
+
+        verify(advertisementService).removeAdvertisementFromFavorites(5L, 99L);
+    }
+
+    @Test
     void getApprovedReviewsAboutUserPassesPageable() {
         Page<ReviewResponse> page = new PageImpl<>(List.of(ReviewResponse.builder().id(1L).build()));
         when(reviewService.getApprovedReviewsAboutUser(any(Long.class), any(Pageable.class))).thenReturn(page);

@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
+import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 import ru.catwarden.advweb.adcategory.AdvertisementCategory;
 import ru.catwarden.advweb.enums.AdModerationStatus;
@@ -21,5 +22,16 @@ public interface AdvertisementRepository extends JpaRepository<Advertisement, Lo
     boolean existsByCategory(AdvertisementCategory advertisementCategory);
 
     Page<Advertisement> findAllByAuthorIdAndAdModerationStatus(Long authorId, AdModerationStatus adModerationStatus, Pageable pageable);
+
+    @Query("""
+            SELECT a
+            FROM User u
+            JOIN u.favoriteAdvertisements a
+            WHERE u.id = :userId
+              AND a.adModerationStatus = :status
+            """)
+    Page<Advertisement> findFavoritesByUserIdAndAdModerationStatus(@Param("userId") Long userId,
+                                                                   @Param("status") AdModerationStatus status,
+                                                                   Pageable pageable);
 
 }

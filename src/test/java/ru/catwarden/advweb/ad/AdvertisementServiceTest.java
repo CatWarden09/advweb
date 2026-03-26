@@ -23,6 +23,7 @@ import ru.catwarden.advweb.exception.DetailedAccessDeniedException;
 import ru.catwarden.advweb.exception.InvalidRelationException;
 import ru.catwarden.advweb.exception.InvalidStateException;
 import ru.catwarden.advweb.exception.LimitExceededException;
+import ru.catwarden.advweb.exception.OperationNotAllowedException;
 import ru.catwarden.advweb.image.ImageService;
 import ru.catwarden.advweb.security.SecurityUtils;
 import ru.catwarden.advweb.user.User;
@@ -650,6 +651,137 @@ class AdvertisementServiceTest {
 
         assertEquals(1, result.getTotalElements());
         assertEquals(List.of("rejected.jpg"), result.getContent().getFirst().getImageUrls());
+    }
+
+    @Test
+    void getUserFavoriteAdvertisementsReturnsApprovedFavoritesPage() {
+        Long userId = 88L;
+        User requestedUser = User.builder().id(userId).keycloakId("owner-id").build();
+        Advertisement advertisement = Advertisement.builder().id(91L).build();
+        AdvertisementResponse response = AdvertisementResponse.builder().id(91L).build();
+        Page<Advertisement> page = new PageImpl<>(List.of(advertisement), PageRequest.of(0, 10), 1);
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(requestedUser));
+        when(advertisementRepository.findFavoritesByUserIdAndAdModerationStatus(
+                userId,
+                AdModerationStatus.APPROVED,
+                PageRequest.of(0, 10)
+        )).thenReturn(page);
+        when(advertisementMapper.toResponse(advertisement)).thenReturn(response);
+        when(imageService.getPreviewImageUrlByAdvertisementId(91L)).thenReturn(List.of("favorite-preview.jpg"));
+
+        Page<AdvertisementResponse> result;
+        try (MockedStatic<SecurityUtils> securityUtilsMockedStatic = mockStatic(SecurityUtils.class)) {
+            securityUtilsMockedStatic.when(SecurityUtils::isCurrentUserAdmin).thenReturn(false);
+            securityUtilsMockedStatic.when(SecurityUtils::getCurrentUserKeycloakId).thenReturn("owner-id");
+
+            result = advertisementService.getUserFavoriteAdvertisements(userId, PageRequest.of(0, 10));
+        }
+
+        assertEquals(1, result.getTotalElements());
+        assertEquals(List.of("favorite-preview.jpg"), result.getContent().getFirst().getImageUrls());
+    }
+
+    @Test
+    void addAdvertisementToFavoritesAddsApprovedAdvertisementForRequestedUser() {
+        Long userId = 5L;
+        Advertisement advertisement = Advertisement.builder()
+                .id(100L)
+                .adModerationStatus(AdModerationStatus.APPROVED)
+                .build();
+        User currentUser = User.builder()
+                .id(userId)
+                .keycloakId("kc-user")
+                .favoriteAdvertisements(new java.util.ArrayList<>())
+                .build();
+        User requestedUser = User.builder().id(userId).keycloakId("kc-user").build();
+
+        when(advertisementRepository.findById(100L)).thenReturn(Optional.of(advertisement));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(requestedUser), Optional.of(currentUser));
+
+        try (MockedStatic<SecurityUtils> securityUtilsMockedStatic = mockStatic(SecurityUtils.class)) {
+            securityUtilsMockedStatic.when(SecurityUtils::getCurrentUserKeycloakId).thenReturn("kc-user");
+            securityUtilsMockedStatic.when(SecurityUtils::isCurrentUserAdmin).thenReturn(false);
+
+            advertisementService.addAdvertisementToFavorites(userId, 100L);
+        }
+
+        assertEquals(1, currentUser.getFavoriteAdvertisements().size());
+        assertEquals(100L, currentUser.getFavoriteAdvertisements().getFirst().getId());
+    }
+
+    @Test
+    void addAdvertisementToFavoritesThrowsForNotApprovedAdvertisement() {
+        Long userId = 5L;
+        Advertisement advertisement = Advertisement.builder()
+                .id(100L)
+                .adModerationStatus(AdModerationStatus.PENDING)
+                .build();
+        User requestedUser = User.builder().id(userId).keycloakId("kc-user").build();
+
+        when(advertisementRepository.findById(100L)).thenReturn(Optional.of(advertisement));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(requestedUser));
+
+        OperationNotAllowedException exception;
+        try (MockedStatic<SecurityUtils> securityUtilsMockedStatic = mockStatic(SecurityUtils.class)) {
+            securityUtilsMockedStatic.when(SecurityUtils::getCurrentUserKeycloakId).thenReturn("kc-user");
+            securityUtilsMockedStatic.when(SecurityUtils::isCurrentUserAdmin).thenReturn(false);
+
+            exception = assertThrows(OperationNotAllowedException.class,
+                    () -> advertisementService.addAdvertisementToFavorites(userId, 100L));
+        }
+
+        assertEquals("Only approved advertisements can be added to favorites", exception.getMessage());
+        assertEquals(Map.of("Advertisement id:", 100L, "Current status:", AdModerationStatus.PENDING), exception.getDetails());
+    }
+
+    @Test
+    void removeAdvertisementFromFavoritesRemovesAdvertisementForRequestedUser() {
+        Long userId = 5L;
+        Advertisement favoriteAdvertisement = Advertisement.builder().id(100L).build();
+        User currentUser = User.builder()
+                .id(userId)
+                .keycloakId("kc-user")
+                .favoriteAdvertisements(new java.util.ArrayList<>(List.of(favoriteAdvertisement)))
+                .build();
+        User requestedUser = User.builder().id(userId).keycloakId("kc-user").build();
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(requestedUser), Optional.of(currentUser));
+
+        try (MockedStatic<SecurityUtils> securityUtilsMockedStatic = mockStatic(SecurityUtils.class)) {
+            securityUtilsMockedStatic.when(SecurityUtils::getCurrentUserKeycloakId).thenReturn("kc-user");
+            securityUtilsMockedStatic.when(SecurityUtils::isCurrentUserAdmin).thenReturn(false);
+
+            advertisementService.removeAdvertisementFromFavorites(userId, 100L);
+        }
+
+        assertTrue(currentUser.getFavoriteAdvertisements().isEmpty());
+    }
+
+    @Test
+    void addAdvertisementToFavoritesThrowsForAnotherUser() {
+        Long userId = 44L;
+        User requestedUser = User.builder().id(userId).keycloakId("owner-id").build();
+        when(userRepository.findById(userId)).thenReturn(Optional.of(requestedUser));
+
+        try (MockedStatic<SecurityUtils> securityUtilsMockedStatic = mockStatic(SecurityUtils.class)) {
+            securityUtilsMockedStatic.when(SecurityUtils::isCurrentUserAdmin).thenReturn(false);
+            securityUtilsMockedStatic.when(SecurityUtils::getCurrentUserKeycloakId).thenReturn("another-user");
+
+            DetailedAccessDeniedException exception = assertThrows(DetailedAccessDeniedException.class,
+                    () -> advertisementService.addAdvertisementToFavorites(userId, 100L));
+            assertEquals("You can only view your own advertisements", exception.getMessage());
+            assertEquals(
+                    Map.of(
+                            "Requested user id:", 44L,
+                            "Requested user keycloak id:", "owner-id",
+                            "Current user keycloak id:", "another-user"
+                    ),
+                    exception.getDetails()
+            );
+        }
+
+        verify(advertisementRepository, never()).findById(any());
     }
 
     private AdvertisementRequest validCreateRequest(List<Long> imageIds) {
