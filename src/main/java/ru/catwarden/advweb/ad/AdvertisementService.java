@@ -58,6 +58,7 @@ public class AdvertisementService {
     }
 
     public Page<AdvertisementResponse> getAdvertisementsByFilter(Pageable pageable, AdvertisementSearchFilter filter){
+        log.debug("Searching advertisements with filter: {}, pageable: {}", filter, pageable);
         QAdvertisement advertisement = QAdvertisement.advertisement;
 
         BooleanBuilder builder = new BooleanBuilder();

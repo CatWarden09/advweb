@@ -150,4 +150,15 @@ public class GlobalExceptionHandler {
                 HttpStatus.FORBIDDEN
         );
     }
+
+    @ExceptionHandler(Exception.class)
+    @ResponseBody
+    public ResponseEntity<ValidationResponse> handleAllExceptions(Exception ex) {
+        log.error("INTERNAL SERVER ERROR: {} ", ex.getMessage(), ex);
+
+        return new ResponseEntity<>(
+                new ValidationResponse(List.of("An internal server error occurred")),
+                HttpStatus.INTERNAL_SERVER_ERROR
+        );
+    }
 }
