@@ -50,14 +50,15 @@ public class AdvertisementService {
 
     // DONE figure out mappers to avoid code repeating
     // DONE moderation status validation
-    // TODO add entitynotfoundexception
-    @Cacheable(value = "advertisements", key = "#id")
     public AdvertisementResponse getAdvertisement(Long id){
         Advertisement advertisement = advertisementRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(Advertisement.class, id));
-        viewCountService.increment(id);
 
         return this.mapWithPreviewImage(advertisement);
+    }
+
+    public void incrementAdvertisementViewCount(Long id){
+        viewCountService.increment(id);
     }
 
     public Page<AdvertisementResponse> getAdvertisementsByFilter(Pageable pageable, AdvertisementSearchFilter filter){
@@ -130,7 +131,7 @@ public class AdvertisementService {
     // need to use @Transactional because there are multiple DB operations in single method
     // if some operations go wrong, we need to roll back all of them or then part changes will be applied to the DB
     @Transactional
-    @CacheEvict(value = {"advertisements", "advertisements-list"}, allEntries = true)
+    @CacheEvict(value = "advertisements-list", allEntries = true)
     public Long createAdvertisement(AdvertisementRequest advertisementRequest){
         String currentKeycloakId = SecurityUtils.getCurrentUserKeycloakId();
         User author = userRepository.findByKeycloakId(currentKeycloakId)
@@ -193,7 +194,7 @@ public class AdvertisementService {
     }
 
     @Transactional
-    @CacheEvict(value = {"advertisements", "advertisements-list"}, allEntries = true)
+    @CacheEvict(value = "advertisements-list", allEntries = true)
     public void updateAdvertisement(Long id, AdvertisementUpdateRequest advertisementUpdateRequest){
         Advertisement advertisement = advertisementRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(Advertisement.class, id));
@@ -257,7 +258,7 @@ public class AdvertisementService {
     }
 
     // DONE add status checking (cannot approve/reject not pending)
-    @CacheEvict(value = {"advertisements", "advertisements-list"}, allEntries = true)
+    @CacheEvict(value = "advertisements-list", allEntries = true)
     public void approveAdvertisement(Long id){
         Advertisement advertisement = advertisementRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(Advertisement.class, id));
@@ -279,7 +280,7 @@ public class AdvertisementService {
         );
     }
 
-    @CacheEvict(value = {"advertisements", "advertisements-list"}, allEntries = true)
+    @CacheEvict(value = "advertisements-list", allEntries = true)
     public void rejectAdvertisement(Long id, String moderationRejectionReason){
         Advertisement advertisement = advertisementRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(Advertisement.class, id));
@@ -302,7 +303,7 @@ public class AdvertisementService {
         );
     }
 
-    @CacheEvict(value = {"advertisements", "advertisements-list"}, allEntries = true)
+    @CacheEvict(value = "advertisements-list", allEntries = true)
     public void deleteAdvertisement(Long id){
         Advertisement advertisement = advertisementRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(Advertisement.class, id));

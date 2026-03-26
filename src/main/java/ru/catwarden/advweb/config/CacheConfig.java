@@ -22,10 +22,6 @@ public class CacheConfig {
                 Caffeine.newBuilder().expireAfterWrite(Duration.ofDays(1)).maximumSize(1_000).build()
         );
         cacheManager.registerCustomCache(
-                "advertisements",
-                Caffeine.newBuilder().expireAfterWrite(Duration.ofMinutes(30)).maximumSize(10_000).build()
-        );
-        cacheManager.registerCustomCache(
                 "advertisements-list",
                 Caffeine.newBuilder().expireAfterWrite(Duration.ofMinutes(10)).maximumSize(1_000).build()
         );
