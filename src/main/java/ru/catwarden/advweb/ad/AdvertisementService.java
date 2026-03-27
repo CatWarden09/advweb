@@ -148,7 +148,8 @@ public class AdvertisementService {
             throw new OperationNotAllowedException("Only approved advertisements can be added to favorites",
                     Map.of(
                             "Advertisement id:", advertisementId,
-                            "Current status:", advertisement.getAdModerationStatus()
+                            "Current status:", advertisement.getAdModerationStatus(),
+                            "User id:", userId
                     ));
         }
 
