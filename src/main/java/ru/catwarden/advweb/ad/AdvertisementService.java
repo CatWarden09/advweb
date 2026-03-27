@@ -166,7 +166,8 @@ public class AdvertisementService {
 
         currentUser.getFavoriteAdvertisements().add(advertisement);
 
-        log.info("AUDIT advertisement added to favorites: adId={}, userId={}", advertisementId, currentUser.getId());
+        log.info("AUDIT advertisement added to favorites: adId={}, userId={}",
+                advertisementId, currentUser.getId());
     }
 
     @Transactional
@@ -305,12 +306,13 @@ public class AdvertisementService {
         advertisement.setAdModerationStatus(AdModerationStatus.PENDING);
 
         log.info(
-                "AUDIT advertisement updated: adId={}, authorId={}, fieldsChanged={}, imagesChanged={}, status={}",
+                "AUDIT advertisement updated: adId={}, authorId={}, fieldsChanged={}, imagesChanged={}, status={}, actorId={}",
                 advertisement.getId(),
                 getAuthorId(advertisement),
                 isFieldsChanged,
                 isImagesChanged,
-                advertisement.getAdModerationStatus()
+                advertisement.getAdModerationStatus(),
+                SecurityUtils.getCurrentUserKeycloakId()
         );
 
     }
@@ -331,10 +333,11 @@ public class AdvertisementService {
         advertisementRepository.save(advertisement);
 
         log.info(
-                "AUDIT advertisement approved: adId={}, authorId={}, status={}",
+                "AUDIT advertisement approved: adId={}, authorId={}, status={}, actorId={}",
                 advertisement.getId(),
                 getAuthorId(advertisement),
-                advertisement.getAdModerationStatus()
+                advertisement.getAdModerationStatus(),
+                SecurityUtils.getCurrentUserKeycloakId()
         );
     }
 
@@ -354,10 +357,11 @@ public class AdvertisementService {
         advertisementRepository.save(advertisement);
 
         log.info(
-                "AUDIT advertisement rejected: adId={}, authorId={}, status={}",
+                "AUDIT advertisement rejected: adId={}, authorId={}, status={}, actorId={}",
                 advertisement.getId(),
                 getAuthorId(advertisement),
-                advertisement.getAdModerationStatus()
+                advertisement.getAdModerationStatus(),
+                SecurityUtils.getCurrentUserKeycloakId()
         );
     }
 
@@ -385,9 +389,10 @@ public class AdvertisementService {
         imageService.unlinkAllImagesFromAdvertisement(advertisement.getId());
 
         log.info(
-                "AUDIT advertisement deleted: adId={}, authorId={}",
+                "AUDIT advertisement deleted: adId={}, authorId={}, actorId={}",
                 advertisement.getId(),
-                getAuthorId(advertisement)
+                getAuthorId(advertisement),
+                SecurityUtils.getCurrentUserKeycloakId()
         );
     }
 

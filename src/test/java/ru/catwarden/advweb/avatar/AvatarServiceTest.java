@@ -150,7 +150,7 @@ class AvatarServiceTest {
                     () -> avatarService.setAvatarToUser(10L, 5L));
             assertEquals("Avatar is linked to another user", exception.getMessage());
             assertEquals(
-                    Map.of("Avatar id:", 10L, "Requested user id:", 5L, "Avatar is already linked:", true),
+                    Map.of("Avatar id:", 10L, "Requested user id:", 5L, "Avatar is already linked:", true, "Actor id:", "owner-id"),
                     exception.getDetails()
             );
         }
@@ -179,8 +179,8 @@ class AvatarServiceTest {
                     Map.of(
                             "Avatar id:", 10L,
                             "Avatar uploader keycloak id:", "another-user",
-                            "Current user keycloak id:", "owner-id",
-                            "Requested user id:", 5L
+                            "Requested user id:", 5L,
+                            "Actor id:", "owner-id"
                     ),
                     exception.getDetails()
             );

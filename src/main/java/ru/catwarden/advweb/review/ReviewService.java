@@ -85,7 +85,7 @@ public class ReviewService {
 
         if (currentUser.equals(recipient)){
             throw new InvalidRelationException("Users cannot create reviews for themselves",
-                    Map.of("Current user id:", currentUser.getId(), "Recipient user id:", recipient.getId()));
+                    Map.of("Actor id:", currentUser.getId(), "Recipient user id:", recipient.getId()));
         }
 
         Review review = reviewMapper.toEntity(reviewRequest);
@@ -121,8 +121,8 @@ public class ReviewService {
             throw new DetailedAccessDeniedException("You are not allowed to update this review",
                     Map.of(
                             "Review id:", review.getId(),
-                            "Review author keycloak id:", String.valueOf(review.getAuthor().getKeycloakId()),
-                            "Current user keycloak id:", String.valueOf(currentKeycloakId)
+                            "Review author keycloak id:", review.getAuthor().getKeycloakId(),
+                            "Actor id:", currentKeycloakId
                     ));
         }
 
@@ -137,13 +137,14 @@ public class ReviewService {
         }
 
         log.info(
-                "AUDIT review updated: reviewId={}, authorId={}, recipientId={}, status={}, rating={}, wasApproved={}",
+                "AUDIT review updated: reviewId={}, authorId={}, recipientId={}, status={}, rating={}, wasApproved={}, actorId={}",
                 review.getId(),
                 getAuthorId(review),
                 getRecipientId(review),
                 review.getModerationStatus(),
                 review.getRating(),
-                wasApproved
+                wasApproved,
+                currentKeycloakId
         );
     }
 
@@ -164,11 +165,12 @@ public class ReviewService {
         userService.recalculateUserRating(review.getRecipient().getId());
 
         log.info(
-                "AUDIT review approved: reviewId={}, authorId={}, recipientId={}, status={}",
+                "AUDIT review approved: reviewId={}, authorId={}, recipientId={}, status={}, actorId={}",
                 review.getId(),
                 getAuthorId(review),
                 getRecipientId(review),
-                review.getModerationStatus()
+                review.getModerationStatus(),
+                SecurityUtils.getCurrentUserKeycloakId()
         );
     }
 
@@ -188,11 +190,12 @@ public class ReviewService {
         reviewRepository.save(review);
 
         log.info(
-                "AUDIT review rejected: reviewId={}, authorId={}, recipientId={}, status={}",
+                "AUDIT review rejected: reviewId={}, authorId={}, recipientId={}, status={}, actorId={}",
                 review.getId(),
                 getAuthorId(review),
                 getRecipientId(review),
-                review.getModerationStatus()
+                review.getModerationStatus(),
+                SecurityUtils.getCurrentUserKeycloakId()
         );
     }
 
@@ -215,8 +218,8 @@ public class ReviewService {
             throw new DetailedAccessDeniedException("You are not allowed to delete this review",
                     Map.of(
                             "Review id:", review.getId(),
-                            "Review author keycloak id:", String.valueOf(review.getAuthor().getKeycloakId()),
-                            "Current user keycloak id:", String.valueOf(currentKeycloakId)
+                            "Review author keycloak id:", review.getAuthor().getKeycloakId(),
+                            "Actor id:", currentKeycloakId
                     ));
         }
 
@@ -227,11 +230,12 @@ public class ReviewService {
         }
 
         log.info(
-                "AUDIT review deleted: reviewId={}, authorId={}, recipientId={}, wasApproved={}",
+                "AUDIT review deleted: reviewId={}, authorId={}, recipientId={}, wasApproved={}, actorId={}",
                 review.getId(),
                 getAuthorId(review),
                 getRecipientId(review),
-                wasApproved
+                wasApproved,
+                SecurityUtils.getCurrentUserKeycloakId()
         );
     }
 
@@ -250,7 +254,7 @@ public class ReviewService {
                     Map.of(
                             "Requested user id:", userId,
                             "Requested user keycloak id:", String.valueOf(requestedUser.getKeycloakId()),
-                            "Current user keycloak id:", String.valueOf(currentKeycloakId)
+                            "Actor id:", currentKeycloakId
                     ));
         }
     }

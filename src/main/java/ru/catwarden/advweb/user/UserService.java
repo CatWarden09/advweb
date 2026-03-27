@@ -70,14 +70,14 @@ public class UserService {
                 .filter(existingUser -> !existingUser.getId().equals(id))
                 .ifPresent(existingUser -> {
                     throw new OperationNotAllowedException("Email is already in use",
-                            Map.of("Current user id:", id, "Passed email:", userUpdateRequest.getEmail() ,"User with existing email id", existingUser.getId()));
+                            Map.of("Actor id:", currentKeycloakId, "Passed email:", userUpdateRequest.getEmail() ,"User with existing email id", existingUser.getId()));
                 });
 
         userRepository.findByPhone(userUpdateRequest.getPhone())
                 .filter(existingUser -> !existingUser.getId().equals(id))
                 .ifPresent(existingUser -> {
                     throw new OperationNotAllowedException("Phone is already in use",
-                            Map.of("Current user id:", id, "Passed phone:", userUpdateRequest.getPhone() ,"User with existing phone id", existingUser.getId()));
+                            Map.of("Actor id:", currentKeycloakId, "Passed phone:", userUpdateRequest.getPhone() ,"User with existing phone id", existingUser.getId()));
                 });
 
         user.setFirstName(userUpdateRequest.getFirstName());
@@ -85,7 +85,7 @@ public class UserService {
         user.setPhone(userUpdateRequest.getPhone());
         user.setEmail(userUpdateRequest.getEmail());
 
-        log.info("AUDIT User updated: userId={}", id);
+        log.info("AUDIT User updated: userId={}, actorId={}", id, currentKeycloakId);
 
         return userResponseAssembler.toUserResponse(user);
     }
@@ -102,7 +102,10 @@ public class UserService {
         avatarService.setAvatarToUser(avatarId, userId);
         user.setAvatarId(avatarId);
 
-        log.info("AUDIT User avatar set: userId={}, avatarId={}", userId, avatarId);
+        log.info("AUDIT User avatar set: userId={}, avatarId={}, actorId={}",
+                userId,
+                avatarId,
+                currentKeycloakId);
     }
 
     @Transactional
@@ -118,7 +121,7 @@ public class UserService {
 
         user.setAvatarId(null);
 
-        log.info("AUDIT User avatar unlinked: userId={}", userId);
+        log.info("AUDIT User avatar unlinked: userId={}, actorId={}", userId, currentKeycloakId);
     }
 
     // this method is used to sync the keycloak user with the local user (for example when registering a new user, we get the jwt token and create a new local user with the given keycloakId)
@@ -178,7 +181,7 @@ public class UserService {
                     Map.of(
                             "User id:", user.getId(),
                             "User keycloak id:", String.valueOf(user.getKeycloakId()),
-                            "Current user keycloak id:", String.valueOf(currentKeycloakId)
+                            "Actor id:", String.valueOf(currentKeycloakId)
                     ));
         }
     }

@@ -59,7 +59,7 @@ public class ImageService {
                 .map(imageMapper::toDto)
                 .toList();
 
-        log.info("AUDIT images uploaded: userId={}, images={}", currentKeycloakId, imageDtoList.stream().map(ImageDto::getId).toList());
+        log.info("AUDIT images uploaded: actorId={}, images={}", currentKeycloakId, imageDtoList.stream().map(ImageDto::getId).toList());
 
         return imageDtoList;
     }
@@ -93,7 +93,10 @@ public class ImageService {
         }
         imageRepository.saveAll(images);
 
-        log.info("AUDIT images set to advertisement: advertisementId={}, images={}", advertisementId, imageIds);
+        log.info("AUDIT images set to advertisement: advertisementId={}, images={}, actorId={}",
+                advertisementId,
+                imageIds,
+                SecurityUtils.getCurrentUserKeycloakId());
     }
 
     public boolean syncImagesInAdvertisement(Long advertisementId, List<Long> requestImageIds){
@@ -146,7 +149,8 @@ public class ImageService {
                     Map.of(
                             "Requested advertisement id:", advertisementId,
                             "Conflicting image id:", foreignLinkedImage.getId(),
-                            "Conflicting image advertisement id:", String.valueOf(foreignLinkedImage.getAdId())
+                            "Conflicting image advertisement id:", String.valueOf(foreignLinkedImage.getAdId()),
+                            "Actor id:", currentKeycloakId
                     ));
         }
 
@@ -165,7 +169,7 @@ public class ImageService {
                             "Requested advertisement id:", advertisementId,
                             "Conflicting image id:", imageUploadedByAnotherUser.getId(),
                             "Conflicting image uploader keycloak id:", String.valueOf(imageUploadedByAnotherUser.getUploaderKeycloakId()),
-                            "Current user keycloak id:", String.valueOf(currentKeycloakId)
+                            "Actor id:", currentKeycloakId
                     ));
         }
     }
@@ -179,7 +183,7 @@ public class ImageService {
         }
         imageRepository.saveAll(images);
 
-        log.info("AUDIT all images unlinked from advertisement: advertisementId={}", advertisementId);
+        log.info("AUDIT all images unlinked from advertisement: advertisementId={}, actorId={}", advertisementId, SecurityUtils.getCurrentUserKeycloakId());
     }
 
     @Scheduled(cron = "0 0 4 * * *", zone = "Europe/Moscow")

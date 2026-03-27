@@ -71,7 +71,7 @@ class UserServiceTest {
                     Map.of(
                             "User id:", 1L,
                             "User keycloak id:", "owner-id",
-                            "Current user keycloak id:", "another-user"
+                            "Actor id:", "another-user"
                     ),
                     exception.getDetails()
             );
@@ -102,7 +102,7 @@ class UserServiceTest {
                     () -> userService.updateUser(1L, request));
             assertEquals("Email is already in use", exception.getMessage());
             assertEquals(
-                    Map.of("Current user id:", 1L, "Passed email:", "taken@mail.com", "User with existing email id", 2L),
+                    Map.of("Actor id:", "owner-id", "Passed email:", "taken@mail.com", "User with existing email id", 2L),
                     exception.getDetails()
             );
         }
@@ -132,7 +132,7 @@ class UserServiceTest {
                     () -> userService.updateUser(1L, request));
             assertEquals("Phone is already in use", exception.getMessage());
             assertEquals(
-                    Map.of("Current user id:", 1L, "Passed phone:", "+7111", "User with existing phone id", 2L),
+                    Map.of("Actor id:", "owner-id", "Passed phone:", "+7111", "User with existing phone id", 2L),
                     exception.getDetails()
             );
         }

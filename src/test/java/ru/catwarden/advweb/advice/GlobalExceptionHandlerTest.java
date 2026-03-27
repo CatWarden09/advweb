@@ -127,7 +127,7 @@ class GlobalExceptionHandlerTest {
     @Test
     void handleInvalidRelationReturnsBadRequest() {
         InvalidRelationException exception = new InvalidRelationException("User cannot review himself",
-                Map.of("Current user id:", 1, "Recipient user id:", 1));
+                Map.of("Actor id:", 1, "Recipient user id:", 1));
 
         ResponseEntity<ValidationResponse> response = handler.handleInvalidRelation(exception);
 

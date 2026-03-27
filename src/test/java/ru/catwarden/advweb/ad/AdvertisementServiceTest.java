@@ -732,7 +732,7 @@ class AdvertisementServiceTest {
         }
 
         assertEquals("Only approved advertisements can be added to favorites", exception.getMessage());
-        assertEquals(Map.of("Advertisement id:", 100L, "Current status:", AdModerationStatus.PENDING), exception.getDetails());
+        assertEquals(Map.of("Advertisement id:", 100L, "Current status:", AdModerationStatus.PENDING, "User id:", 5L), exception.getDetails());
     }
 
     @Test

@@ -56,8 +56,6 @@ public class AvatarService {
                 currentKeycloakId
         );
 
-
-
         return avatarMapper.toDto(avatar);
     }
 
@@ -85,13 +83,19 @@ public class AvatarService {
                     currentAvatar.setLinkedToUser(false);
                     currentAvatar.setUserId(null);
                     avatarRepository.save(currentAvatar);
-                    log.info("AUDIT current avatar unlinked: avatarId={}, userId={}", avatarId, userId);
+                    log.info("AUDIT --(set new avatar to user)-- Current avatar unlinked: avatarId={}, userId={}, actorId={}",
+                            avatarId,
+                            userId,
+                            SecurityUtils.getCurrentUserKeycloakId());
                 });
 
         avatar.setLinkedToUser(true);
         avatar.setUserId(userId);
 
-        log.info("AUDIT new avatar linked: avatarId={}, userId={}", avatarId, userId);
+        log.info("AUDIT --(set new avatar to user)-- New avatar linked: avatarId={}, userId={}, actorId={}",
+                avatarId,
+                userId,
+                SecurityUtils.getCurrentUserKeycloakId());
 
         avatarRepository.save(avatar);
     }
@@ -105,7 +109,10 @@ public class AvatarService {
         avatar.setLinkedToUser(false);
         avatar.setUserId(null);
 
-        log.info("AUDIT avatar unlinked: avatarId={}, userId={}", avatar.getId(), userId);
+        log.info("AUDIT avatar unlinked: avatarId={}, userId={}, actorId={}",
+                avatar.getId(),
+                userId,
+                SecurityUtils.getCurrentUserKeycloakId());
 
         avatarRepository.save(avatar);
     }
@@ -121,7 +128,8 @@ public class AvatarService {
                     Map.of(
                             "Avatar id:", avatar.getId(),
                             "Requested user id:", userId,
-                            "Avatar is already linked:", true
+                            "Avatar is already linked:", true,
+                            "Actor id:", currentKeycloakId
                     ));
         }
 
@@ -133,8 +141,8 @@ public class AvatarService {
                     Map.of(
                             "Avatar id:", avatar.getId(),
                             "Avatar uploader keycloak id:", String.valueOf(avatar.getUploaderKeycloakId()),
-                            "Current user keycloak id:", String.valueOf(currentKeycloakId),
-                            "Requested user id:", userId
+                            "Requested user id:", userId,
+                            "Actor id:", currentKeycloakId
                     ));
         }
     }

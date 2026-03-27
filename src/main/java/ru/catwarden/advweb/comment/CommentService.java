@@ -90,14 +90,15 @@ public class CommentService {
                 .orElseThrow(() -> new EntityNotFoundException(Comment.class, id));
 
         String currentKeycloakId = SecurityUtils.getCurrentUserKeycloakId();
+
         boolean isAdmin = SecurityUtils.isCurrentUserAdmin();
 
         if (!isAdmin && !comment.getAuthor().getKeycloakId().equals(currentKeycloakId)) {
             throw new DetailedAccessDeniedException("You are not allowed to update this comment",
                     Map.of(
                             "Comment id:", comment.getId(),
-                            "Comment author keycloak id:", String.valueOf(comment.getAuthor().getKeycloakId()),
-                            "Current user keycloak id:", String.valueOf(currentKeycloakId)
+                            "Comment author keycloak id:", comment.getAuthor().getKeycloakId(),
+                            "Actor id:", currentKeycloakId
                     ));
         }
 
@@ -107,11 +108,12 @@ public class CommentService {
         commentRepository.save(comment);
 
         log.info(
-                "AUDIT comment updated: commentId={}, adId={}, authorId={}, isModerated={}",
+                "AUDIT comment updated: commentId={}, adId={}, authorId={}, isModerated={}, actorId={}",
                 comment.getId(),
                 getAdvertisementId(comment),
                 getAuthorId(comment),
-                comment.getIsModerated()
+                comment.getIsModerated(),
+                currentKeycloakId
         );
     }
 
@@ -126,11 +128,12 @@ public class CommentService {
         commentRepository.save(comment);
 
         log.info(
-                "AUDIT comment on moderation updated: commentId={}, adId={}, authorId={}, isModerated={}",
+                "AUDIT comment on moderation updated: commentId={}, adId={}, authorId={}, isModerated={}, actorId={}",
                 comment.getId(),
                 getAdvertisementId(comment),
                 getAuthorId(comment),
-                comment.getIsModerated()
+                comment.getIsModerated(),
+                SecurityUtils.getCurrentUserKeycloakId()
         );
     }
 
@@ -151,17 +154,18 @@ public class CommentService {
                     Map.of(
                             "Comment id:", comment.getId(),
                             "Comment author keycloak id:", String.valueOf(comment.getAuthor().getKeycloakId()),
-                            "Current user keycloak id:", String.valueOf(currentKeycloakId)
+                            "Actor id:", String.valueOf(currentKeycloakId)
                     ));
         }
 
         commentRepository.deleteById(id);
 
         log.info(
-                "AUDIT comment deleted: commentId={}, adId={}, authorId={}",
+                "AUDIT comment deleted: commentId={}, adId={}, authorId={}, actorId={}",
                 comment.getId(),
                 getAdvertisementId(comment),
-                getAuthorId(comment)
+                getAuthorId(comment),
+                currentKeycloakId
         );
     }
 
@@ -173,7 +177,7 @@ public class CommentService {
 
         commentRepository.deleteAllByAdId(adId);
 
-        log.info("AUDIT all comments deleted: adId={}", adId);
+        log.info("AUDIT all comments deleted: adId={}, actorId={}", adId, SecurityUtils.getCurrentUserKeycloakId());
     }
 
     private Long getAuthorId(Comment comment) {

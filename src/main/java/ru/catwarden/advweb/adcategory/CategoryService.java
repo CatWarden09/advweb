@@ -12,6 +12,7 @@ import ru.catwarden.advweb.ad.AdvertisementRepository;
 import ru.catwarden.advweb.exception.EntityNotFoundException;
 import ru.catwarden.advweb.exception.InvalidRelationException;
 import ru.catwarden.advweb.exception.OperationNotAllowedException;
+import ru.catwarden.advweb.security.SecurityUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,10 +59,11 @@ public class CategoryService {
         categoryRepository.save(advertisementCategory);
 
         log.info(
-                "AUDIT category created: categoryId={}, name={}, parentId={}",
+                "AUDIT category created: categoryId={}, name={}, parentId={}, actorId={}",
                 advertisementCategory.getId(),
                 advertisementCategory.getName(),
-                getParentId(advertisementCategory)
+                getParentId(advertisementCategory),
+                SecurityUtils.getCurrentUserKeycloakId()
         );
     }
 
@@ -86,9 +88,10 @@ public class CategoryService {
         categoryRepository.saveAll(advertisementSubcategories);
 
         log.info(
-                "AUDIT category subcategories created: parentId={}, createdCount={}",
+                "AUDIT category subcategories created: parentId={}, createdCount={}, actorId={}",
                 parent.getId(),
-                advertisementSubcategories.size()
+                advertisementSubcategories.size(),
+                SecurityUtils.getCurrentUserKeycloakId()
         );
     }
 
@@ -106,10 +109,11 @@ public class CategoryService {
         categoryRepository.save(advertisementCategory);
 
         log.info(
-                "AUDIT category updated: categoryId={}, previousName={}, newName={}",
+                "AUDIT category updated: categoryId={}, previousName={}, newName={}, actorId={}",
                 advertisementCategory.getId(),
                 previousName,
-                advertisementCategory.getName()
+                advertisementCategory.getName(),
+                SecurityUtils.getCurrentUserKeycloakId()
         );
 
     }
@@ -132,10 +136,11 @@ public class CategoryService {
         categoryRepository.delete(advertisementCategory);
 
         log.info(
-                "AUDIT category deleted: categoryId={}, name={}, parentId={}",
+                "AUDIT category deleted: categoryId={}, name={}, parentId={}, actorId={}",
                 advertisementCategory.getId(),
                 advertisementCategory.getName(),
-                getParentId(advertisementCategory)
+                getParentId(advertisementCategory),
+                SecurityUtils.getCurrentUserKeycloakId()
         );
     }
 

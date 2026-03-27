@@ -145,7 +145,7 @@ class CommentServiceTest {
                     Map.of(
                             "Comment id:", 1L,
                             "Comment author keycloak id:", "author-id",
-                            "Current user keycloak id:", "another-user"
+                            "Actor id:", "another-user"
                     ),
                     exception.getDetails()
             );
@@ -215,7 +215,7 @@ class CommentServiceTest {
                     Map.of(
                             "Comment id:", 1L,
                             "Comment author keycloak id:", "author-id",
-                            "Current user keycloak id:", "another-user"
+                            "Actor id:", "another-user"
                     ),
                     exception.getDetails()
             );
