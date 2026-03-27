@@ -18,7 +18,7 @@ import ru.catwarden.advweb.ad.dto.AdvertisementUpdateRequest;
 import ru.catwarden.advweb.adcategory.AdvertisementCategory;
 import ru.catwarden.advweb.adcategory.CategoryRepository;
 import ru.catwarden.advweb.comment.CommentService;
-import ru.catwarden.advweb.enums.AdModerationStatus;
+import ru.catwarden.advweb.enums.Status;
 import ru.catwarden.advweb.exception.DetailedAccessDeniedException;
 import ru.catwarden.advweb.exception.InvalidRelationException;
 import ru.catwarden.advweb.exception.InvalidStateException;
@@ -135,7 +135,7 @@ class AdvertisementServiceTest {
         AdvertisementResponse response = AdvertisementResponse.builder().id(30L).build();
         Page<Advertisement> page = new PageImpl<>(List.of(advertisement), pageable, 1);
 
-        when(advertisementRepository.findAllByAdModerationStatus(AdModerationStatus.APPROVED, pageable)).thenReturn(page);
+        when(advertisementRepository.findAllByStatus(Status.APPROVED, pageable)).thenReturn(page);
         when(advertisementMapper.toResponse(advertisement)).thenReturn(response);
         when(imageService.getPreviewImageUrlByAdvertisementId(30L)).thenReturn(List.of("preview.jpg"));
 
@@ -152,7 +152,7 @@ class AdvertisementServiceTest {
         AdvertisementResponse response = AdvertisementResponse.builder().id(31L).build();
         Page<Advertisement> page = new PageImpl<>(List.of(advertisement), pageable, 1);
 
-        when(advertisementRepository.findAllByAdModerationStatus(AdModerationStatus.PENDING, pageable)).thenReturn(page);
+        when(advertisementRepository.findAllByStatus(Status.PENDING, pageable)).thenReturn(page);
         when(advertisementMapper.toResponse(advertisement)).thenReturn(response);
         when(imageService.getPreviewImageUrlByAdvertisementId(31L)).thenReturn(List.of("pending-preview.jpg"));
 
@@ -169,7 +169,7 @@ class AdvertisementServiceTest {
         AdvertisementResponse response = AdvertisementResponse.builder().id(32L).build();
         Page<Advertisement> page = new PageImpl<>(List.of(advertisement), pageable, 1);
 
-        when(advertisementRepository.findAllByAdModerationStatus(AdModerationStatus.REJECTED, pageable)).thenReturn(page);
+        when(advertisementRepository.findAllByStatus(Status.REJECTED, pageable)).thenReturn(page);
         when(advertisementMapper.toResponse(advertisement)).thenReturn(response);
         when(imageService.getPreviewImageUrlByAdvertisementId(32L)).thenReturn(List.of("rejected-preview.jpg"));
 
@@ -186,7 +186,7 @@ class AdvertisementServiceTest {
         AdvertisementResponse response = AdvertisementResponse.builder().id(33L).build();
         Page<Advertisement> page = new PageImpl<>(List.of(advertisement), pageable, 1);
 
-        when(advertisementRepository.findAllByAuthorIdAndAdModerationStatus(55L, AdModerationStatus.APPROVED, pageable))
+        when(advertisementRepository.findAllByAuthorIdAndStatus(55L, Status.APPROVED, pageable))
                 .thenReturn(page);
         when(advertisementMapper.toResponse(advertisement)).thenReturn(response);
         when(imageService.getPreviewImageUrlByAdvertisementId(33L)).thenReturn(List.of("approved-user-preview.jpg"));
@@ -239,7 +239,7 @@ class AdvertisementServiceTest {
         assertEquals(category, savedAdvertisement.getCategory());
         assertEquals(subcategory, savedAdvertisement.getSubcategory());
         assertEquals(mappedAddress, savedAdvertisement.getAddress());
-        assertEquals(AdModerationStatus.PENDING, savedAdvertisement.getAdModerationStatus());
+        assertEquals(Status.PENDING, savedAdvertisement.getStatus());
 
         verify(imageService).setImagesToAdvertisement(request.getImageIds(), 999L);
     }
@@ -366,7 +366,7 @@ class AdvertisementServiceTest {
                 .description("Same description")
                 .price(100.0)
                 .address(oldAddress)
-                .adModerationStatus(AdModerationStatus.APPROVED)
+                .status(Status.APPROVED)
                 .build();
         AdvertisementUpdateRequest request = validUpdateRequest("Same name", "Same description", 100.0, List.of(1L, 2L));
 
@@ -384,7 +384,7 @@ class AdvertisementServiceTest {
         assertEquals("Same name", advertisement.getName());
         assertEquals("Same description", advertisement.getDescription());
         assertEquals(100.0, advertisement.getPrice());
-        assertEquals(AdModerationStatus.APPROVED, advertisement.getAdModerationStatus());
+        assertEquals(Status.APPROVED, advertisement.getStatus());
     }
 
     @Test
@@ -397,7 +397,7 @@ class AdvertisementServiceTest {
                 .description("Old description")
                 .price(100.0)
                 .address(Address.builder().city("Moscow").street("A").house("1").build())
-                .adModerationStatus(AdModerationStatus.APPROVED)
+                .status(Status.APPROVED)
                 .build();
         AdvertisementUpdateRequest request = validUpdateRequest("New name", "New description", 150.0, List.of(1L, 2L));
         Address newAddress = Address.builder().city("Kazan").street("B").house("2").build();
@@ -417,7 +417,7 @@ class AdvertisementServiceTest {
         assertEquals("New description", advertisement.getDescription());
         assertEquals(150.0, advertisement.getPrice());
         assertEquals(newAddress, advertisement.getAddress());
-        assertEquals(AdModerationStatus.PENDING, advertisement.getAdModerationStatus());
+        assertEquals(Status.PENDING, advertisement.getStatus());
     }
 
     @Test
@@ -460,14 +460,14 @@ class AdvertisementServiceTest {
     void approveAdvertisementChangesStatusWhenPending() {
         Advertisement advertisement = Advertisement.builder()
                 .id(50L)
-                .adModerationStatus(AdModerationStatus.PENDING)
+                .status(Status.PENDING)
                 .build();
 
         when(advertisementRepository.findById(50L)).thenReturn(Optional.of(advertisement));
 
         advertisementService.approveAdvertisement(50L);
 
-        assertEquals(AdModerationStatus.APPROVED, advertisement.getAdModerationStatus());
+        assertEquals(Status.APPROVED, advertisement.getStatus());
         verify(advertisementRepository).save(advertisement);
     }
 
@@ -475,7 +475,7 @@ class AdvertisementServiceTest {
     void approveAdvertisementThrowsWhenStatusIsNotPending() {
         Advertisement advertisement = Advertisement.builder()
                 .id(50L)
-                .adModerationStatus(AdModerationStatus.REJECTED)
+                .status(Status.REJECTED)
                 .build();
 
         when(advertisementRepository.findById(50L)).thenReturn(Optional.of(advertisement));
@@ -483,7 +483,7 @@ class AdvertisementServiceTest {
         InvalidStateException exception = assertThrows(InvalidStateException.class,
                 () -> advertisementService.approveAdvertisement(50L));
         assertEquals("Cannot change status of a non-pending advertisement", exception.getMessage());
-        assertEquals(Map.of("Advertisement id:", 50L, "Current status:", AdModerationStatus.REJECTED), exception.getDetails());
+        assertEquals(Map.of("Advertisement id:", 50L, "Current status:", Status.REJECTED), exception.getDetails());
         verify(advertisementRepository, never()).save(any());
     }
 
@@ -491,14 +491,14 @@ class AdvertisementServiceTest {
     void rejectAdvertisementChangesStatusAndReason() {
         Advertisement advertisement = Advertisement.builder()
                 .id(51L)
-                .adModerationStatus(AdModerationStatus.PENDING)
+                .status(Status.PENDING)
                 .build();
 
         when(advertisementRepository.findById(51L)).thenReturn(Optional.of(advertisement));
 
         advertisementService.rejectAdvertisement(51L, "Incorrect description");
 
-        assertEquals(AdModerationStatus.REJECTED, advertisement.getAdModerationStatus());
+        assertEquals(Status.REJECTED, advertisement.getStatus());
         assertEquals("Incorrect description", advertisement.getModerationRejectionReason());
         verify(advertisementRepository).save(advertisement);
     }
@@ -507,7 +507,7 @@ class AdvertisementServiceTest {
     void rejectAdvertisementThrowsWhenStatusIsNotPending() {
         Advertisement advertisement = Advertisement.builder()
                 .id(51L)
-                .adModerationStatus(AdModerationStatus.APPROVED)
+                .status(Status.APPROVED)
                 .build();
 
         when(advertisementRepository.findById(51L)).thenReturn(Optional.of(advertisement));
@@ -515,7 +515,7 @@ class AdvertisementServiceTest {
         InvalidStateException exception = assertThrows(InvalidStateException.class, () ->
                 advertisementService.rejectAdvertisement(51L, "Reason"));
         assertEquals("Cannot change status of a non-pending advertisement", exception.getMessage());
-        assertEquals(Map.of("Advertisement id:", 51L, "Current status:", AdModerationStatus.APPROVED), exception.getDetails());
+        assertEquals(Map.of("Advertisement id:", 51L, "Current status:", Status.APPROVED), exception.getDetails());
         verify(advertisementRepository, never()).save(any());
     }
 
@@ -594,7 +594,7 @@ class AdvertisementServiceTest {
         }
 
         verify(advertisementRepository, never())
-                .findAllByAuthorIdAndAdModerationStatus(any(), any(), any());
+                .findAllByAuthorIdAndStatus(any(), any(), any());
     }
 
     @Test
@@ -603,9 +603,9 @@ class AdvertisementServiceTest {
         AdvertisementResponse response = AdvertisementResponse.builder().id(1L).build();
         Page<Advertisement> page = new PageImpl<>(List.of(advertisement), PageRequest.of(0, 10), 1);
 
-        when(advertisementRepository.findAllByAuthorIdAndAdModerationStatus(
+        when(advertisementRepository.findAllByAuthorIdAndStatus(
                 eq(44L),
-                eq(AdModerationStatus.PENDING),
+                eq(Status.PENDING),
                 any(PageRequest.class)
         )).thenReturn(page);
         when(advertisementMapper.toResponse(advertisement)).thenReturn(response);
@@ -633,9 +633,9 @@ class AdvertisementServiceTest {
         Page<Advertisement> page = new PageImpl<>(List.of(advertisement), PageRequest.of(0, 10), 1);
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(requestedUser));
-        when(advertisementRepository.findAllByAuthorIdAndAdModerationStatus(
+        when(advertisementRepository.findAllByAuthorIdAndStatus(
                 userId,
-                AdModerationStatus.REJECTED,
+                Status.REJECTED,
                 PageRequest.of(0, 10)
         )).thenReturn(page);
         when(advertisementMapper.toResponse(advertisement)).thenReturn(response);
@@ -662,9 +662,9 @@ class AdvertisementServiceTest {
         Page<Advertisement> page = new PageImpl<>(List.of(advertisement), PageRequest.of(0, 10), 1);
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(requestedUser));
-        when(advertisementRepository.findFavoritesByUserIdAndAdModerationStatus(
+        when(advertisementRepository.findFavoritesByUserIdAndStatus(
                 userId,
-                AdModerationStatus.APPROVED,
+                Status.APPROVED,
                 PageRequest.of(0, 10)
         )).thenReturn(page);
         when(advertisementMapper.toResponse(advertisement)).thenReturn(response);
@@ -687,7 +687,7 @@ class AdvertisementServiceTest {
         Long userId = 5L;
         Advertisement advertisement = Advertisement.builder()
                 .id(100L)
-                .adModerationStatus(AdModerationStatus.APPROVED)
+                .status(Status.APPROVED)
                 .build();
         User currentUser = User.builder()
                 .id(userId)
@@ -715,7 +715,7 @@ class AdvertisementServiceTest {
         Long userId = 5L;
         Advertisement advertisement = Advertisement.builder()
                 .id(100L)
-                .adModerationStatus(AdModerationStatus.PENDING)
+                .status(Status.PENDING)
                 .build();
         User requestedUser = User.builder().id(userId).keycloakId("kc-user").build();
 
@@ -732,7 +732,7 @@ class AdvertisementServiceTest {
         }
 
         assertEquals("Only approved advertisements can be added to favorites", exception.getMessage());
-        assertEquals(Map.of("Advertisement id:", 100L, "Current status:", AdModerationStatus.PENDING, "User id:", 5L), exception.getDetails());
+        assertEquals(Map.of("Advertisement id:", 100L, "Current status:", Status.PENDING, "User id:", 5L), exception.getDetails());
     }
 
     @Test

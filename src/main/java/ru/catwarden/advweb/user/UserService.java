@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.transaction.annotation.Transactional;
 import ru.catwarden.advweb.avatar.AvatarService;
-import ru.catwarden.advweb.enums.AdModerationStatus;
+import ru.catwarden.advweb.enums.Status;
 import ru.catwarden.advweb.exception.DetailedAccessDeniedException;
 import ru.catwarden.advweb.exception.EntityNotFoundException;
 import ru.catwarden.advweb.exception.OperationNotAllowedException;
@@ -162,7 +162,7 @@ public class UserService {
         }
 
         Object[] aggregate = reviewRepository
-                .aggregateRatingByRecipientAndStatus(userId, AdModerationStatus.APPROVED)
+                .aggregateRatingByRecipientAndStatus(userId, Status.APPROVED)
                 .orElse(new Object[]{0.0, 0L});
 
         Double rating = aggregate[0] != null ? ((Number) aggregate[0]).doubleValue() : 0.0;

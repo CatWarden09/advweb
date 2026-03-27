@@ -16,7 +16,7 @@ import ru.catwarden.advweb.ad.dto.AdvertisementUpdateRequest;
 import ru.catwarden.advweb.adcategory.AdvertisementCategory;
 import ru.catwarden.advweb.adcategory.CategoryRepository;
 import ru.catwarden.advweb.comment.CommentService;
-import ru.catwarden.advweb.enums.AdModerationStatus;
+import ru.catwarden.advweb.enums.Status;
 import ru.catwarden.advweb.exception.DetailedAccessDeniedException;
 import ru.catwarden.advweb.exception.EntityNotFoundException;
 import ru.catwarden.advweb.exception.InvalidRelationException;
@@ -87,7 +87,7 @@ public class AdvertisementService {
         if(filter.getSubcategoryId() != null){
             builder.and(advertisement.subcategory.id.eq(filter.getSubcategoryId()));
         }
-        builder.and(advertisement.adModerationStatus.eq(AdModerationStatus.APPROVED));
+        builder.and(advertisement.status.eq(Status.APPROVED));
 
         return advertisementRepository.findAll(builder, pageable)
                 .map(this::mapWithImages);
@@ -99,41 +99,41 @@ public class AdvertisementService {
             condition = "#pageable.pageNumber == 0"
     )
     public Page<AdvertisementResponse> getAllApprovedAdvertisements(Pageable pageable){
-        return advertisementRepository.findAllByAdModerationStatus(AdModerationStatus.APPROVED, pageable)
+        return advertisementRepository.findAllByStatus(Status.APPROVED, pageable)
                 .map(this::mapWithPreviewImage);
     }
 
     public Page<AdvertisementResponse> getAllPendingAdvertisements(Pageable pageable){
-        return advertisementRepository.findAllByAdModerationStatus(AdModerationStatus.PENDING, pageable)
+        return advertisementRepository.findAllByStatus(Status.PENDING, pageable)
                 .map(this::mapWithPreviewImage);
     }
 
     public Page<AdvertisementResponse> getAllRejectedAdvertisements(Pageable pageable){
-        return advertisementRepository.findAllByAdModerationStatus(AdModerationStatus.REJECTED, pageable)
+        return advertisementRepository.findAllByStatus(Status.REJECTED, pageable)
                 .map(this::mapWithPreviewImage);
     }
 
     public Page<AdvertisementResponse> getUserApprovedAdvertisements(Long userId, Pageable pageable){
-        return advertisementRepository.findAllByAuthorIdAndAdModerationStatus(userId, AdModerationStatus.APPROVED, pageable)
+        return advertisementRepository.findAllByAuthorIdAndStatus(userId, Status.APPROVED, pageable)
                 .map(this::mapWithPreviewImage);
     }
 
     public Page<AdvertisementResponse> getUserPendingAdvertisements(Long userId, Pageable pageable){
         validateCurrentUserOrAdmin(userId);
-        return advertisementRepository.findAllByAuthorIdAndAdModerationStatus(userId, AdModerationStatus.PENDING, pageable)
+        return advertisementRepository.findAllByAuthorIdAndStatus(userId, Status.PENDING, pageable)
                 .map(this::mapWithPreviewImage);
     }
 
     public Page<AdvertisementResponse> getUserRejectedAdvertisements(Long userId, Pageable pageable){
         validateCurrentUserOrAdmin(userId);
-        return advertisementRepository.findAllByAuthorIdAndAdModerationStatus(userId, AdModerationStatus.REJECTED, pageable)
+        return advertisementRepository.findAllByAuthorIdAndStatus(userId, Status.REJECTED, pageable)
                 .map(this::mapWithPreviewImage);
     }
 
 
     public Page<AdvertisementResponse> getUserFavoriteAdvertisements(Long userId, Pageable pageable){
         validateCurrentUserOrAdmin(userId);
-        return advertisementRepository.findFavoritesByUserIdAndAdModerationStatus(userId, AdModerationStatus.APPROVED, pageable)
+        return advertisementRepository.findFavoritesByUserIdAndStatus(userId, Status.APPROVED, pageable)
                 .map(this::mapWithPreviewImage);
     }
 
@@ -144,11 +144,11 @@ public class AdvertisementService {
         Advertisement advertisement = advertisementRepository.findById(advertisementId)
                 .orElseThrow(() -> new EntityNotFoundException(Advertisement.class, advertisementId));
 
-        if (advertisement.getAdModerationStatus() != AdModerationStatus.APPROVED) {
+        if (advertisement.getStatus() != Status.APPROVED) {
             throw new OperationNotAllowedException("Only approved advertisements can be added to favorites",
                     Map.of(
                             "Advertisement id:", advertisementId,
-                            "Current status:", advertisement.getAdModerationStatus(),
+                            "Current status:", advertisement.getStatus(),
                             "User id:", userId
                     ));
         }
@@ -230,7 +230,7 @@ public class AdvertisementService {
         Address address = addressMapper.toEntity(advertisementRequest.getAddress());
         advertisement.setAddress(address);
 
-        advertisement.setAdModerationStatus(AdModerationStatus.PENDING);
+        advertisement.setStatus(Status.PENDING);
 
         Advertisement savedAdvertisement = advertisementRepository.save(advertisement);
 
@@ -303,7 +303,7 @@ public class AdvertisementService {
         advertisement.setPrice(advertisementUpdateRequest.getPrice());
         advertisement.setAddress(requestAddress);
 
-        advertisement.setAdModerationStatus(AdModerationStatus.PENDING);
+        advertisement.setStatus(Status.PENDING);
 
         log.info(
                 "AUDIT advertisement updated: adId={}, authorId={}, fieldsChanged={}, imagesChanged={}, status={}, actorId={}",
@@ -311,7 +311,7 @@ public class AdvertisementService {
                 getAuthorId(advertisement),
                 isFieldsChanged,
                 isImagesChanged,
-                advertisement.getAdModerationStatus(),
+                advertisement.getStatus(),
                 SecurityUtils.getCurrentUserKeycloakId()
         );
 
@@ -323,12 +323,12 @@ public class AdvertisementService {
         Advertisement advertisement = advertisementRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(Advertisement.class, id));
 
-        if(advertisement.getAdModerationStatus() != AdModerationStatus.PENDING){
+        if(advertisement.getStatus() != Status.PENDING){
             throw new InvalidStateException("Cannot change status of a non-pending advertisement",
-                    Map.of("Advertisement id:", advertisement.getId(), "Current status:", advertisement.getAdModerationStatus()));
+                    Map.of("Advertisement id:", advertisement.getId(), "Current status:", advertisement.getStatus()));
         }
 
-        advertisement.setAdModerationStatus(AdModerationStatus.APPROVED);
+        advertisement.setStatus(Status.APPROVED);
 
         advertisementRepository.save(advertisement);
 
@@ -336,7 +336,7 @@ public class AdvertisementService {
                 "AUDIT advertisement approved: adId={}, authorId={}, status={}, actorId={}",
                 advertisement.getId(),
                 getAuthorId(advertisement),
-                advertisement.getAdModerationStatus(),
+                advertisement.getStatus(),
                 SecurityUtils.getCurrentUserKeycloakId()
         );
     }
@@ -346,12 +346,12 @@ public class AdvertisementService {
         Advertisement advertisement = advertisementRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(Advertisement.class, id));
 
-        if(advertisement.getAdModerationStatus() != AdModerationStatus.PENDING){
+        if(advertisement.getStatus() != Status.PENDING){
             throw new InvalidStateException("Cannot change status of a non-pending advertisement",
-                    Map.of("Advertisement id:", advertisement.getId(), "Current status:", advertisement.getAdModerationStatus()));
+                    Map.of("Advertisement id:", advertisement.getId(), "Current status:", advertisement.getStatus()));
         }
 
-        advertisement.setAdModerationStatus(AdModerationStatus.REJECTED);
+        advertisement.setStatus(Status.REJECTED);
         advertisement.setModerationRejectionReason(moderationRejectionReason);
 
         advertisementRepository.save(advertisement);
@@ -360,7 +360,7 @@ public class AdvertisementService {
                 "AUDIT advertisement rejected: adId={}, authorId={}, status={}, actorId={}",
                 advertisement.getId(),
                 getAuthorId(advertisement),
-                advertisement.getAdModerationStatus(),
+                advertisement.getStatus(),
                 SecurityUtils.getCurrentUserKeycloakId()
         );
     }

@@ -9,7 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import ru.catwarden.advweb.enums.AdModerationStatus;
+import ru.catwarden.advweb.enums.Status;
 import ru.catwarden.advweb.exception.DetailedAccessDeniedException;
 import ru.catwarden.advweb.exception.EntityNotFoundException;
 import ru.catwarden.advweb.exception.InvalidRelationException;
@@ -60,7 +60,7 @@ class ReviewServiceTest {
         ReviewResponse response = ReviewResponse.builder().id(7L).build();
         ShortUserInfoResponse authorInfo = ShortUserInfoResponse.builder().id(1L).firstName("Ivan").build();
 
-        when(reviewRepository.findByModerationStatus(AdModerationStatus.APPROVED, PageRequest.of(0, 10)))
+        when(reviewRepository.findByStatus(Status.APPROVED, PageRequest.of(0, 10)))
                 .thenReturn(new PageImpl<>(List.of(review), PageRequest.of(0, 10), 1));
         when(reviewMapper.toResponse(review)).thenReturn(response);
         when(userResponseAssembler.toShortUserInfoResponse(author)).thenReturn(authorInfo);
@@ -78,7 +78,7 @@ class ReviewServiceTest {
         ReviewResponse response = ReviewResponse.builder().id(8L).build();
         ShortUserInfoResponse authorInfo = ShortUserInfoResponse.builder().id(2L).firstName("Petr").build();
 
-        when(reviewRepository.findByModerationStatus(AdModerationStatus.PENDING, PageRequest.of(0, 10)))
+        when(reviewRepository.findByStatus(Status.PENDING, PageRequest.of(0, 10)))
                 .thenReturn(new PageImpl<>(List.of(review), PageRequest.of(0, 10), 1));
         when(reviewMapper.toResponse(review)).thenReturn(response);
         when(userResponseAssembler.toShortUserInfoResponse(author)).thenReturn(authorInfo);
@@ -96,7 +96,7 @@ class ReviewServiceTest {
         ReviewResponse response = ReviewResponse.builder().id(9L).build();
         ShortUserInfoResponse authorInfo = ShortUserInfoResponse.builder().id(3L).firstName("Alex").build();
 
-        when(reviewRepository.findByModerationStatus(AdModerationStatus.REJECTED, PageRequest.of(0, 10)))
+        when(reviewRepository.findByStatus(Status.REJECTED, PageRequest.of(0, 10)))
                 .thenReturn(new PageImpl<>(List.of(review), PageRequest.of(0, 10), 1));
         when(reviewMapper.toResponse(review)).thenReturn(response);
         when(userResponseAssembler.toShortUserInfoResponse(author)).thenReturn(authorInfo);
@@ -114,7 +114,7 @@ class ReviewServiceTest {
         ReviewResponse response = ReviewResponse.builder().id(10L).build();
         ShortUserInfoResponse authorInfo = ShortUserInfoResponse.builder().id(4L).firstName("Oleg").build();
 
-        when(reviewRepository.findByRecipientIdAndModerationStatus(55L, AdModerationStatus.APPROVED, PageRequest.of(0, 10)))
+        when(reviewRepository.findByRecipientIdAndStatus(55L, Status.APPROVED, PageRequest.of(0, 10)))
                 .thenReturn(new PageImpl<>(List.of(review), PageRequest.of(0, 10), 1));
         when(reviewMapper.toResponse(review)).thenReturn(response);
         when(userResponseAssembler.toShortUserInfoResponse(author)).thenReturn(authorInfo);
@@ -134,7 +134,7 @@ class ReviewServiceTest {
             securityUtilsMockedStatic.when(SecurityUtils::getCurrentUserKeycloakId).thenReturn("another-user");
             securityUtilsMockedStatic.when(SecurityUtils::isCurrentUserAdmin).thenReturn(false);
             DetailedAccessDeniedException exception = assertThrows(DetailedAccessDeniedException.class, () ->
-                    reviewService.getUserReviews(8L, PageRequest.of(0, 10), AdModerationStatus.PENDING));
+                    reviewService.getUserReviews(8L, PageRequest.of(0, 10), Status.PENDING));
             assertEquals("You can only view your own reviews", exception.getMessage());
             assertEquals(
                     Map.of(
@@ -156,7 +156,7 @@ class ReviewServiceTest {
         ShortUserInfoResponse authorInfo = ShortUserInfoResponse.builder().id(8L).firstName("Ivan").build();
 
         when(userRepository.findById(8L)).thenReturn(Optional.of(requestedUser));
-        when(reviewRepository.findByAuthorIdAndModerationStatus(8L, AdModerationStatus.PENDING, PageRequest.of(0, 10)))
+        when(reviewRepository.findByAuthorIdAndStatus(8L, Status.PENDING, PageRequest.of(0, 10)))
                 .thenReturn(new PageImpl<>(List.of(review), PageRequest.of(0, 10), 1));
         when(reviewMapper.toResponse(review)).thenReturn(response);
         when(userResponseAssembler.toShortUserInfoResponse(author)).thenReturn(authorInfo);
@@ -165,7 +165,7 @@ class ReviewServiceTest {
         try (MockedStatic<SecurityUtils> securityUtilsMockedStatic = mockStatic(SecurityUtils.class)) {
             securityUtilsMockedStatic.when(SecurityUtils::getCurrentUserKeycloakId).thenReturn("owner-id");
             securityUtilsMockedStatic.when(SecurityUtils::isCurrentUserAdmin).thenReturn(false);
-            result = reviewService.getUserReviews(8L, PageRequest.of(0, 10), AdModerationStatus.PENDING);
+            result = reviewService.getUserReviews(8L, PageRequest.of(0, 10), Status.PENDING);
         }
 
         assertEquals(1, result.getTotalElements());
@@ -179,7 +179,7 @@ class ReviewServiceTest {
         ReviewResponse response = ReviewResponse.builder().id(21L).build();
         ShortUserInfoResponse authorInfo = ShortUserInfoResponse.builder().id(99L).firstName("Admin").build();
 
-        when(reviewRepository.findByAuthorIdAndModerationStatus(8L, AdModerationStatus.APPROVED, PageRequest.of(0, 10)))
+        when(reviewRepository.findByAuthorIdAndStatus(8L, Status.APPROVED, PageRequest.of(0, 10)))
                 .thenReturn(new PageImpl<>(List.of(review), PageRequest.of(0, 10), 1));
         when(reviewMapper.toResponse(review)).thenReturn(response);
         when(userResponseAssembler.toShortUserInfoResponse(author)).thenReturn(authorInfo);
@@ -188,7 +188,7 @@ class ReviewServiceTest {
         try (MockedStatic<SecurityUtils> securityUtilsMockedStatic = mockStatic(SecurityUtils.class)) {
             securityUtilsMockedStatic.when(SecurityUtils::getCurrentUserKeycloakId).thenReturn("admin-id");
             securityUtilsMockedStatic.when(SecurityUtils::isCurrentUserAdmin).thenReturn(true);
-            result = reviewService.getUserReviews(8L, PageRequest.of(0, 10), AdModerationStatus.APPROVED);
+            result = reviewService.getUserReviews(8L, PageRequest.of(0, 10), Status.APPROVED);
         }
 
         assertEquals(1, result.getTotalElements());
@@ -203,7 +203,7 @@ class ReviewServiceTest {
             securityUtilsMockedStatic.when(SecurityUtils::getCurrentUserKeycloakId).thenReturn("owner-id");
             securityUtilsMockedStatic.when(SecurityUtils::isCurrentUserAdmin).thenReturn(false);
             assertThrows(EntityNotFoundException.class, () ->
-                    reviewService.getUserReviews(8L, PageRequest.of(0, 10), AdModerationStatus.PENDING));
+                    reviewService.getUserReviews(8L, PageRequest.of(0, 10), Status.PENDING));
         }
     }
 
@@ -229,7 +229,7 @@ class ReviewServiceTest {
 
         assertEquals(currentUser, review.getAuthor());
         assertEquals(recipient, review.getRecipient());
-        assertEquals(AdModerationStatus.PENDING, review.getModerationStatus());
+        assertEquals(Status.PENDING, review.getStatus());
         verify(reviewRepository).save(review);
     }
 
@@ -289,7 +289,7 @@ class ReviewServiceTest {
     @Test
     void updateReviewThrowsWhenCurrentUserHasNoAccess() {
         User author = User.builder().keycloakId("owner-id").build();
-        Review review = Review.builder().id(4L).author(author).moderationStatus(AdModerationStatus.PENDING).build();
+        Review review = Review.builder().id(4L).author(author).status(Status.PENDING).build();
         ReviewUpdateRequest request = ReviewUpdateRequest.builder()
                 .text("This updated text is long enough and meaningful for update authorization check.")
                 .rating(4)
@@ -332,7 +332,7 @@ class ReviewServiceTest {
                 .id(4L)
                 .author(author)
                 .recipient(recipient)
-                .moderationStatus(AdModerationStatus.APPROVED)
+                .status(Status.APPROVED)
                 .build();
         ReviewUpdateRequest request = ReviewUpdateRequest.builder()
                 .text("This updated text is long enough and meaningful for approved review update test.")
@@ -348,7 +348,7 @@ class ReviewServiceTest {
 
         assertEquals(request.getText(), review.getText());
         assertEquals(3, review.getRating());
-        assertEquals(AdModerationStatus.PENDING, review.getModerationStatus());
+        assertEquals(Status.PENDING, review.getStatus());
         verify(reviewRepository).save(review);
         verify(userService).recalculateUserRating(9L);
     }
@@ -361,7 +361,7 @@ class ReviewServiceTest {
                 .id(4L)
                 .author(author)
                 .recipient(recipient)
-                .moderationStatus(AdModerationStatus.PENDING)
+                .status(Status.PENDING)
                 .build();
         ReviewUpdateRequest request = ReviewUpdateRequest.builder()
                 .text("This updated text is long enough and meaningful for pending review update test.")
@@ -387,7 +387,7 @@ class ReviewServiceTest {
                 .id(4L)
                 .author(author)
                 .recipient(recipient)
-                .moderationStatus(AdModerationStatus.PENDING)
+                .status(Status.PENDING)
                 .build();
         ReviewUpdateRequest request = ReviewUpdateRequest.builder()
                 .text("This updated text is long enough and meaningful for admin update path coverage.")
@@ -407,12 +407,12 @@ class ReviewServiceTest {
     @Test
     void approveReviewChangesStatusAndRecalculatesRating() {
         User recipient = User.builder().id(11L).build();
-        Review review = Review.builder().id(3L).moderationStatus(AdModerationStatus.PENDING).recipient(recipient).build();
+        Review review = Review.builder().id(3L).status(Status.PENDING).recipient(recipient).build();
         when(reviewRepository.findById(3L)).thenReturn(Optional.of(review));
 
         reviewService.approveReview(3L);
 
-        assertEquals(AdModerationStatus.APPROVED, review.getModerationStatus());
+        assertEquals(Status.APPROVED, review.getStatus());
         verify(reviewRepository).save(review);
         verify(userService).recalculateUserRating(11L);
     }
@@ -426,23 +426,23 @@ class ReviewServiceTest {
 
     @Test
     void approveReviewThrowsWhenStatusIsNotPending() {
-        Review review = Review.builder().id(3L).moderationStatus(AdModerationStatus.REJECTED).build();
+        Review review = Review.builder().id(3L).status(Status.REJECTED).build();
         when(reviewRepository.findById(3L)).thenReturn(Optional.of(review));
 
         InvalidStateException exception = assertThrows(InvalidStateException.class, () -> reviewService.approveReview(3L));
         assertEquals("Cannot change status of a non-pending review", exception.getMessage());
-        assertEquals(Map.of("Review id:", 3L, "Current status:", AdModerationStatus.REJECTED), exception.getDetails());
+        assertEquals(Map.of("Review id:", 3L, "Current status:", Status.REJECTED), exception.getDetails());
         verify(reviewRepository, never()).save(any(Review.class));
     }
 
     @Test
     void rejectReviewChangesStatusAndReason() {
-        Review review = Review.builder().id(3L).moderationStatus(AdModerationStatus.PENDING).build();
+        Review review = Review.builder().id(3L).status(Status.PENDING).build();
         when(reviewRepository.findById(3L)).thenReturn(Optional.of(review));
 
         reviewService.rejectReview(3L, "Bad language");
 
-        assertEquals(AdModerationStatus.REJECTED, review.getModerationStatus());
+        assertEquals(Status.REJECTED, review.getStatus());
         assertEquals("Bad language", review.getModerationRejectionReason());
         verify(reviewRepository).save(review);
     }
@@ -456,13 +456,13 @@ class ReviewServiceTest {
 
     @Test
     void rejectReviewThrowsWhenStatusIsNotPending() {
-        Review review = Review.builder().id(3L).moderationStatus(AdModerationStatus.APPROVED).build();
+        Review review = Review.builder().id(3L).status(Status.APPROVED).build();
         when(reviewRepository.findById(3L)).thenReturn(Optional.of(review));
 
         InvalidStateException exception = assertThrows(InvalidStateException.class,
                 () -> reviewService.rejectReview(3L, "Bad language"));
         assertEquals("Cannot change status of a non-pending review", exception.getMessage());
-        assertEquals(Map.of("Review id:", 3L, "Current status:", AdModerationStatus.APPROVED), exception.getDetails());
+        assertEquals(Map.of("Review id:", 3L, "Current status:", Status.APPROVED), exception.getDetails());
         verify(reviewRepository, never()).save(any(Review.class));
     }
 
@@ -487,7 +487,7 @@ class ReviewServiceTest {
         Review review = Review.builder()
                 .id(5L)
                 .author(author)
-                .moderationStatus(AdModerationStatus.PENDING)
+                .status(Status.PENDING)
                 .build();
         when(reviewRepository.existsById(5L)).thenReturn(true);
         when(reviewRepository.findById(5L)).thenReturn(Optional.of(review));
@@ -519,7 +519,7 @@ class ReviewServiceTest {
                 .id(5L)
                 .author(author)
                 .recipient(recipient)
-                .moderationStatus(AdModerationStatus.PENDING)
+                .status(Status.PENDING)
                 .build();
         when(reviewRepository.existsById(5L)).thenReturn(true);
         when(reviewRepository.findById(5L)).thenReturn(Optional.of(review));
@@ -542,7 +542,7 @@ class ReviewServiceTest {
                 .id(5L)
                 .author(author)
                 .recipient(recipient)
-                .moderationStatus(AdModerationStatus.PENDING)
+                .status(Status.PENDING)
                 .build();
         when(reviewRepository.existsById(5L)).thenReturn(true);
         when(reviewRepository.findById(5L)).thenReturn(Optional.of(review));
@@ -564,7 +564,7 @@ class ReviewServiceTest {
                 .id(5L)
                 .author(author)
                 .recipient(recipient)
-                .moderationStatus(AdModerationStatus.APPROVED)
+                .status(Status.APPROVED)
                 .build();
         when(reviewRepository.existsById(5L)).thenReturn(true);
         when(reviewRepository.findById(5L)).thenReturn(Optional.of(review));

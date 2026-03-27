@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.catwarden.advweb.adcategory.AdvertisementCategory;
-import ru.catwarden.advweb.enums.AdModerationStatus;
+import ru.catwarden.advweb.enums.Status;
 import ru.catwarden.advweb.user.User;
 
 import java.time.LocalDateTime;
@@ -53,8 +53,9 @@ public class Advertisement {
 
     private LocalDateTime updatedAt;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private AdModerationStatus adModerationStatus;
+    private Status status;
 
     private String moderationRejectionReason;
 

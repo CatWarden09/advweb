@@ -5,7 +5,7 @@ import ru.catwarden.advweb.ad.dto.AddressDto;
 import ru.catwarden.advweb.ad.dto.AdvertisementRequest;
 import ru.catwarden.advweb.ad.dto.AdvertisementResponse;
 import ru.catwarden.advweb.adcategory.AdvertisementCategory;
-import ru.catwarden.advweb.enums.AdModerationStatus;
+import ru.catwarden.advweb.enums.Status;
 import ru.catwarden.advweb.user.User;
 
 import java.time.LocalDateTime;
@@ -57,7 +57,7 @@ class AdvertisementMapperTest {
                 .subcategory(subcategory)
                 .createdAt(createdAt)
                 .updatedAt(updatedAt)
-                .adModerationStatus(AdModerationStatus.APPROVED)
+                .status(Status.APPROVED)
                 .moderationRejectionReason(null)
                 .views(22L)
                 .build();
@@ -76,7 +76,7 @@ class AdvertisementMapperTest {
         assertEquals(4L, response.getSubcategoryId());
         assertEquals(createdAt, response.getCreatedAt());
         assertEquals(updatedAt, response.getUpdatedAt());
-        assertEquals(AdModerationStatus.APPROVED, response.getAdModerationStatus());
+        assertEquals(Status.APPROVED, response.getStatus());
         assertEquals(22L, response.getViews());
     }
 }

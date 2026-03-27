@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.catwarden.advweb.enums.AdModerationStatus;
+import ru.catwarden.advweb.enums.Status;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,7 +24,7 @@ public class AdvertisementResponse {
     private Long subcategoryId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private AdModerationStatus adModerationStatus;
+    private Status status;
     private String moderationRejectionReason;
     private List<String> imageUrls;
     private Long views;
