@@ -5,23 +5,23 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import ru.catwarden.advweb.enums.AdModerationStatus;
+import ru.catwarden.advweb.enums.Status;
 
 import java.util.Optional;
 
 public interface ReviewRepository extends JpaRepository<Review, Long> {
-    Page<Review> findByModerationStatus(AdModerationStatus moderationStatus, Pageable pageable);
+    Page<Review> findByStatus(Status status, Pageable pageable);
 
-    Page<Review> findByRecipientIdAndModerationStatus(Long recipientId, AdModerationStatus moderationStatus, Pageable pageable);
+    Page<Review> findByRecipientIdAndStatus(Long recipientId, Status status, Pageable pageable);
 
-    Page<Review> findByAuthorIdAndModerationStatus(Long authorId, AdModerationStatus moderationStatus, Pageable pageable);
+    Page<Review> findByAuthorIdAndStatus(Long authorId, Status status, Pageable pageable);
 
     @Query("""
             SELECT AVG(r.rating), COUNT(r)
             FROM Review r
             WHERE r.recipient.id = :recipientId
-              AND r.moderationStatus = :moderationStatus
+              AND r.status = :status
             """)
     Optional<Object[]> aggregateRatingByRecipientAndStatus(@Param("recipientId") Long recipientId,
-                                                           @Param("moderationStatus") AdModerationStatus moderationStatus);
+                                                           @Param("status") Status status);
 }

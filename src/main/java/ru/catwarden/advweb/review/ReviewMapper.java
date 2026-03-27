@@ -11,7 +11,7 @@ public class ReviewMapper {
                 .id(review.getId())
                 .text(review.getText())
                 .rating(review.getRating())
-                .moderationStatus(review.getModerationStatus())
+                .status(review.getStatus())
                 .moderationRejectionReason(review.getModerationRejectionReason())
                 .recipientId(review.getRecipient().getId())
                 .createdAt(review.getCreatedAt())

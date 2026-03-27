@@ -7,7 +7,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import ru.catwarden.advweb.enums.AdModerationStatus;
+import ru.catwarden.advweb.enums.Status;
 import ru.catwarden.advweb.exception.DetailedAccessDeniedException;
 import ru.catwarden.advweb.exception.EntityNotFoundException;
 import ru.catwarden.advweb.exception.InvalidRelationException;
@@ -42,17 +42,17 @@ public class ReviewService {
             condition = "#pageable.pageNumber == 0"
     )
     public Page<ReviewResponse> getAllApprovedReviews(Pageable pageable) {
-        return reviewRepository.findByModerationStatus(AdModerationStatus.APPROVED, pageable)
+        return reviewRepository.findByStatus(Status.APPROVED, pageable)
                 .map(this::mapWithShortUserInfo);
     }
 
     public Page<ReviewResponse> getAllPendingReviews(Pageable pageable) {
-        return reviewRepository.findByModerationStatus(AdModerationStatus.PENDING, pageable)
+        return reviewRepository.findByStatus(Status.PENDING, pageable)
                 .map(this::mapWithShortUserInfo);
     }
 
     public Page<ReviewResponse> getAllRejectedReviews(Pageable pageable) {
-        return reviewRepository.findByModerationStatus(AdModerationStatus.REJECTED, pageable)
+        return reviewRepository.findByStatus(Status.REJECTED, pageable)
                 .map(this::mapWithShortUserInfo);
     }
 
@@ -62,15 +62,15 @@ public class ReviewService {
             condition = "#pageable.pageNumber == 0"
     )
     public Page<ReviewResponse> getApprovedReviewsAboutUser(Long userId, Pageable pageable) {
-        return reviewRepository.findByRecipientIdAndModerationStatus(userId, AdModerationStatus.APPROVED, pageable)
+        return reviewRepository.findByRecipientIdAndStatus(userId, Status.APPROVED, pageable)
                 .map(this::mapWithShortUserInfo);
     }
 
-    public Page<ReviewResponse> getUserReviews(Long userId, Pageable pageable, AdModerationStatus status) {
+    public Page<ReviewResponse> getUserReviews(Long userId, Pageable pageable, Status status) {
         String currentKeycloakId = SecurityUtils.getCurrentUserKeycloakId();
         validateCurrentUserOrAdmin(currentKeycloakId, userId);
 
-        return reviewRepository.findByAuthorIdAndModerationStatus(userId, status, pageable)
+        return reviewRepository.findByAuthorIdAndStatus(userId, status, pageable)
                 .map(this::mapWithShortUserInfo);
     }
 
@@ -92,7 +92,7 @@ public class ReviewService {
 
         review.setAuthor(currentUser);
         review.setRecipient(recipient);
-        review.setModerationStatus(AdModerationStatus.PENDING);
+        review.setStatus(Status.PENDING);
 
         reviewRepository.save(review);
 
@@ -101,7 +101,7 @@ public class ReviewService {
                 review.getId(),
                 getAuthorId(review),
                 getRecipientId(review),
-                review.getModerationStatus(),
+                review.getStatus(),
                 review.getRating()
         );
     }
@@ -111,7 +111,7 @@ public class ReviewService {
         Review review = reviewRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(Review.class, id));
 
-        boolean wasApproved = review.getModerationStatus() == AdModerationStatus.APPROVED;
+        boolean wasApproved = review.getStatus() == Status.APPROVED;
 
         String currentKeycloakId = SecurityUtils.getCurrentUserKeycloakId();
 
@@ -128,7 +128,7 @@ public class ReviewService {
 
         review.setText(reviewUpdateRequest.getText());
         review.setRating(reviewUpdateRequest.getRating());
-        review.setModerationStatus(AdModerationStatus.PENDING);
+        review.setStatus(Status.PENDING);
 
         reviewRepository.save(review);
 
@@ -141,7 +141,7 @@ public class ReviewService {
                 review.getId(),
                 getAuthorId(review),
                 getRecipientId(review),
-                review.getModerationStatus(),
+                review.getStatus(),
                 review.getRating(),
                 wasApproved,
                 currentKeycloakId
@@ -154,12 +154,12 @@ public class ReviewService {
         Review review = reviewRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(Review.class, id));
 
-        if(review.getModerationStatus() != AdModerationStatus.PENDING){
+        if(review.getStatus() != Status.PENDING){
             throw new InvalidStateException("Cannot change status of a non-pending review",
-                    Map.of("Review id:", review.getId(), "Current status:", review.getModerationStatus()));
+                    Map.of("Review id:", review.getId(), "Current status:", review.getStatus()));
         }
 
-        review.setModerationStatus(AdModerationStatus.APPROVED);
+        review.setStatus(Status.APPROVED);
 
         reviewRepository.save(review);
         userService.recalculateUserRating(review.getRecipient().getId());
@@ -169,7 +169,7 @@ public class ReviewService {
                 review.getId(),
                 getAuthorId(review),
                 getRecipientId(review),
-                review.getModerationStatus(),
+                review.getStatus(),
                 SecurityUtils.getCurrentUserKeycloakId()
         );
     }
@@ -179,12 +179,12 @@ public class ReviewService {
         Review review = reviewRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(Review.class, id));
 
-        if(review.getModerationStatus() != AdModerationStatus.PENDING){
+        if(review.getStatus() != Status.PENDING){
             throw new InvalidStateException("Cannot change status of a non-pending review",
-                    Map.of("Review id:", review.getId(), "Current status:", review.getModerationStatus()));
+                    Map.of("Review id:", review.getId(), "Current status:", review.getStatus()));
         }
 
-        review.setModerationStatus(AdModerationStatus.REJECTED);
+        review.setStatus(Status.REJECTED);
         review.setModerationRejectionReason(moderationRejectionReason);
 
         reviewRepository.save(review);
@@ -194,7 +194,7 @@ public class ReviewService {
                 review.getId(),
                 getAuthorId(review),
                 getRecipientId(review),
-                review.getModerationStatus(),
+                review.getStatus(),
                 SecurityUtils.getCurrentUserKeycloakId()
         );
     }
@@ -207,7 +207,7 @@ public class ReviewService {
 
         Review review = reviewRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(Review.class, id));
-        boolean wasApproved = review.getModerationStatus() == AdModerationStatus.APPROVED;
+        boolean wasApproved = review.getStatus() == Status.APPROVED;
 
 
         String currentKeycloakId = SecurityUtils.getCurrentUserKeycloakId();

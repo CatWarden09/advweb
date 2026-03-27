@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.catwarden.advweb.enums.AdModerationStatus;
+import ru.catwarden.advweb.enums.Status;
 import ru.catwarden.advweb.user.dto.ShortUserInfoResponse;
 
 import java.time.LocalDateTime;
@@ -17,7 +17,7 @@ public class ReviewResponse {
     private Long id;
     private String text;
     private Integer rating;
-    private AdModerationStatus moderationStatus;
+    private Status status;
     private String moderationRejectionReason;
     private ShortUserInfoResponse authorInfo;
     private Long recipientId;

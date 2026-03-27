@@ -11,7 +11,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import ru.catwarden.advweb.ad.AdvertisementService;
 import ru.catwarden.advweb.ad.dto.AdvertisementResponse;
-import ru.catwarden.advweb.enums.AdModerationStatus;
+import ru.catwarden.advweb.enums.Status;
 import ru.catwarden.advweb.review.ReviewService;
 import ru.catwarden.advweb.review.dto.ReviewResponse;
 import ru.catwarden.advweb.user.dto.UserResponse;
@@ -147,32 +147,32 @@ class UserControllerTest {
 
     @Test
     void getUserRejectedReviewsPassesRejectedStatus() {
-        when(reviewService.getUserReviews(any(Long.class), any(Pageable.class), any(AdModerationStatus.class)))
+        when(reviewService.getUserReviews(any(Long.class), any(Pageable.class), any(Status.class)))
                 .thenReturn(new PageImpl<>(List.of()));
 
         userController.getUserRejectedReviews(5L, 0, 10);
 
-        verify(reviewService).getUserReviews(org.mockito.ArgumentMatchers.eq(5L), any(Pageable.class), org.mockito.ArgumentMatchers.eq(AdModerationStatus.REJECTED));
+        verify(reviewService).getUserReviews(org.mockito.ArgumentMatchers.eq(5L), any(Pageable.class), org.mockito.ArgumentMatchers.eq(Status.REJECTED));
     }
 
     @Test
     void getUserPendingReviewsPassesPendingStatus() {
-        when(reviewService.getUserReviews(any(Long.class), any(Pageable.class), any(AdModerationStatus.class)))
+        when(reviewService.getUserReviews(any(Long.class), any(Pageable.class), any(Status.class)))
                 .thenReturn(new PageImpl<>(List.of()));
 
         userController.getUserPendingReviews(5L, 0, 10);
 
-        verify(reviewService).getUserReviews(org.mockito.ArgumentMatchers.eq(5L), any(Pageable.class), org.mockito.ArgumentMatchers.eq(AdModerationStatus.PENDING));
+        verify(reviewService).getUserReviews(org.mockito.ArgumentMatchers.eq(5L), any(Pageable.class), org.mockito.ArgumentMatchers.eq(Status.PENDING));
     }
 
     @Test
     void getUserApprovedReviewsPassesApprovedStatus() {
-        when(reviewService.getUserReviews(any(Long.class), any(Pageable.class), any(AdModerationStatus.class)))
+        when(reviewService.getUserReviews(any(Long.class), any(Pageable.class), any(Status.class)))
                 .thenReturn(new PageImpl<>(List.of()));
 
         userController.getUserApprovedReviews(5L, 0, 10);
 
-        verify(reviewService).getUserReviews(org.mockito.ArgumentMatchers.eq(5L), any(Pageable.class), org.mockito.ArgumentMatchers.eq(AdModerationStatus.APPROVED));
+        verify(reviewService).getUserReviews(org.mockito.ArgumentMatchers.eq(5L), any(Pageable.class), org.mockito.ArgumentMatchers.eq(Status.APPROVED));
     }
 
     @Test

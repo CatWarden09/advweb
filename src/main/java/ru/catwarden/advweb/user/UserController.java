@@ -8,7 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import ru.catwarden.advweb.ad.AdvertisementService;
 import ru.catwarden.advweb.ad.dto.AdvertisementResponse;
-import ru.catwarden.advweb.enums.AdModerationStatus;
+import ru.catwarden.advweb.enums.Status;
 import ru.catwarden.advweb.review.ReviewService;
 import ru.catwarden.advweb.review.dto.ReviewResponse;
 import ru.catwarden.advweb.user.dto.UserResponse;
@@ -70,7 +70,7 @@ public class UserController {
                                                        @RequestParam(defaultValue = "0") int page,
                                                        @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
-        return reviewService.getUserReviews(id, pageable, AdModerationStatus.REJECTED);
+        return reviewService.getUserReviews(id, pageable, Status.REJECTED);
     }
 
     @GetMapping("/{id}/reviews/authored/pending")
@@ -78,7 +78,7 @@ public class UserController {
                                                       @RequestParam(defaultValue = "0") int page,
                                                       @RequestParam(defaultValue = "10") int size){
         Pageable pageable = PageRequest.of(page, size);
-        return reviewService.getUserReviews(id, pageable, AdModerationStatus.PENDING);
+        return reviewService.getUserReviews(id, pageable, Status.PENDING);
     }
 
     @GetMapping("/{id}/reviews/authored/approved")
@@ -86,7 +86,7 @@ public class UserController {
                                                        @RequestParam(defaultValue = "0") int page,
                                                        @RequestParam(defaultValue = "10") int size){
         Pageable pageable = PageRequest.of(page, size);
-        return reviewService.getUserReviews(id, pageable, AdModerationStatus.APPROVED);
+        return reviewService.getUserReviews(id, pageable, Status.APPROVED);
     }
 
     @GetMapping("/{id}/favorites")

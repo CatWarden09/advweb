@@ -11,7 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import ru.catwarden.advweb.enums.AdModerationStatus;
+import ru.catwarden.advweb.enums.Status;
 import ru.catwarden.advweb.exception.DetailedAccessDeniedException;
 import ru.catwarden.advweb.exception.EntityNotFoundException;
 import ru.catwarden.advweb.exception.FileOperationException;
@@ -137,7 +137,7 @@ class GlobalExceptionHandlerTest {
     @Test
     void handleInvalidStateReturnsConflict() {
         InvalidStateException exception = new InvalidStateException("Review is not in pending status",
-                Map.of("Review id:", 1, "Current status:", AdModerationStatus.APPROVED));
+                Map.of("Review id:", 1, "Current status:", Status.APPROVED));
 
         ResponseEntity<ValidationResponse> response = handler.handleInvalidState(exception);
 

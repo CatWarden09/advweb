@@ -1,7 +1,7 @@
 package ru.catwarden.advweb.review;
 
 import org.junit.jupiter.api.Test;
-import ru.catwarden.advweb.enums.AdModerationStatus;
+import ru.catwarden.advweb.enums.Status;
 import ru.catwarden.advweb.review.dto.ReviewRequest;
 import ru.catwarden.advweb.review.dto.ReviewResponse;
 import ru.catwarden.advweb.user.User;
@@ -22,7 +22,7 @@ class ReviewMapperTest {
                 .id(7L)
                 .text("This review text is long enough and meaningful for mapping check in tests.")
                 .rating(5)
-                .moderationStatus(AdModerationStatus.APPROVED)
+                .status(Status.APPROVED)
                 .moderationRejectionReason(null)
                 .recipient(recipient)
                 .createdAt(createdAt)
@@ -33,7 +33,7 @@ class ReviewMapperTest {
         assertEquals(7L, result.getId());
         assertEquals("This review text is long enough and meaningful for mapping check in tests.", result.getText());
         assertEquals(5, result.getRating());
-        assertEquals(AdModerationStatus.APPROVED, result.getModerationStatus());
+        assertEquals(Status.APPROVED, result.getStatus());
         assertEquals(15L, result.getRecipientId());
         assertEquals(createdAt, result.getCreatedAt());
     }

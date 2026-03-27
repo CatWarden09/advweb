@@ -1,7 +1,8 @@
 package ru.catwarden.advweb.enums;
 
-public enum AdModerationStatus {
+public enum Status {
     PENDING,
     APPROVED,
-    REJECTED
+    REJECTED,
+    FINISHED
 }

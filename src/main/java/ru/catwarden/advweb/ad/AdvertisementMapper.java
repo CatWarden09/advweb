@@ -22,7 +22,7 @@ public class AdvertisementMapper {
                 .subcategoryId(ad.getSubcategory().getId())
                 .createdAt(ad.getCreatedAt())
                 .updatedAt(ad.getUpdatedAt())
-                .adModerationStatus(ad.getAdModerationStatus())
+                .status(ad.getStatus())
                 .moderationRejectionReason(ad.getModerationRejectionReason())
                 .views(ad.getViews())
                 .build();
