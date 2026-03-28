@@ -11,6 +11,7 @@ import ru.catwarden.advweb.ad.dto.AdvertisementResponse;
 import ru.catwarden.advweb.enums.Status;
 import ru.catwarden.advweb.review.ReviewService;
 import ru.catwarden.advweb.review.dto.ReviewResponse;
+import ru.catwarden.advweb.user.dto.UserEarnedResponse;
 import ru.catwarden.advweb.user.dto.UserResponse;
 import ru.catwarden.advweb.user.dto.UserUpdateRequest;
 
@@ -25,6 +26,11 @@ public class UserController {
     @GetMapping("/{id}")
     public UserResponse getUser(@PathVariable Long id) {
         return userService.getUser(id);
+    }
+
+    @GetMapping("/{id}/earned")
+    public UserEarnedResponse getUserTotalEarned(@PathVariable Long id) {
+        return userService.getUserTotalEarned(id);
     }
 
     @PutMapping("/{id}")

@@ -27,6 +27,7 @@ import ru.catwarden.advweb.image.ImageService;
 import ru.catwarden.advweb.security.SecurityUtils;
 import ru.catwarden.advweb.user.User;
 import ru.catwarden.advweb.user.UserRepository;
+import ru.catwarden.advweb.user.UserService;
 
 import java.util.List;
 import java.util.Map;
@@ -47,6 +48,7 @@ public class AdvertisementService {
     private final ImageService imageService;
     private final CommentService commentService;
     private final ViewCountService viewCountService;
+    private final UserService userService;
 
     private final int MAX_IMAGES_PER_AD = 10;
 
@@ -377,6 +379,7 @@ public class AdvertisementService {
         );
     }
 
+    @Transactional
     @CacheEvict(value = "advertisements-list", allEntries = true)
     public void finishAdvertisement(Long id){
         Advertisement advertisement = advertisementRepository.findById(id)
@@ -391,8 +394,6 @@ public class AdvertisementService {
 
         advertisement.setStatus(Status.FINISHED);
 
-        advertisementRepository.save(advertisement);
-
         log.info(
                 "AUDIT advertisement finished: adId={}, authorId={}, status={}, actorId={}",
                 advertisement.getId(),
@@ -400,6 +401,8 @@ public class AdvertisementService {
                 advertisement.getStatus(),
                 SecurityUtils.getCurrentUserKeycloakId()
         );
+
+        userService.recalculateUserTotalEarned(advertisement.getAuthor().getId(), advertisement.getPrice());
     }
 
     @CacheEvict(value = "advertisements-list", allEntries = true)
