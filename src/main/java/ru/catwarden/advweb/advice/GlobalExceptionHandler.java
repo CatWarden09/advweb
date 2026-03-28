@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import ru.catwarden.advweb.exception.*;
+import ru.catwarden.advweb.security.SecurityUtils;
 import ru.catwarden.advweb.validation.dto.ValidationResponse;
 
 import java.util.List;
@@ -51,7 +52,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(EntityNotFoundException.class)
     @ResponseBody
     public ResponseEntity<ValidationResponse> handleEntityNotFound(EntityNotFoundException ex) {
-        log.warn("ENTITY NOT FOUND: {}", ex.getMessage());
+        log.warn("ENTITY NOT FOUND: {}, actorId: {}", ex.getMessage(), getCurrentUser());
 
         return new ResponseEntity<>(
                 new ValidationResponse(List.of(ex.getMessage())),
@@ -62,7 +63,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidFileTypeException.class)
     @ResponseBody
     public ResponseEntity<ValidationResponse> handleInvalidFileType(InvalidFileTypeException ex) {
-        log.error("INVALID FILE TYPE: {}", ex.getMessage());
+        log.error("INVALID FILE TYPE: {}, actorId: {}", ex.getMessage(), getCurrentUser());
 
         return new ResponseEntity<>(
                 new ValidationResponse(List.of(ex.getMessage())),
@@ -73,7 +74,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(FileTooLargeException.class)
     @ResponseBody
     public ResponseEntity<ValidationResponse> handleFileTooLarge(FileTooLargeException ex) {
-        log.error("FILE TOO LARGE: {}", ex.getMessage());
+        log.error("FILE TOO LARGE: {}, actorId: {}", ex.getMessage(), getCurrentUser());
 
         return new ResponseEntity<>(
                 new ValidationResponse(List.of(ex.getMessage())),
@@ -84,7 +85,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({FileStorageException.class, FileOperationException.class})
     @ResponseBody
     public ResponseEntity<ValidationResponse> handleFileOperation(FileOperationException ex) {
-        log.error("FILE OPERATION ERROR: {}", ex.getMessage());
+        log.error("FILE OPERATION ERROR: {}, actorId: {}", ex.getMessage(), getCurrentUser());
 
         return new ResponseEntity<>(
                 new ValidationResponse(List.of(ex.getMessage())),
@@ -95,7 +96,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidRelationException.class)
     @ResponseBody
     public ResponseEntity<ValidationResponse> handleInvalidRelation(InvalidRelationException ex) {
-        log.warn("INVALID ENTITY RELATION: {} | details: {}", ex.getMessage(), ex.getDetails());
+        log.warn("INVALID ENTITY RELATION: {} | details: {}, actorId: {}", ex.getMessage(), ex.getDetails(), getCurrentUser());
 
         return new ResponseEntity<>(
                 new ValidationResponse(List.of(ex.getMessage())),
@@ -106,7 +107,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidStateException.class)
     @ResponseBody
     public ResponseEntity<ValidationResponse> handleInvalidState(InvalidStateException ex) {
-        log.warn("INVALID ENTITY STATE: {} | details: {}", ex.getMessage(), ex.getDetails());
+        log.warn("INVALID ENTITY STATE: {} | details: {}, actorId: {}", ex.getMessage(), ex.getDetails(), getCurrentUser());
 
         return new ResponseEntity<>(
                 new ValidationResponse(List.of(ex.getMessage())),
@@ -117,7 +118,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(LimitExceededException.class)
     @ResponseBody
     public ResponseEntity<ValidationResponse> handleLimitExceeded(LimitExceededException ex) {
-        log.warn("LIMIT EXCEEDED: {} | details: {}", ex.getMessage(), ex.getDetails());
+        log.warn("LIMIT EXCEEDED: {} | details: {}, actorId: {}", ex.getMessage(), ex.getDetails(), getCurrentUser());
 
         return new ResponseEntity<>(
                 new ValidationResponse(List.of(ex.getMessage())),
@@ -128,7 +129,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(OperationNotAllowedException.class)
     @ResponseBody
     public ResponseEntity<ValidationResponse> handleOperationNotAllowed(OperationNotAllowedException ex) {
-        log.warn("OPERATION NOT ALLOWED: {} | details: {}", ex.getMessage(), ex.getDetails());
+        log.warn("OPERATION NOT ALLOWED: {} | details: {}, actorId: {}", ex.getMessage(), ex.getDetails(), getCurrentUser());
 
         return new ResponseEntity<>(
                 new ValidationResponse(List.of(ex.getMessage())),
@@ -140,9 +141,9 @@ public class GlobalExceptionHandler {
     @ResponseBody
     public ResponseEntity<ValidationResponse> handleAccessDenied(AccessDeniedException ex) {
         if (ex instanceof DetailedAccessDeniedException detailedAccessDeniedException) {
-            log.warn("ACCESS DENIED: {} | details: {}", ex.getMessage(), detailedAccessDeniedException.getDetails());
+            log.warn("ACCESS DENIED: {} | details: {}, actorId: {}", ex.getMessage(), detailedAccessDeniedException.getDetails(), getCurrentUser());
         } else {
-            log.warn("ACCESS DENIED: {}", ex.getMessage());
+            log.warn("ACCESS DENIED: {}, actorId: {}", ex.getMessage(), getCurrentUser());
         }
 
         return new ResponseEntity<>(
@@ -160,5 +161,9 @@ public class GlobalExceptionHandler {
                 new ValidationResponse(List.of("An internal server error occurred")),
                 HttpStatus.INTERNAL_SERVER_ERROR
         );
+    }
+
+    private String getCurrentUser() {
+        return SecurityUtils.getCurrentUserKeycloakId() == null ? "Unauthenticated user" : SecurityUtils.getCurrentUserKeycloakId();
     }
 }

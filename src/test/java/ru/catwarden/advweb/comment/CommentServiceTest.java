@@ -144,8 +144,7 @@ class CommentServiceTest {
             assertEquals(
                     Map.of(
                             "Comment id:", 1L,
-                            "Comment author keycloak id:", "author-id",
-                            "Actor id:", "another-user"
+                            "Comment author keycloak id:", "author-id"
                     ),
                     exception.getDetails()
             );
@@ -214,8 +213,7 @@ class CommentServiceTest {
             assertEquals(
                     Map.of(
                             "Comment id:", 1L,
-                            "Comment author keycloak id:", "author-id",
-                            "Actor id:", "another-user"
+                            "Comment author keycloak id:", "author-id"
                     ),
                     exception.getDetails()
             );

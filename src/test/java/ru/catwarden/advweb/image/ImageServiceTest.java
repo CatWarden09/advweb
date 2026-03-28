@@ -166,8 +166,7 @@ class ImageServiceTest {
                     Map.of(
                             "Requested advertisement id:", 10L,
                             "Conflicting image id:", 1L,
-                            "Conflicting image advertisement id:", "999",
-                            "Actor id:", "owner"
+                            "Conflicting image advertisement id:", "999"
                     ),
                     exception.getDetails()
             );
@@ -195,8 +194,7 @@ class ImageServiceTest {
                     Map.of(
                             "Requested advertisement id:", 10L,
                             "Conflicting image id:", 1L,
-                            "Conflicting image uploader keycloak id:", "another-user",
-                            "Actor id:", "owner"
+                            "Conflicting image uploader keycloak id:", "another-user"
                     ),
                     exception.getDetails()
             );

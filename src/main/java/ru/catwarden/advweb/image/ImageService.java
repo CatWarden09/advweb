@@ -149,8 +149,7 @@ public class ImageService {
                     Map.of(
                             "Requested advertisement id:", advertisementId,
                             "Conflicting image id:", foreignLinkedImage.getId(),
-                            "Conflicting image advertisement id:", String.valueOf(foreignLinkedImage.getAdId()),
-                            "Actor id:", currentKeycloakId
+                            "Conflicting image advertisement id:", String.valueOf(foreignLinkedImage.getAdId())
                     ));
         }
 
@@ -168,8 +167,7 @@ public class ImageService {
                     Map.of(
                             "Requested advertisement id:", advertisementId,
                             "Conflicting image id:", imageUploadedByAnotherUser.getId(),
-                            "Conflicting image uploader keycloak id:", String.valueOf(imageUploadedByAnotherUser.getUploaderKeycloakId()),
-                            "Actor id:", currentKeycloakId
+                            "Conflicting image uploader keycloak id:", String.valueOf(imageUploadedByAnotherUser.getUploaderKeycloakId())
                     ));
         }
     }

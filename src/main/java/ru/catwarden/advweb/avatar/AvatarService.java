@@ -128,8 +128,7 @@ public class AvatarService {
                     Map.of(
                             "Avatar id:", avatar.getId(),
                             "Requested user id:", userId,
-                            "Avatar is already linked:", true,
-                            "Actor id:", currentKeycloakId
+                            "Avatar is already linked:", true
                     ));
         }
 
@@ -141,8 +140,7 @@ public class AvatarService {
                     Map.of(
                             "Avatar id:", avatar.getId(),
                             "Avatar uploader keycloak id:", String.valueOf(avatar.getUploaderKeycloakId()),
-                            "Requested user id:", userId,
-                            "Actor id:", currentKeycloakId
+                            "Requested user id:", userId
                     ));
         }
     }
