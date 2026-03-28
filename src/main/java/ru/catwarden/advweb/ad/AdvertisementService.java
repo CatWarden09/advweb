@@ -56,6 +56,18 @@ public class AdvertisementService {
         Advertisement advertisement = advertisementRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(Advertisement.class, id));
 
+        boolean isAdmin = SecurityUtils.isCurrentUserAdmin();
+        String currentKeycloakId = SecurityUtils.getCurrentUserKeycloakId();
+        boolean isAuthor = Objects.equals(advertisement.getAuthor().getKeycloakId(), currentKeycloakId);
+
+        if(advertisement.getStatus() != Status.APPROVED && advertisement.getStatus() != Status.FINISHED && !isAdmin && !isAuthor)
+            throw new DetailedAccessDeniedException("You can only view approved or finished advertisements",
+                    Map.of(
+                            "Advertisement id:", advertisement.getId(),
+                            "Advertisement author keycloak id:", advertisement.getAuthor().getKeycloakId(),
+                            "Actor keycloak id:", SecurityUtils.getCurrentUserKeycloakId()
+                    ));
+
         return this.mapWithPreviewImage(advertisement);
     }
 
@@ -127,6 +139,12 @@ public class AdvertisementService {
     public Page<AdvertisementResponse> getUserRejectedAdvertisements(Long userId, Pageable pageable){
         validateCurrentUserOrAdmin(userId);
         return advertisementRepository.findAllByAuthorIdAndStatus(userId, Status.REJECTED, pageable)
+                .map(this::mapWithPreviewImage);
+    }
+
+    public Page<AdvertisementResponse> getUserFinishedAdvertisements(Long userId, Pageable pageable){
+        validateCurrentUserOrAdmin(userId);
+        return advertisementRepository.findAllByAuthorIdAndStatus(userId, Status.FINISHED, pageable)
                 .map(this::mapWithPreviewImage);
     }
 
@@ -258,16 +276,11 @@ public class AdvertisementService {
         Advertisement advertisement = advertisementRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(Advertisement.class, id));
 
-        String currentKeycloakId = SecurityUtils.getCurrentUserKeycloakId();
-        boolean isAdmin = SecurityUtils.isCurrentUserAdmin();
+        validateCurrentUserOrAdmin(advertisement.getAuthor().getId());
 
-        if (!isAdmin && !advertisement.getAuthor().getKeycloakId().equals(currentKeycloakId)) {
-            throw new DetailedAccessDeniedException("You are not allowed to update this advertisement",
-                    Map.of(
-                            "Advertisement id:", advertisement.getId(),
-                            "Advertisement author keycloak id:", String.valueOf(advertisement.getAuthor().getKeycloakId()),
-                            "Current user keycloak id:", String.valueOf(currentKeycloakId)
-                    ));
+        if (advertisement.getStatus() == Status.FINISHED) {
+            throw new InvalidStateException("Cannot update a finished advertisement",
+                    Map.of("Advertisement id:", advertisement.getId(), "Current status:", advertisement.getStatus()));
         }
 
         boolean isFieldsChanged = false;
@@ -366,21 +379,36 @@ public class AdvertisementService {
     }
 
     @CacheEvict(value = "advertisements-list", allEntries = true)
+    public void finishAdvertisement(Long id){
+        Advertisement advertisement = advertisementRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(Advertisement.class, id));
+
+        validateCurrentUserOrAdmin(advertisement.getAuthor().getId());
+
+        if(advertisement.getStatus() != Status.APPROVED){
+            throw new InvalidStateException("Cannot change status of a non-approved advertisement",
+                    Map.of("Advertisement id:", advertisement.getId(), "Current status:", advertisement.getStatus()));
+        }
+
+        advertisement.setStatus(Status.FINISHED);
+
+        advertisementRepository.save(advertisement);
+
+        log.info(
+                "AUDIT advertisement finished: adId={}, authorId={}, status={}, actorId={}",
+                advertisement.getId(),
+                getAuthorId(advertisement),
+                advertisement.getStatus(),
+                SecurityUtils.getCurrentUserKeycloakId()
+        );
+    }
+
+    @CacheEvict(value = "advertisements-list", allEntries = true)
     public void deleteAdvertisement(Long id){
         Advertisement advertisement = advertisementRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(Advertisement.class, id));
 
-        String currentKeycloakId = SecurityUtils.getCurrentUserKeycloakId();
-        boolean isAdmin = SecurityUtils.isCurrentUserAdmin();
-
-        if (!isAdmin && !advertisement.getAuthor().getKeycloakId().equals(currentKeycloakId)) {
-            throw new DetailedAccessDeniedException("You are not allowed to delete this advertisement",
-                    Map.of(
-                            "Advertisement id:", advertisement.getId(),
-                            "Advertisement author keycloak id:", String.valueOf(advertisement.getAuthor().getKeycloakId()),
-                            "Current user keycloak id:", String.valueOf(currentKeycloakId)
-                    ));
-        }
+        validateCurrentUserOrAdmin(advertisement.getAuthor().getId());
 
         advertisementRepository.deleteById(advertisement.getId());
 
@@ -426,8 +454,8 @@ public class AdvertisementService {
             throw new DetailedAccessDeniedException("You can only view your own advertisements",
                     Map.of(
                             "Requested user id:", userId,
-                            "Requested user keycloak id:", String.valueOf(requestedUser.getKeycloakId()),
-                            "Current user keycloak id:", String.valueOf(currentKeycloakId)
+                            "Requested user keycloak id:", requestedUser.getKeycloakId(),
+                            "Current user keycloak id:", currentKeycloakId
                     ));
         }
     }

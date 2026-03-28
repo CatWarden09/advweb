@@ -62,10 +62,15 @@ public class AdvertisementController {
         return advertisementService.createAdvertisement(advertisementRequest);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/{id}/update")
     public void updateAdvertisement(@PathVariable Long id,
                                     @Valid @RequestBody AdvertisementUpdateRequest advertisementUpdateRequest){
         advertisementService.updateAdvertisement(id, advertisementUpdateRequest);
+    }
+
+    @PutMapping("/{id}/finish")
+    public void finishAdvertisement(@PathVariable Long id){
+        advertisementService.finishAdvertisement(id);
     }
 
     @DeleteMapping("/{id}")
