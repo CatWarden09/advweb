@@ -68,16 +68,26 @@ class AdvertisementServiceTest {
 
     @Test
     void getAdvertisementReturnsResponse() {
-        Advertisement advertisement = Advertisement.builder().id(10L).build();
+        User author = User.builder().id(5L).keycloakId("author-id").build();
+        Advertisement advertisement = Advertisement.builder()
+                .id(10L)
+                .author(author)
+                .status(Status.APPROVED)
+                .build();
         AdvertisementResponse response = AdvertisementResponse.builder().id(10L).build();
 
         when(advertisementRepository.findById(10L)).thenReturn(Optional.of(advertisement));
         when(advertisementMapper.toResponse(advertisement)).thenReturn(response);
         when(imageService.getPreviewImageUrlByAdvertisementId(10L)).thenReturn(List.of("preview.jpg"));
 
-        AdvertisementResponse actual = advertisementService.getAdvertisement(10L);
+        try (MockedStatic<SecurityUtils> securityUtilsMockedStatic = mockStatic(SecurityUtils.class)) {
+            securityUtilsMockedStatic.when(SecurityUtils::getCurrentUserKeycloakId).thenReturn("some-user-id");
+            securityUtilsMockedStatic.when(SecurityUtils::isCurrentUserAdmin).thenReturn(false);
 
-        assertEquals(List.of("preview.jpg"), actual.getImageUrls());
+            AdvertisementResponse actual = advertisementService.getAdvertisement(10L);
+
+            assertEquals(List.of("preview.jpg"), actual.getImageUrls());
+        }
     }
 
     @Test
@@ -322,7 +332,7 @@ class AdvertisementServiceTest {
 
     @Test
     void updateAdvertisementThrowsWhenCurrentUserHasNoAccess() {
-        User author = User.builder().keycloakId("owner-id").build();
+        User author = User.builder().id(5L).keycloakId("owner-id").build();
         Advertisement advertisement = Advertisement.builder()
                 .id(7L)
                 .author(author)
@@ -334,6 +344,7 @@ class AdvertisementServiceTest {
         AdvertisementUpdateRequest request = validUpdateRequest("New name", "New description", 120.0, List.of(1L));
 
         when(advertisementRepository.findById(7L)).thenReturn(Optional.of(advertisement));
+        when(userRepository.findById(5L)).thenReturn(Optional.of(author));
 
         try (MockedStatic<SecurityUtils> securityUtilsMockedStatic = mockStatic(SecurityUtils.class)) {
             securityUtilsMockedStatic.when(SecurityUtils::getCurrentUserKeycloakId).thenReturn("another-user");
@@ -341,11 +352,11 @@ class AdvertisementServiceTest {
 
             DetailedAccessDeniedException exception = assertThrows(DetailedAccessDeniedException.class,
                     () -> advertisementService.updateAdvertisement(7L, request));
-            assertEquals("You are not allowed to update this advertisement", exception.getMessage());
+            assertEquals("You can only view your own advertisements", exception.getMessage());
             assertEquals(
                     Map.of(
-                            "Advertisement id:", 7L,
-                            "Advertisement author keycloak id:", "owner-id",
+                            "Requested user id:", 5L,
+                            "Requested user keycloak id:", "owner-id",
                             "Current user keycloak id:", "another-user"
                     ),
                     exception.getDetails()
@@ -357,7 +368,7 @@ class AdvertisementServiceTest {
 
     @Test
     void updateAdvertisementReturnsWithoutChanges() {
-        User author = User.builder().keycloakId("owner-id").build();
+        User author = User.builder().id(5L).keycloakId("owner-id").build();
         Address oldAddress = Address.builder().city("Moscow").street("A").house("1").build();
         Advertisement advertisement = Advertisement.builder()
                 .id(7L)
@@ -371,6 +382,7 @@ class AdvertisementServiceTest {
         AdvertisementUpdateRequest request = validUpdateRequest("Same name", "Same description", 100.0, List.of(1L, 2L));
 
         when(advertisementRepository.findById(7L)).thenReturn(Optional.of(advertisement));
+        when(userRepository.findById(5L)).thenReturn(Optional.of(author));
         when(addressMapper.toEntity(request.getAddress())).thenReturn(Address.builder().city("Moscow").street("A").house("1").build());
         when(imageService.syncImagesInAdvertisement(7L, request.getImageIds())).thenReturn(false);
 
@@ -389,7 +401,7 @@ class AdvertisementServiceTest {
 
     @Test
     void updateAdvertisementSetsPendingWhenFieldsChanged() {
-        User author = User.builder().keycloakId("owner-id").build();
+        User author = User.builder().id(5L).keycloakId("owner-id").build();
         Advertisement advertisement = Advertisement.builder()
                 .id(7L)
                 .author(author)
@@ -403,6 +415,7 @@ class AdvertisementServiceTest {
         Address newAddress = Address.builder().city("Kazan").street("B").house("2").build();
 
         when(advertisementRepository.findById(7L)).thenReturn(Optional.of(advertisement));
+        when(userRepository.findById(5L)).thenReturn(Optional.of(author));
         when(addressMapper.toEntity(request.getAddress())).thenReturn(newAddress);
         when(imageService.syncImagesInAdvertisement(7L, request.getImageIds())).thenReturn(false);
 
@@ -439,6 +452,7 @@ class AdvertisementServiceTest {
         );
 
         when(advertisementRepository.findById(7L)).thenReturn(Optional.of(advertisement));
+        when(userRepository.findById(6L)).thenReturn(Optional.of(author));
 
         try (MockedStatic<SecurityUtils> securityUtilsMockedStatic = mockStatic(SecurityUtils.class)) {
             securityUtilsMockedStatic.when(SecurityUtils::getCurrentUserKeycloakId).thenReturn("owner-id");
@@ -454,6 +468,31 @@ class AdvertisementServiceTest {
         }
 
         verify(imageService, never()).syncImagesInAdvertisement(any(), any());
+    }
+
+    @Test
+    void updateAdvertisementThrowsWhenAdIsFinished() {
+        User author = User.builder().id(6L).keycloakId("owner-id").build();
+        Advertisement advertisement = Advertisement.builder()
+                .id(7L)
+                .author(author)
+                .status(Status.FINISHED)
+                .build();
+        AdvertisementUpdateRequest request = validUpdateRequest("Name", "Desc", 100.0, List.of(1L));
+
+        when(advertisementRepository.findById(7L)).thenReturn(Optional.of(advertisement));
+        when(userRepository.findById(6L)).thenReturn(Optional.of(author));
+
+        try (MockedStatic<SecurityUtils> securityUtilsMockedStatic = mockStatic(SecurityUtils.class)) {
+            securityUtilsMockedStatic.when(SecurityUtils::getCurrentUserKeycloakId).thenReturn("owner-id");
+            securityUtilsMockedStatic.when(SecurityUtils::isCurrentUserAdmin).thenReturn(false);
+
+            InvalidStateException exception = assertThrows(InvalidStateException.class,
+                    () -> advertisementService.updateAdvertisement(7L, request));
+            assertEquals("Cannot update a finished advertisement", exception.getMessage());
+        }
+
+        verify(advertisementRepository, never()).save(any());
     }
 
     @Test
@@ -521,13 +560,14 @@ class AdvertisementServiceTest {
 
     @Test
     void deleteAdvertisementThrowsWhenCurrentUserHasNoAccess() {
-        User author = User.builder().keycloakId("owner-id").build();
+        User author = User.builder().id(5L).keycloakId("owner-id").build();
         Advertisement advertisement = Advertisement.builder()
                 .id(12L)
                 .author(author)
                 .build();
 
         when(advertisementRepository.findById(12L)).thenReturn(Optional.of(advertisement));
+        when(userRepository.findById(5L)).thenReturn(Optional.of(author));
 
         try (MockedStatic<SecurityUtils> securityUtilsMockedStatic = mockStatic(SecurityUtils.class)) {
             securityUtilsMockedStatic.when(SecurityUtils::getCurrentUserKeycloakId).thenReturn("another-user");
@@ -535,11 +575,11 @@ class AdvertisementServiceTest {
 
             DetailedAccessDeniedException exception = assertThrows(DetailedAccessDeniedException.class,
                     () -> advertisementService.deleteAdvertisement(12L));
-            assertEquals("You are not allowed to delete this advertisement", exception.getMessage());
+            assertEquals("You can only view your own advertisements", exception.getMessage());
             assertEquals(
                     Map.of(
-                            "Advertisement id:", 12L,
-                            "Advertisement author keycloak id:", "owner-id",
+                            "Requested user id:", 5L,
+                            "Requested user keycloak id:", "owner-id",
                             "Current user keycloak id:", "another-user"
                     ),
                     exception.getDetails()
@@ -551,13 +591,14 @@ class AdvertisementServiceTest {
 
     @Test
     void deleteAdvertisementDeletesAdCommentsAndUnlinksImages() {
-        User author = User.builder().keycloakId("owner-id").build();
+        User author = User.builder().id(5L).keycloakId("owner-id").build();
         Advertisement advertisement = Advertisement.builder()
                 .id(12L)
                 .author(author)
                 .build();
 
         when(advertisementRepository.findById(12L)).thenReturn(Optional.of(advertisement));
+        when(userRepository.findById(5L)).thenReturn(Optional.of(author));
 
         try (MockedStatic<SecurityUtils> securityUtilsMockedStatic = mockStatic(SecurityUtils.class)) {
             securityUtilsMockedStatic.when(SecurityUtils::getCurrentUserKeycloakId).thenReturn("owner-id");
@@ -782,6 +823,107 @@ class AdvertisementServiceTest {
         }
 
         verify(advertisementRepository, never()).findById(any());
+    }
+
+    @Test
+    void finishAdvertisementChangesStatusWhenApproved() {
+        User author = User.builder().id(5L).keycloakId("owner-id").build();
+        Advertisement advertisement = Advertisement.builder()
+                .id(60L)
+                .status(Status.APPROVED)
+                .author(author)
+                .build();
+
+        when(advertisementRepository.findById(60L)).thenReturn(Optional.of(advertisement));
+        when(userRepository.findById(5L)).thenReturn(Optional.of(author));
+
+        try (MockedStatic<SecurityUtils> securityUtilsMockedStatic = mockStatic(SecurityUtils.class)) {
+            securityUtilsMockedStatic.when(SecurityUtils::getCurrentUserKeycloakId).thenReturn("owner-id");
+            securityUtilsMockedStatic.when(SecurityUtils::isCurrentUserAdmin).thenReturn(false);
+
+            advertisementService.finishAdvertisement(60L);
+        }
+
+        assertEquals(Status.FINISHED, advertisement.getStatus());
+        verify(advertisementRepository).save(advertisement);
+    }
+
+    @Test
+    void finishAdvertisementThrowsWhenNotApproved() {
+        User author = User.builder().id(5L).keycloakId("owner-id").build();
+        Advertisement advertisement = Advertisement.builder()
+                .id(60L)
+                .status(Status.PENDING)
+                .author(author)
+                .build();
+
+        when(advertisementRepository.findById(60L)).thenReturn(Optional.of(advertisement));
+        when(userRepository.findById(5L)).thenReturn(Optional.of(author));
+
+        try (MockedStatic<SecurityUtils> securityUtilsMockedStatic = mockStatic(SecurityUtils.class)) {
+            securityUtilsMockedStatic.when(SecurityUtils::getCurrentUserKeycloakId).thenReturn("owner-id");
+            securityUtilsMockedStatic.when(SecurityUtils::isCurrentUserAdmin).thenReturn(false);
+
+            InvalidStateException exception = assertThrows(InvalidStateException.class,
+                    () -> advertisementService.finishAdvertisement(60L));
+            assertEquals("Cannot change status of a non-approved advertisement", exception.getMessage());
+            assertEquals(Map.of("Advertisement id:", 60L, "Current status:", Status.PENDING), exception.getDetails());
+        }
+
+        verify(advertisementRepository, never()).save(any());
+    }
+
+    @Test
+    void finishAdvertisementThrowsWhenNotOwner() {
+        User author = User.builder().id(5L).keycloakId("owner-id").build();
+        Advertisement advertisement = Advertisement.builder()
+                .id(60L)
+                .status(Status.APPROVED)
+                .author(author)
+                .build();
+
+        when(advertisementRepository.findById(60L)).thenReturn(Optional.of(advertisement));
+        when(userRepository.findById(5L)).thenReturn(Optional.of(author));
+
+        try (MockedStatic<SecurityUtils> securityUtilsMockedStatic = mockStatic(SecurityUtils.class)) {
+            securityUtilsMockedStatic.when(SecurityUtils::getCurrentUserKeycloakId).thenReturn("another-user");
+            securityUtilsMockedStatic.when(SecurityUtils::isCurrentUserAdmin).thenReturn(false);
+
+            DetailedAccessDeniedException exception = assertThrows(DetailedAccessDeniedException.class,
+                    () -> advertisementService.finishAdvertisement(60L));
+            assertEquals("You can only view your own advertisements", exception.getMessage());
+        }
+
+        verify(advertisementRepository, never()).save(any());
+    }
+
+    @Test
+    void getUserFinishedAdvertisementsReturnsMappedPage() {
+        Long userId = 77L;
+        User requestedUser = User.builder().id(userId).keycloakId("owner-id").build();
+        Advertisement advertisement = Advertisement.builder().id(71L).build();
+        AdvertisementResponse response = AdvertisementResponse.builder().id(71L).build();
+        Page<Advertisement> page = new PageImpl<>(List.of(advertisement), PageRequest.of(0, 10), 1);
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(requestedUser));
+        when(advertisementRepository.findAllByAuthorIdAndStatus(
+                userId,
+                Status.FINISHED,
+                PageRequest.of(0, 10)
+        )).thenReturn(page);
+        when(advertisementMapper.toResponse(advertisement)).thenReturn(response);
+        when(imageService.getPreviewImageUrlByAdvertisementId(71L)).thenReturn(List.of("finished.jpg"));
+
+        Page<AdvertisementResponse> result;
+        try (MockedStatic<SecurityUtils> securityUtilsMockedStatic = mockStatic(SecurityUtils.class)) {
+            securityUtilsMockedStatic.when(SecurityUtils::isCurrentUserAdmin).thenReturn(false);
+            securityUtilsMockedStatic.when(SecurityUtils::getCurrentUserKeycloakId).thenReturn("owner-id");
+
+            result = advertisementService.getUserFinishedAdvertisements(userId, PageRequest.of(0, 10));
+        }
+
+        assertEquals(1, result.getTotalElements());
+        assertEquals(List.of("finished.jpg"), result.getContent().getFirst().getImageUrls());
     }
 
     private AdvertisementRequest validCreateRequest(List<Long> imageIds) {

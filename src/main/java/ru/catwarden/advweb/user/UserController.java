@@ -57,6 +57,14 @@ public class UserController {
         return advertisementService.getUserRejectedAdvertisements(id, pageable);
     }
 
+    @GetMapping("/{id}/advertisements/finished")
+    public Page<AdvertisementResponse> getUserFinishedAdvertisements(@PathVariable Long id,
+                                                                     @RequestParam(defaultValue = "0") int page,
+                                                                     @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return advertisementService.getUserFinishedAdvertisements(id, pageable);
+    }
+
     @GetMapping("/{id}/reviews/received")
     public Page<ReviewResponse> getApprovedReviewsAboutUser(@PathVariable Long id,
                                                             @RequestParam(defaultValue = "0") int page,

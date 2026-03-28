@@ -108,6 +108,19 @@ class UserControllerTest {
     }
 
     @Test
+    void getUserFinishedAdvertisementsPassesPageable() {
+        Page<AdvertisementResponse> page = new PageImpl<>(List.of());
+        when(advertisementService.getUserFinishedAdvertisements(any(Long.class), any(Pageable.class))).thenReturn(page);
+
+        userController.getUserFinishedAdvertisements(5L, 0, 10);
+
+        ArgumentCaptor<Pageable> captor = ArgumentCaptor.forClass(Pageable.class);
+        verify(advertisementService).getUserFinishedAdvertisements(org.mockito.ArgumentMatchers.eq(5L), captor.capture());
+        assertEquals(0, captor.getValue().getPageNumber());
+        assertEquals(10, captor.getValue().getPageSize());
+    }
+
+    @Test
     void getUserFavoriteAdvertisementsPassesPageable() {
         Page<AdvertisementResponse> page = new PageImpl<>(List.of());
         when(advertisementService.getUserFavoriteAdvertisements(any(Long.class), any(Pageable.class))).thenReturn(page);

@@ -115,5 +115,12 @@ class AdvertisementControllerTest {
 
         verify(advertisementService).deleteAdvertisement(9L);
     }
+
+    @Test
+    void finishAdvertisementDelegatesToService() {
+        controller.finishAdvertisement(10L);
+
+        verify(advertisementService).finishAdvertisement(10L);
+    }
 }
 
