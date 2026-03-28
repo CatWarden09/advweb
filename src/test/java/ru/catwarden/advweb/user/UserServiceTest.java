@@ -66,11 +66,11 @@ class UserServiceTest {
             securityUtilsMockedStatic.when(SecurityUtils::isCurrentUserAdmin).thenReturn(false);
             DetailedAccessDeniedException exception = assertThrows(DetailedAccessDeniedException.class,
                     () -> userService.updateUser(1L, request));
-            assertEquals("You are not allowed to update this user", exception.getMessage());
+            assertEquals("You can only have access to your own data", exception.getMessage());
             assertEquals(
                     Map.of(
-                            "User id:", 1L,
-                            "User keycloak id:", "owner-id"
+                            "Requested user id:", 1L,
+                            "Requested user keycloak id:", "owner-id"
                     ),
                     exception.getDetails()
             );
@@ -280,6 +280,39 @@ class UserServiceTest {
         userService.recalculateUserRating(9L);
 
         verify(userRepository).updateUserRatingStats(9L, 4.5, 2L);
+    }
+
+    @Test
+    void recalculateUserTotalEarnedThrowsWhenUserMissing() {
+        when(userRepository.findById(9L)).thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () -> userService.recalculateUserTotalEarned(9L, 500.0));
+    }
+
+    @Test void recalculateUserTotalEarnedUpdatesTotalEarned() {
+        when(userRepository.findById(9L)).thenReturn(Optional.of(User.builder().id(9L).build()));
+
+        userService.recalculateUserTotalEarned(9L, 500.0);
+
+        verify(userRepository).updateUserTotalEarned(9L, 500.0);
+    }
+
+    @Test void recalculateUserTotalEarnedWithNewPriceUpdatesTotalEarned(){
+        User user = User.builder()
+                .id(1L)
+                .keycloakId("owner-id")
+                .firstName("OldFirstName")
+                .lastName("OldLastName")
+                .email("old@mail.com")
+                .phone("+7000")
+                .totalEarned(5000.0d)
+                .build();
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+
+        userService.recalculateUserTotalEarned(1L, 1000.0d);
+
+        verify(userRepository).updateUserTotalEarned(1L, 1000.0d);
     }
 
     private UserUpdateRequest validUpdateRequest() {

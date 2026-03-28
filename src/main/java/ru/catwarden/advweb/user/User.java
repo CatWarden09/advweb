@@ -54,4 +54,6 @@ public class User {
     @Builder.Default
     private List<Advertisement> favoriteAdvertisements = new ArrayList<>();
 
+    private Double totalEarned;
+
 }

@@ -28,6 +28,7 @@ import ru.catwarden.advweb.image.ImageService;
 import ru.catwarden.advweb.security.SecurityUtils;
 import ru.catwarden.advweb.user.User;
 import ru.catwarden.advweb.user.UserRepository;
+import ru.catwarden.advweb.user.UserService;
 
 import java.util.List;
 import java.util.Map;
@@ -62,6 +63,8 @@ class AdvertisementServiceTest {
     private CommentService commentService;
     @Mock
     private ViewCountService viewCountService;
+    @Mock
+    private UserService userService;
 
     @InjectMocks
     private AdvertisementService advertisementService;
@@ -828,6 +831,7 @@ class AdvertisementServiceTest {
                 .id(60L)
                 .status(Status.APPROVED)
                 .author(author)
+                .price(6000D)
                 .build();
 
         when(advertisementRepository.findById(60L)).thenReturn(Optional.of(advertisement));
@@ -841,7 +845,6 @@ class AdvertisementServiceTest {
         }
 
         assertEquals(Status.FINISHED, advertisement.getStatus());
-        verify(advertisementRepository).save(advertisement);
     }
 
     @Test

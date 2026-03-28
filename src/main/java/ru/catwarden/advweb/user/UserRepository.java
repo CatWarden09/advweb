@@ -14,7 +14,12 @@
 
         @Modifying
         @Query("UPDATE User u SET u.rating = :rating, u.ratingCount = :ratingCount WHERE u.id = :userId")
-        void updateUserRatingStats(@Param("userId") Long userId,
+        void updateUserRatingStats (@Param("userId") Long userId,
                                    @Param("rating") Double rating,
                                    @Param("ratingCount") Long ratingCount);
+
+
+        @Modifying
+        @Query("UPDATE User u SET u.totalEarned = u.totalEarned + :newPrice WHERE u.id = :userId")
+        void  updateUserTotalEarned (@Param("userId") Long userId, @Param("newPrice") Double newPrice);
     }
