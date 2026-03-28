@@ -97,8 +97,7 @@ public class CommentService {
             throw new DetailedAccessDeniedException("You are not allowed to update this comment",
                     Map.of(
                             "Comment id:", comment.getId(),
-                            "Comment author keycloak id:", comment.getAuthor().getKeycloakId(),
-                            "Actor id:", currentKeycloakId
+                            "Comment author keycloak id:", comment.getAuthor().getKeycloakId()
                     ));
         }
 
@@ -153,8 +152,7 @@ public class CommentService {
             throw new DetailedAccessDeniedException("You are not allowed to delete this comment",
                     Map.of(
                             "Comment id:", comment.getId(),
-                            "Comment author keycloak id:", String.valueOf(comment.getAuthor().getKeycloakId()),
-                            "Actor id:", String.valueOf(currentKeycloakId)
+                            "Comment author keycloak id:", String.valueOf(comment.getAuthor().getKeycloakId())
                     ));
         }
 

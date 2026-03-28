@@ -85,7 +85,7 @@ public class ReviewService {
 
         if (currentUser.equals(recipient)){
             throw new InvalidRelationException("Users cannot create reviews for themselves",
-                    Map.of("Actor id:", currentUser.getId(), "Recipient user id:", recipient.getId()));
+                    Map.of("Recipient user id:", recipient.getId()));
         }
 
         Review review = reviewMapper.toEntity(reviewRequest);
@@ -121,8 +121,7 @@ public class ReviewService {
             throw new DetailedAccessDeniedException("You are not allowed to update this review",
                     Map.of(
                             "Review id:", review.getId(),
-                            "Review author keycloak id:", review.getAuthor().getKeycloakId(),
-                            "Actor id:", currentKeycloakId
+                            "Review author keycloak id:", review.getAuthor().getKeycloakId()
                     ));
         }
 
@@ -218,8 +217,7 @@ public class ReviewService {
             throw new DetailedAccessDeniedException("You are not allowed to delete this review",
                     Map.of(
                             "Review id:", review.getId(),
-                            "Review author keycloak id:", review.getAuthor().getKeycloakId(),
-                            "Actor id:", currentKeycloakId
+                            "Review author keycloak id:", review.getAuthor().getKeycloakId()
                     ));
         }
 
@@ -253,8 +251,7 @@ public class ReviewService {
             throw new DetailedAccessDeniedException("You can only view your own reviews",
                     Map.of(
                             "Requested user id:", userId,
-                            "Requested user keycloak id:", String.valueOf(requestedUser.getKeycloakId()),
-                            "Actor id:", currentKeycloakId
+                            "Requested user keycloak id:", String.valueOf(requestedUser.getKeycloakId())
                     ));
         }
     }

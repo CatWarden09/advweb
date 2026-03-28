@@ -139,8 +139,7 @@ class ReviewServiceTest {
             assertEquals(
                     Map.of(
                             "Requested user id:", 8L,
-                            "Requested user keycloak id:", "owner-id",
-                            "Actor id:", "another-user"
+                            "Requested user keycloak id:", "owner-id"
                     ),
                     exception.getDetails()
             );
@@ -282,7 +281,7 @@ class ReviewServiceTest {
             InvalidRelationException exception = assertThrows(InvalidRelationException.class,
                     () -> reviewService.createReview(request));
             assertEquals("Users cannot create reviews for themselves", exception.getMessage());
-            assertEquals(Map.of("Actor id:", 1L, "Recipient user id:", 1L), exception.getDetails());
+            assertEquals(Map.of("Recipient user id:", 1L), exception.getDetails());
         }
     }
 
@@ -305,8 +304,7 @@ class ReviewServiceTest {
             assertEquals(
                     Map.of(
                             "Review id:", 4L,
-                            "Review author keycloak id:", "owner-id",
-                            "Actor id:", "another-user"
+                            "Review author keycloak id:", "owner-id"
                     ),
                     exception.getDetails()
             );
@@ -501,8 +499,7 @@ class ReviewServiceTest {
             assertEquals(
                     Map.of(
                             "Review id:", 5L,
-                            "Review author keycloak id:", "owner-id",
-                            "Actor id:", "another-user"
+                            "Review author keycloak id:", "owner-id"
                     ),
                     exception.getDetails()
             );

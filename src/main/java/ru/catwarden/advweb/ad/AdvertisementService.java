@@ -64,8 +64,7 @@ public class AdvertisementService {
             throw new DetailedAccessDeniedException("You can only view approved or finished advertisements",
                     Map.of(
                             "Advertisement id:", advertisement.getId(),
-                            "Advertisement author keycloak id:", advertisement.getAuthor().getKeycloakId(),
-                            "Actor keycloak id:", SecurityUtils.getCurrentUserKeycloakId()
+                            "Advertisement author keycloak id:", advertisement.getAuthor().getKeycloakId()
                     ));
 
         return this.mapWithPreviewImage(advertisement);
@@ -454,8 +453,7 @@ public class AdvertisementService {
             throw new DetailedAccessDeniedException("You can only view your own advertisements",
                     Map.of(
                             "Requested user id:", userId,
-                            "Requested user keycloak id:", requestedUser.getKeycloakId(),
-                            "Current user keycloak id:", currentKeycloakId
+                            "Requested user keycloak id:", requestedUser.getKeycloakId()
                     ));
         }
     }

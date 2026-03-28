@@ -356,8 +356,7 @@ class AdvertisementServiceTest {
             assertEquals(
                     Map.of(
                             "Requested user id:", 5L,
-                            "Requested user keycloak id:", "owner-id",
-                            "Current user keycloak id:", "another-user"
+                            "Requested user keycloak id:", "owner-id"
                     ),
                     exception.getDetails()
             );
@@ -579,8 +578,7 @@ class AdvertisementServiceTest {
             assertEquals(
                     Map.of(
                             "Requested user id:", 5L,
-                            "Requested user keycloak id:", "owner-id",
-                            "Current user keycloak id:", "another-user"
+                            "Requested user keycloak id:", "owner-id"
                     ),
                     exception.getDetails()
             );
@@ -627,8 +625,7 @@ class AdvertisementServiceTest {
             assertEquals(
                     Map.of(
                             "Requested user id:", 44L,
-                            "Requested user keycloak id:", "owner-id",
-                            "Current user keycloak id:", "another-user"
+                            "Requested user keycloak id:", "owner-id"
                     ),
                     exception.getDetails()
             );
@@ -815,8 +812,7 @@ class AdvertisementServiceTest {
             assertEquals(
                     Map.of(
                             "Requested user id:", 44L,
-                            "Requested user keycloak id:", "owner-id",
-                            "Current user keycloak id:", "another-user"
+                            "Requested user keycloak id:", "owner-id"
                     ),
                     exception.getDetails()
             );
