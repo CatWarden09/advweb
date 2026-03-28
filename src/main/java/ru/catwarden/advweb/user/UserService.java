@@ -14,14 +14,13 @@ import ru.catwarden.advweb.exception.EntityNotFoundException;
 import ru.catwarden.advweb.exception.OperationNotAllowedException;
 import ru.catwarden.advweb.review.ReviewRepository;
 import ru.catwarden.advweb.security.SecurityUtils;
+import ru.catwarden.advweb.user.dto.UserEarnedResponse;
 import ru.catwarden.advweb.user.dto.UserResponse;
 import ru.catwarden.advweb.user.dto.UserUpdateRequest;
 
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-
-import static ru.catwarden.advweb.ad.QAdvertisement.advertisement;
 
 @Service
 @RequiredArgsConstructor
@@ -41,6 +40,15 @@ public class UserService {
         return userResponseAssembler.toUserResponse(user);
     }
 
+    public UserEarnedResponse getUserTotalEarned(Long id) {
+        validateCurrentUserOrAdmin(id);
+
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(User.class, id));
+
+        return new UserEarnedResponse(user.getTotalEarned());
+    }
+
     @Transactional
     @CacheEvict(value = "users", key = "#id")
     public UserResponse updateUser(Long id, UserUpdateRequest userUpdateRequest) {
@@ -50,8 +58,7 @@ public class UserService {
                 .orElseThrow(() -> new EntityNotFoundException(User.class, id));
 
 
-        String currentKeycloakId = SecurityUtils.getCurrentUserKeycloakId();
-        validateCurrentUserCanUpdate(user, currentKeycloakId);
+        validateCurrentUserOrAdmin(id);
 
         // protection from NLP
         if (!Objects.equals(user.getFirstName(), userUpdateRequest.getFirstName())
@@ -85,7 +92,7 @@ public class UserService {
         user.setPhone(userUpdateRequest.getPhone());
         user.setEmail(userUpdateRequest.getEmail());
 
-        log.info("AUDIT User updated: userId={}, actorId={}", id, currentKeycloakId);
+        log.info("AUDIT User updated: userId={}, actorId={}", id, SecurityUtils.getCurrentUserKeycloakId());
 
         return userResponseAssembler.toUserResponse(user);
     }
@@ -96,8 +103,7 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException(User.class, userId));
 
-        String currentKeycloakId = SecurityUtils.getCurrentUserKeycloakId();
-        validateCurrentUserCanUpdate(user, currentKeycloakId);
+        validateCurrentUserOrAdmin(userId);
 
         avatarService.setAvatarToUser(avatarId, userId);
         user.setAvatarId(avatarId);
@@ -105,7 +111,7 @@ public class UserService {
         log.info("AUDIT User avatar set: userId={}, avatarId={}, actorId={}",
                 userId,
                 avatarId,
-                currentKeycloakId);
+                SecurityUtils.getCurrentUserKeycloakId());
     }
 
     @Transactional
@@ -114,14 +120,13 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException(User.class, userId));
 
-        String currentKeycloakId = SecurityUtils.getCurrentUserKeycloakId();
-        validateCurrentUserCanUpdate(user, currentKeycloakId);
+        validateCurrentUserOrAdmin(userId);
 
         avatarService.unlinkUserAvatar(userId);
 
         user.setAvatarId(null);
 
-        log.info("AUDIT User avatar unlinked: userId={}, actorId={}", userId, currentKeycloakId);
+        log.info("AUDIT User avatar unlinked: userId={}, actorId={}", userId, SecurityUtils.getCurrentUserKeycloakId());
     }
 
     // this method is used to sync the keycloak user with the local user (for example when registering a new user, we get the jwt token and create a new local user with the given keycloakId)
@@ -173,14 +178,30 @@ public class UserService {
         log.info("AUDIT User rating recalculated: userId={}, rating={}, ratingCount={}", userId, rating, ratingCount);
     }
 
-    private void validateCurrentUserCanUpdate(User user, String currentKeycloakId) {
-        boolean isAdmin = SecurityUtils.isCurrentUserAdmin();
 
-        if (!isAdmin && !Objects.equals(user.getKeycloakId(), currentKeycloakId)) {
-            throw new DetailedAccessDeniedException("You are not allowed to update this user",
+    public void recalculateUserTotalEarned(Long userId, double newPrice){
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException(User.class, userId));
+
+        userRepository.updateUserTotalEarned(userId, newPrice);
+
+        log.info("AUDIT User total earned recalculated: userId={}, price added={}", userId, newPrice);
+    }
+
+    private void validateCurrentUserOrAdmin(Long userId) {
+        if (SecurityUtils.isCurrentUserAdmin()) {
+            return;
+        }
+
+        String currentKeycloakId = SecurityUtils.getCurrentUserKeycloakId();
+        User requestedUser = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException(User.class, userId));
+
+        if (!currentKeycloakId.equals(requestedUser.getKeycloakId())) {
+            throw new DetailedAccessDeniedException("You can only have access to your own data",
                     Map.of(
-                            "User id:", user.getId(),
-                            "User keycloak id:", String.valueOf(user.getKeycloakId())
+                            "Requested user id:", userId,
+                            "Requested user keycloak id:", requestedUser.getKeycloakId()
                     ));
         }
     }
