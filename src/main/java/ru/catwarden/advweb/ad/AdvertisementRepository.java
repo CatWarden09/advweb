@@ -10,6 +10,9 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 import ru.catwarden.advweb.adcategory.AdvertisementCategory;
 import ru.catwarden.advweb.enums.Status;
+import ru.catwarden.advweb.user.User;
+
+import java.util.List;
 
 public interface AdvertisementRepository extends JpaRepository<Advertisement, Long>, QuerydslPredicateExecutor<Advertisement> {
 
@@ -22,6 +25,15 @@ public interface AdvertisementRepository extends JpaRepository<Advertisement, Lo
     boolean existsByCategory(AdvertisementCategory advertisementCategory);
 
     Page<Advertisement> findAllByAuthorIdAndStatus(Long authorId, Status status, Pageable pageable);
+
+    List<Advertisement> findTop5ByAuthorIdAndStatusOrderByViewsDesc(Long authorId, Status status);
+
+    @Query("""
+            SELECT DISTINCT a.author
+            FROM Advertisement a
+            WHERE a.status = :status
+            """)
+    List<User> findDistinctAuthorsByStatus(@Param("status") Status status);
 
     @Query("""
             SELECT a
