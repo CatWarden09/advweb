@@ -76,7 +76,7 @@ public class WeeklyDigestService {
     private String buildEmailBody(User user, List<Advertisement> advertisements, String weekKey) {
         StringBuilder body = new StringBuilder();
         body.append("Здравствуйте, ").append(user.getFirstName()).append("!\n\n");
-        body.append("Вот ваш еженедельный топ-5 объявлений по просмотрам за ").append(weekKey).append(":\n\n");
+        body.append("В этом письме мы собрали топ-5 ваших объявлений, которые набрали больше всего просмотров").append(":\n\n");
 
         for (int i = 0; i < advertisements.size(); i++) {
             Advertisement advertisement = advertisements.get(i);
@@ -94,7 +94,9 @@ public class WeeklyDigestService {
                     .append("\n\n");
         }
 
-        body.append("С уважением,\nAdvweb");
+        body.append("Сервис объявлений Advweb\n")
+                .append(publicBaseUrl)
+                .append("\n\n");
         return body.toString();
     }
 }
