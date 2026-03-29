@@ -34,6 +34,9 @@ services:
 
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+
   keycloak:
     image: quay.io/keycloak/keycloak:26.1
     container_name: advweb_keycloak
@@ -119,3 +122,5 @@ volumes:
     name: advweb_uploads
   logs:
     name: advweb_logs
+  kafka_data:
+    name: advweb_kafka_data
