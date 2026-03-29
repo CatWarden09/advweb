@@ -16,7 +16,22 @@ public class WeeklyDigestProducer {
     private String weeklyDigestTopic;
 
     public void send(WeeklyDigestEvent event) {
-        kafkaTemplate.send(weeklyDigestTopic, event.userId().toString(), event);
-        log.info("AUDIT weekly digest event published: userId={}, weekKey={}", event.userId(), event.weekKey());
+        kafkaTemplate.send(weeklyDigestTopic, event.userId().toString(), event)
+                .whenComplete((result, exception) -> {
+                    if (exception != null) {
+                        log.error("Weekly digest event publish failed: userId={}, weekKey={}",
+                                event.userId(),
+                                event.weekKey(),
+                                exception);
+                        return;
+                    }
+
+                    log.info("AUDIT weekly digest event published: userId={}, weekKey={}, topic={}, partition={}, offset={}",
+                            event.userId(),
+                            event.weekKey(),
+                            result.getRecordMetadata().topic(),
+                            result.getRecordMetadata().partition(),
+                            result.getRecordMetadata().offset());
+                });
     }
 }
