@@ -142,8 +142,8 @@ spec:
             periodSeconds: 15
 
         - name: advweb-app
-          image: advweb-app:k8s
-          imagePullPolicy: Never
+          image: catwarden09/advweb:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 8088
           envFrom:
