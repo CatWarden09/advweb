@@ -46,5 +46,5 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         script: |
           kubectl set image deployment/advweb-demo \
-            advweb-demo=${{ secrets.DOCKERHUB_PROJECT_NAME }}:latest -n advweb
+            advweb-app=${{ secrets.DOCKERHUB_PROJECT_NAME }}:latest -n advweb
           kubectl rollout status deployment/advweb-demo -n advweb
