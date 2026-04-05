@@ -31,23 +31,23 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     needs: build
     runs-on: ubuntu-latest
-
+  
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
+  
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-
+  
       - name: Build Docker image
         run: docker build -t ${{ secrets.DOCKERHUB_PROJECT_NAME }}:latest .
-
+  
       - name: Push Docker image
         run: docker push ${{ secrets.DOCKERHUB_PROJECT_NAME }}:latest
-
+  
       - name: Deploy to Kubernetes
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -56,10 +56,5 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             set -e
-            cd /root/advweb
-            git fetch origin
-            git checkout master
-            git pull origin master
-            kubectl apply -f k8s/advweb.yaml
             kubectl -n advweb rollout restart deployment/advweb-demo
             kubectl -n advweb rollout status deployment/advweb-demo --timeout=600s
