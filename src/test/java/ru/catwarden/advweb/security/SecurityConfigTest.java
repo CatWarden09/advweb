@@ -29,6 +29,7 @@ class SecurityConfigTest {
 
         HttpSecurity http = mock(HttpSecurity.class);
         DefaultSecurityFilterChain expectedChain = mock(DefaultSecurityFilterChain.class);
+        when(http.cors(any())).thenReturn(http);
         when(http.csrf(any())).thenReturn(http);
         when(http.authorizeHttpRequests(any())).thenReturn(http);
         when(http.oauth2ResourceServer(any())).thenReturn(http);
@@ -37,6 +38,7 @@ class SecurityConfigTest {
         SecurityFilterChain result = securityConfig.securityFilterChain(http);
 
         assertEquals(expectedChain, result);
+        verify(http).cors(any());
         verify(http).csrf(any());
         verify(http).authorizeHttpRequests(any());
         verify(http).oauth2ResourceServer(any());
@@ -51,6 +53,7 @@ class SecurityConfigTest {
 
         HttpSecurity http = mock(HttpSecurity.class);
         DefaultSecurityFilterChain builtChain = mock(DefaultSecurityFilterChain.class);
+        when(http.cors(any())).thenReturn(http);
         when(http.csrf(any())).thenReturn(http);
         when(http.authorizeHttpRequests(any())).thenReturn(http);
         when(http.oauth2ResourceServer(any())).thenReturn(http);
@@ -88,6 +91,7 @@ class SecurityConfigTest {
         SecurityConfig securityConfig = new SecurityConfig(converter);
 
         HttpSecurity http = mock(HttpSecurity.class);
+        when(http.cors(any())).thenReturn(http);
         when(http.csrf(any())).thenReturn(http);
         when(http.authorizeHttpRequests(any())).thenReturn(http);
         when(http.oauth2ResourceServer(any())).thenReturn(http);
@@ -114,6 +118,7 @@ class SecurityConfigTest {
 
         authorizeCaptor.getValue().customize(registry);
 
+        verify(registry).requestMatchers(HttpMethod.OPTIONS, "/**");
         verify(registry).requestMatchers("/error");
         verify(registry).requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html");
         verify(registry).requestMatchers(HttpMethod.GET, "/uploads/**");
