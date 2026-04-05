@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.stereotype.Service;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.catwarden.advweb.avatar.AvatarService;
 import ru.catwarden.advweb.enums.Status;
@@ -36,6 +36,19 @@ public class UserService {
     public UserResponse getUser(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(User.class, id));
+
+        return userResponseAssembler.toUserResponse(user);
+    }
+
+    public UserResponse getCurrentUser() {
+        String keycloakId = SecurityUtils.getCurrentUserKeycloakId();
+
+        if (keycloakId == null) {
+            throw new EntityNotFoundException(User.class, "current authenticated user");
+        }
+
+        User user = userRepository.findByKeycloakId(keycloakId)
+                .orElseThrow(() -> new EntityNotFoundException(User.class, keycloakId));
 
         return userResponseAssembler.toUserResponse(user);
     }

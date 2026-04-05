@@ -23,6 +23,11 @@ public class UserController {
     private final AdvertisementService advertisementService;
     private final ReviewService reviewService;
 
+    @GetMapping("/me")
+    public UserResponse getCurrentUser() {
+        return userService.getCurrentUser();
+    }
+
     @GetMapping("/{id}")
     public UserResponse getUser(@PathVariable Long id) {
         return userService.getUser(id);
