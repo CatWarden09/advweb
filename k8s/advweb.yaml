@@ -127,20 +127,59 @@ spec:
             - start
             - --http-enabled=true
             - --http-port=8081
+            - --http-relative-path=/auth
             - --proxy-headers=xforwarded
+          env:
+            - name: KC_BOOTSTRAP_ADMIN_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: advweb-env
+                  key: KEYCLOAK_ADMIN_USERNAME
+            - name: KC_BOOTSTRAP_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: advweb-env
+                  key: KEYCLOAK_ADMIN_PASSWORD
+            - name: KC_HOSTNAME
+              valueFrom:
+                secretKeyRef:
+                  name: advweb-env
+                  key: APP_KEYCLOAK_BASE_URL
+            - name: KC_HTTP_RELATIVE_PATH
+              value: /auth
+            - name: KC_PROXY_HEADERS
+              value: xforwarded
+            - name: KC_HOSTNAME_STRICT
+              value: "true"
+            - name: KC_LOG_LEVEL
+              value: info
+            - name: KC_DB
+              value: postgres
+            - name: KC_DB_URL
+              value: jdbc:postgresql://localhost:5432/advweb
+            - name: KC_DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: advweb-env
+                  key: POSTGRES_USER
+            - name: KC_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: advweb-env
+                  key: POSTGRES_PASSWORD
           ports:
             - containerPort: 8081
           readinessProbe:
             httpGet:
               path: /auth/realms/master
               port: 8081
-            initialDelaySeconds: 30
+            initialDelaySeconds: 45
             periodSeconds: 10
           livenessProbe:
             httpGet:
               path: /auth/realms/master
               port: 8081
-            initialDelaySeconds: 60
+            initialDelaySeconds: 90
             periodSeconds: 15
 
         - name: advweb-app
@@ -171,13 +210,13 @@ spec:
               mountPath: /app/uploads
           readinessProbe:
             httpGet:
-              path: /actuator/health
+              path: /actuator/health/readiness
               port: 8088
-            initialDelaySeconds: 15
+            initialDelaySeconds: 25
             periodSeconds: 5
           livenessProbe:
             httpGet:
-              path: /actuator/health
+              path: /actuator/health/liveness
               port: 8088
-            initialDelaySeconds: 30
+            initialDelaySeconds: 50
             periodSeconds: 10
