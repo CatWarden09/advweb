@@ -38,13 +38,13 @@ jobs:
     - name: Push Docker image
       run: docker push ${{ secrets.DOCKERHUB_PROJECT_NAME }}:latest
 
-    # - name: Deploy to Kubernetes
-    #   uses: appleboy/ssh-action@v1.0.3
-    #   with:
-    #     host: ${{ secrets.SERVER_IP }}
-    #     username: ${{ secrets.SERVER_USER }}
-    #     key: ${{ secrets.SSH_PRIVATE_KEY }}
-    #     script: |
-    #       kubectl set image deployment/advweb-demo \
-    #         advweb-app=${{ secrets.DOCKERHUB_PROJECT_NAME }}:latest -n advweb
-    #       kubectl rollout status deployment/advweb-demo -n advweb
+    - name: Deploy to Kubernetes
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.SERVER_IP }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          kubectl set image deployment/advweb-demo \
+            advweb-app=${{ secrets.DOCKERHUB_PROJECT_NAME }}:latest -n advweb
+          kubectl rollout status deployment/advweb-demo -n advweb
