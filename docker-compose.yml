@@ -6,6 +6,8 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-advweb}
       POSTGRES_USER: ${POSTGRES_USER:-advweb_user}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-admin}
+    ports:
+      - "5432:5432"
     volumes:
       - advweb_db_data:/var/lib/postgresql/data
     healthcheck:
@@ -64,7 +66,7 @@ services:
       db:
         condition: service_healthy
     ports:
-      - "127.0.0.1:8082:8080"
+      - "8082:8080"
     volumes:
       - keycloak_data:/opt/keycloak/data
     restart: unless-stopped
@@ -73,7 +75,7 @@ services:
     image: redis:7.2-alpine
     container_name: advweb_redis
     ports:
-      - "127.0.0.1:6379:6379"
+      - "6379:6379"
     volumes:
       - redis_data:/data
     restart: unless-stopped

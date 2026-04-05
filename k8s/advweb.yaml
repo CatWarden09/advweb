@@ -6,10 +6,7 @@ metadata:
 spec:
   replicas: 1
   strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxUnavailable: 0 #don't delete the old pod until the new one is ready
-      maxSurge: 1 # create an additional pod while the new pod is starting
+    type: Recreate
   selector:
     matchLabels:
       app: advweb-demo
@@ -21,175 +18,11 @@ spec:
       imagePullSecrets:
         - name: dockerhub-creds
       volumes:
-        - name: postgres-data
-          hostPath:
-            path: /var/lib/docker/volumes/advweb_db_data/_data
-            type: DirectoryOrCreate
         - name: uploads-data
           hostPath:
             path: /var/lib/docker/volumes/advweb_uploads/_data
             type: DirectoryOrCreate
       containers:
-        - name: postgres
-          image: postgres:15
-          ports:
-            - containerPort: 5432
-          env:
-            - name: POSTGRES_DB
-              valueFrom:
-                secretKeyRef:
-                  name: advweb-env
-                  key: POSTGRES_DB
-            - name: POSTGRES_USER
-              valueFrom:
-                secretKeyRef:
-                  name: advweb-env
-                  key: POSTGRES_USER
-            - name: POSTGRES_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: advweb-env
-                  key: POSTGRES_PASSWORD
-          volumeMounts:
-            - name: postgres-data
-              mountPath: /var/lib/postgresql/data
-          readinessProbe:
-            tcpSocket:
-              port: 5432
-            initialDelaySeconds: 10
-            periodSeconds: 5
-          livenessProbe:
-            tcpSocket:
-              port: 5432
-            initialDelaySeconds: 30
-            periodSeconds: 10
-
-        - name: redis
-          image: redis:7.2-alpine
-          ports:
-            - containerPort: 6379
-          readinessProbe:
-            tcpSocket:
-              port: 6379
-            initialDelaySeconds: 5
-            periodSeconds: 5
-          livenessProbe:
-            tcpSocket:
-              port: 6379
-            initialDelaySeconds: 15
-            periodSeconds: 10
-
-        - name: zookeeper
-          image: confluentinc/cp-zookeeper:7.5.0
-          env:
-            - name: ZOOKEEPER_CLIENT_PORT
-              value: "2181"
-          ports:
-            - containerPort: 2181
-          readinessProbe:
-            tcpSocket:
-              port: 2181
-            initialDelaySeconds: 10
-            periodSeconds: 5
-          livenessProbe:
-            tcpSocket:
-              port: 2181
-            initialDelaySeconds: 30
-            periodSeconds: 10
-
-        - name: kafka
-          image: confluentinc/cp-kafka:7.5.0
-          env:
-            - name: KAFKA_ZOOKEEPER_CONNECT
-              value: localhost:2181
-            - name: KAFKA_LISTENERS
-              value: PLAINTEXT://0.0.0.0:9092
-            - name: KAFKA_ADVERTISED_LISTENERS
-              value: PLAINTEXT://localhost:9092
-            - name: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
-              value: "1"
-          ports:
-            - containerPort: 9092
-          readinessProbe:
-            tcpSocket:
-              port: 9092
-            initialDelaySeconds: 20
-            periodSeconds: 5
-          livenessProbe:
-            tcpSocket:
-              port: 9092
-            initialDelaySeconds: 60
-            periodSeconds: 10
-
-        - name: keycloak
-          image: quay.io/keycloak/keycloak:26.1
-          args:
-            - start
-            - --http-enabled=true
-            - --http-port=8081
-            - --http-relative-path=/auth
-            - --proxy-headers=xforwarded
-          env:
-            - name: KC_BOOTSTRAP_ADMIN_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: advweb-env
-                  key: KEYCLOAK_ADMIN_USERNAME
-            - name: KC_BOOTSTRAP_ADMIN_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: advweb-env
-                  key: KEYCLOAK_ADMIN_PASSWORD
-            - name: KC_HOSTNAME
-              valueFrom:
-                secretKeyRef:
-                  name: advweb-env
-                  key: APP_KEYCLOAK_BASE_URL
-            - name: KC_HTTP_RELATIVE_PATH
-              value: /auth
-            - name: KC_PROXY_HEADERS
-              value: xforwarded
-            - name: KC_HOSTNAME_STRICT
-              value: "true"
-            - name: KC_LOG_LEVEL
-              value: info
-            - name: KC_DB
-              value: postgres
-            - name: KC_DB_URL
-              value: jdbc:postgresql://localhost:5432/advweb
-            - name: KC_DB_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: advweb-env
-                  key: POSTGRES_USER
-            - name: KC_DB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: advweb-env
-                  key: POSTGRES_PASSWORD
-          ports:
-            - containerPort: 8081
-          startupProbe:
-            httpGet:
-              path: /auth/realms/master
-              port: 8081
-            periodSeconds: 10
-            failureThreshold: 60
-          readinessProbe:
-            httpGet:
-              path: /auth/realms/master
-              port: 8081
-            initialDelaySeconds: 5
-            periodSeconds: 10
-            failureThreshold: 6
-          livenessProbe:
-            httpGet:
-              path: /auth/realms/master
-              port: 8081
-            initialDelaySeconds: 15
-            periodSeconds: 15
-            failureThreshold: 6
-
         - name: advweb-app
           image: catwarden09/advweb:latest
           imagePullPolicy: Always
@@ -201,18 +34,27 @@ spec:
           env:
             - name: SERVER_PORT
               value: "8088"
+            # Replace this with the VPS host IP if it changes.
+            - name: INFRA_HOST
+              value: "92.38.48.50"
             - name: SPRING_DATASOURCE_URL
-              value: jdbc:postgresql://localhost:5432/advweb
+              value: jdbc:postgresql://92.38.48.50:5432/advweb
             - name: SPRING_FLYWAY_ENABLED
               value: "true"
             - name: SPRING_DATA_REDIS_HOST
-              value: localhost
+              value: 92.38.48.50
             - name: SPRING_DATA_REDIS_PORT
               value: "6379"
             - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
-              value: localhost:9092
-            - name: SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI
-              value: http://localhost:8081/auth/realms/advweb/protocol/openid-connect/certs
+              value: 92.38.48.50:9092
+            - name: SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI
+              value: https://advweb.duckdns.org/auth/realms/advweb
+            - name: APP_KEYCLOAK_ISSUER_URI
+              value: https://advweb.duckdns.org/auth/realms/advweb
+            - name: APP_KEYCLOAK_BASE_URL
+              value: https://advweb.duckdns.org/auth
+            - name: APP_PUBLIC_BASE_URL
+              value: https://advweb.duckdns.org
           volumeMounts:
             - name: uploads-data
               mountPath: /app/uploads
@@ -227,12 +69,27 @@ spec:
               path: /actuator/health/readiness
               port: 8088
             initialDelaySeconds: 5
-            periodSeconds: 5
+            periodSeconds: 10
             failureThreshold: 6
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness
               port: 8088
             initialDelaySeconds: 15
-            periodSeconds: 10
+            periodSeconds: 20
             failureThreshold: 6
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: advweb-demo
+  namespace: advweb
+spec:
+  selector:
+    app: advweb-demo
+  ports:
+    - name: http
+      port: 8088
+      targetPort: 8088
+      nodePort: 30088
+  type: NodePort
