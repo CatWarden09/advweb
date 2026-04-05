@@ -173,8 +173,8 @@ spec:
             httpGet:
               path: /auth/realms/master
               port: 8081
-            periodSeconds: 5
-            failureThreshold: 24
+            periodSeconds: 10
+            failureThreshold: 60
           readinessProbe:
             httpGet:
               path: /auth/realms/master
@@ -220,8 +220,8 @@ spec:
             httpGet:
               path: /actuator/health/liveness
               port: 8088
-            periodSeconds: 5
-            failureThreshold: 30
+            periodSeconds: 10
+            failureThreshold: 36
           readinessProbe:
             httpGet:
               path: /actuator/health/readiness
