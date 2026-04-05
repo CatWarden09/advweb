@@ -169,18 +169,26 @@ spec:
                   key: POSTGRES_PASSWORD
           ports:
             - containerPort: 8081
+          startupProbe:
+            httpGet:
+              path: /auth/realms/master
+              port: 8081
+            periodSeconds: 5
+            failureThreshold: 24
           readinessProbe:
             httpGet:
               path: /auth/realms/master
               port: 8081
-            initialDelaySeconds: 45
+            initialDelaySeconds: 5
             periodSeconds: 10
+            failureThreshold: 6
           livenessProbe:
             httpGet:
               path: /auth/realms/master
               port: 8081
-            initialDelaySeconds: 90
+            initialDelaySeconds: 15
             periodSeconds: 15
+            failureThreshold: 6
 
         - name: advweb-app
           image: catwarden09/advweb:latest
@@ -208,15 +216,23 @@ spec:
           volumeMounts:
             - name: uploads-data
               mountPath: /app/uploads
+          startupProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8088
+            periodSeconds: 5
+            failureThreshold: 30
           readinessProbe:
             httpGet:
               path: /actuator/health/readiness
               port: 8088
-            initialDelaySeconds: 25
+            initialDelaySeconds: 5
             periodSeconds: 5
+            failureThreshold: 6
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness
               port: 8088
-            initialDelaySeconds: 50
+            initialDelaySeconds: 15
             periodSeconds: 10
+            failureThreshold: 6
