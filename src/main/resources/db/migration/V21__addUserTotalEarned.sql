@@ -1,2 +1,2 @@
 ALTER TABLE users
-    ADD total_earned DOUBLE PRECISION;
+    ADD COLUMN IF NOT EXISTS total_earned DOUBLE PRECISION;
