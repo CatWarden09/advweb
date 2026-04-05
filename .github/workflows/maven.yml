@@ -2,49 +2,64 @@ name: Java CI with Maven, Docker and Kubernetes
 
 on:
   push:
-    branches: [ "master", "dev" ]
+    branches: ["master", "dev"]
   pull_request:
-    branches: [ "master", "dev"]
+    branches: ["master", "dev"]
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: Set up JDK 21
-      uses: actions/setup-java@v4
-      with:
-        java-version: '21'
-        distribution: 'temurin'
-        cache: maven
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: "21"
+          distribution: temurin
+          cache: maven
 
-    - name: Make Maven Wrapper executable
-      run: chmod +x ./mvnw
+      - name: Make Maven Wrapper executable
+        run: chmod +x ./mvnw
 
-    - name: Build project with Maven Wrapper
-      run: ./mvnw -B package -DskipTests
+      - name: Build and test project with Maven Wrapper
+        run: ./mvnw -B package
 
-    - name: Log in to Docker Hub
-      uses: docker/login-action@v2
-      with:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_TOKEN }}
+  deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    needs: build
+    runs-on: ubuntu-latest
 
-    - name: Build Docker image
-      run: docker build -t ${{ secrets.DOCKERHUB_PROJECT_NAME }}:latest .
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: Push Docker image
-      run: docker push ${{ secrets.DOCKERHUB_PROJECT_NAME }}:latest
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    - name: Deploy to Kubernetes
-      uses: appleboy/ssh-action@v1.0.3
-      with:
-        host: ${{ secrets.SERVER_IP }}
-        username: ${{ secrets.SERVER_USER }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        script: |
-          kubectl set image deployment/advweb-demo \
-            advweb-app=${{ secrets.DOCKERHUB_PROJECT_NAME }}:latest -n advweb
-          kubectl rollout status deployment/advweb-demo -n advweb
+      - name: Build Docker image
+        run: docker build -t ${{ secrets.DOCKERHUB_PROJECT_NAME }}:latest .
+
+      - name: Push Docker image
+        run: docker push ${{ secrets.DOCKERHUB_PROJECT_NAME }}:latest
+
+      - name: Deploy to Kubernetes
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            set -e
+            cd /root/advweb
+            git fetch origin
+            git checkout master
+            git pull origin master
+            kubectl apply -f k8s/advweb.yaml
+            kubectl -n advweb rollout restart deployment/advweb-demo
+            kubectl -n advweb rollout status deployment/advweb-demo --timeout=600s
