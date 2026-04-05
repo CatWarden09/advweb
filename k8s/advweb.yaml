@@ -18,6 +18,8 @@ spec:
       labels:
         app: advweb-demo
     spec:
+      imagePullSecrets:
+        - name: dockerhub-creds
       volumes:
         - name: postgres-data
           hostPath:
