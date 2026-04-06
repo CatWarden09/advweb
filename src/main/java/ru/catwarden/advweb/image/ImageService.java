@@ -121,12 +121,8 @@ public class ImageService {
             return false;
         }
 
-        List<Long> imageIdsToUnlink = currentImageIds.stream()
-                .filter(id -> !requested.contains(id))
-                .toList();
-
-        if (!imageIdsToUnlink.isEmpty()) {
-            imageRepository.unlinkDeletedImagesFromAdvertisement(advertisementId, imageIdsToUnlink);
+        if (!requestImageIds.isEmpty()) {
+            imageRepository.unlinkImagesMissingFromAdvertisement(advertisementId, requestImageIds);
         }
 
         setImagesToAdvertisement(requestImageIds, advertisementId);

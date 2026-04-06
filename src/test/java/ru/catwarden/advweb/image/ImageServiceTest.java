@@ -211,7 +211,7 @@ class ImageServiceTest {
         boolean result = imageService.syncImagesInAdvertisement(7L, List.of(2L, 1L));
 
         assertFalse(result);
-        verify(imageRepository, never()).unlinkDeletedImagesFromAdvertisement(any(Long.class), any(List.class));
+        verify(imageRepository, never()).unlinkImagesMissingFromAdvertisement(any(Long.class), any(List.class));
     }
 
     @Test
@@ -236,7 +236,7 @@ class ImageServiceTest {
         }
 
         assertTrue(result);
-        verify(imageRepository).unlinkDeletedImagesFromAdvertisement(7L, List.of(1L));
+        verify(imageRepository).unlinkImagesMissingFromAdvertisement(7L, requestIds);
         verify(imageRepository).saveAll(List.of(image2, image3, image4));
         assertEquals(7L, image4.getAdId());
         assertTrue(image4.getLinkedToAd());
