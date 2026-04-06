@@ -3,8 +3,12 @@ package ru.catwarden.advweb.adcategory;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.catwarden.advweb.ad.dto.AdvertisementResponse;
 import ru.catwarden.advweb.adcategory.dto.AdvertisementCategoryRequest;
 import ru.catwarden.advweb.adcategory.dto.AdvertisementCategoryUpdateRequest;
 import ru.catwarden.advweb.adcategory.dto.AdvertisementCategoryResponse;
@@ -31,6 +35,26 @@ public class CategoryController {
     @GetMapping("/{id}/subcategories")
     public List<AdvertisementCategoryResponse> getSubcategories(@PathVariable Long id){
         return categoryService.getSubcategories(id);
+    }
+
+    @GetMapping("/{id}/ads")
+    public Page<AdvertisementResponse> getCategoryAds(@RequestParam(defaultValue = "0") int page,
+                                                              @RequestParam(defaultValue = "10") int size,
+                                                              @PathVariable Long id){
+        Pageable pageable = PageRequest.of(page, size);
+
+        return categoryService.getCategoryAds(pageable, id);
+    }
+
+    @GetMapping("/{parent_id}/{sub_id}/ads")
+    public Page<AdvertisementResponse> getSubcategoryAds(@RequestParam(defaultValue = "0") int page,
+                                                         @RequestParam(defaultValue = "10") int size,
+                                                         @PathVariable Long parent_id,
+                                                         @PathVariable Long sub_id){
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        return categoryService.getSubcategoryAds(pageable, parent_id, sub_id);
     }
 
     @PostMapping

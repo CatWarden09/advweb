@@ -4,7 +4,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import ru.catwarden.advweb.ad.AdvertisementService;
+import ru.catwarden.advweb.ad.dto.AdvertisementResponse;
+import ru.catwarden.advweb.ad.dto.AdvertisementSearchFilter;
 import ru.catwarden.advweb.adcategory.dto.AdvertisementCategoryRequest;
 import ru.catwarden.advweb.adcategory.dto.AdvertisementCategoryUpdateRequest;
 import ru.catwarden.advweb.adcategory.dto.AdvertisementCategoryResponse;
@@ -23,6 +28,7 @@ import java.util.Map;
 @Slf4j
 public class CategoryService {
     private final CategoryRepository categoryRepository;
+    private final AdvertisementService advertisementService;
     private final AdvertisementRepository advertisementRepository;
     private final AdvertisementCategoryMapper advertisementCategoryMapper;
 
@@ -51,6 +57,30 @@ public class CategoryService {
                 .stream()
                 .map(advertisementCategoryMapper::toResponse)
                 .toList();
+    }
+
+    @Cacheable(
+            value = "category-advertisements-list",
+            key = "'cat-' + #id + '-p-' + #pageable.pageNumber + '-s-' + #pageable.pageSize"
+    )
+    public Page<AdvertisementResponse> getCategoryAds(Pageable pageable, Long id){
+        AdvertisementSearchFilter filter = new AdvertisementSearchFilter();
+        filter.setCategoryId(id);
+
+        return advertisementService.getAdvertisementsByFilter(pageable, filter);
+
+    }
+
+    @Cacheable(
+            value = "subcategory-advertisements-list",
+            key = "'cat-' + #parentId + '-sub-' + #subId + '-p-' + #pageable.pageNumber + '-s-' + #pageable.pageSize"
+    )
+    public Page<AdvertisementResponse> getSubcategoryAds(Pageable pageable, Long parentId, Long subId){
+        AdvertisementSearchFilter filter = new AdvertisementSearchFilter();
+        filter.setCategoryId(parentId);
+        filter.setSubcategoryId(subId);
+
+        return advertisementService.getAdvertisementsByFilter(pageable, filter);
     }
 
     @CacheEvict(value = "categories", allEntries = true)
