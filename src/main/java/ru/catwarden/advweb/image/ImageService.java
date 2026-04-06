@@ -64,6 +64,15 @@ public class ImageService {
         return imageDtoList;
     }
 
+    public List<ImageDto> getImagesByAdId(Long id){
+        List<Image> images = imageRepository.findAllByAdId(id);
+
+        return images.stream()
+                .map(imageMapper::toDto)
+                .toList();
+    }
+
+
     public List<String> getPreviewImageUrlByAdvertisementId(Long id){
         Image image = imageRepository.findFirstByAdId(id)
                 .orElseThrow(() -> new EntityNotFoundException(Advertisement.class, id));
