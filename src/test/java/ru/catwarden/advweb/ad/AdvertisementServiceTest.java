@@ -81,7 +81,7 @@ class AdvertisementServiceTest {
 
         when(advertisementRepository.findById(10L)).thenReturn(Optional.of(advertisement));
         when(advertisementMapper.toResponse(advertisement)).thenReturn(response);
-        when(imageService.getPreviewImageUrlByAdvertisementId(10L)).thenReturn(List.of("preview.jpg"));
+        when(imageService.getImageUrlsByAdvertisementId(10L)).thenReturn(List.of("image1.jpg", "image2.jpg"));
 
         try (MockedStatic<SecurityUtils> securityUtilsMockedStatic = mockStatic(SecurityUtils.class)) {
             securityUtilsMockedStatic.when(SecurityUtils::getCurrentUserKeycloakId).thenReturn("some-user-id");
@@ -89,7 +89,7 @@ class AdvertisementServiceTest {
 
             AdvertisementResponse actual = advertisementService.getAdvertisement(10L);
 
-            assertEquals(List.of("preview.jpg"), actual.getImageUrls());
+            assertEquals(List.of("image1.jpg", "image2.jpg"), actual.getImageUrls());
         }
     }
 
