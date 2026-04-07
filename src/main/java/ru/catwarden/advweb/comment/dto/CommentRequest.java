@@ -17,6 +17,6 @@ public class CommentRequest {
     private Long advertisementId;
 
     @NotBlank
-    @Size(min = 50, max = 300)
+    @Size(min = 20, max = 300)
     private String text;
 }
