@@ -189,9 +189,14 @@ public class ImageService {
         log.info("AUDIT all images unlinked from advertisement: advertisementId={}, actorId={}", advertisementId, SecurityUtils.getCurrentUserKeycloakId());
     }
 
-    @Scheduled(cron = "0 0 4 * * *", zone = "Europe/Moscow")
+    @Scheduled(cron = "${app.images.cleanup.cron:0 0 4 * * *}", zone = "${app.images.cleanup.zone:Europe/Moscow}")
     public void deleteUnusedImages(){
         List<Image> images = imageRepository.findAllByLinkedToAdFalse();
+        List<Long> imageIds = images.stream()
+                .map(Image::getId)
+                .toList();
+
+        log.info("AUDIT unused images cleanup started: count={}, imageIds={}", images.size(), imageIds);
 
         try{
             for(Image image : images){
@@ -202,6 +207,8 @@ public class ImageService {
         }
 
         imageRepository.deleteAll(images);
+
+        log.info("AUDIT unused images cleanup finished: deletedCount={}, deletedImageIds={}", images.size(), imageIds);
     }
 
 }

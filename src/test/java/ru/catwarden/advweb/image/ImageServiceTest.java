@@ -10,11 +10,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.multipart.MultipartFile;
 import ru.catwarden.advweb.exception.DetailedAccessDeniedException;
 import ru.catwarden.advweb.exception.EntityNotFoundException;
+import ru.catwarden.advweb.exception.FileStorageException;
 import ru.catwarden.advweb.image.dto.ImageDto;
 import ru.catwarden.advweb.security.SecurityUtils;
 import ru.catwarden.advweb.storage.FileUploader;
 import ru.catwarden.advweb.storage.StoredFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -24,6 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -255,6 +260,40 @@ class ImageServiceTest {
         assertFalse(image1.getLinkedToAd());
         assertFalse(image2.getLinkedToAd());
         verify(imageRepository).saveAll(List.of(image1, image2));
+    }
+
+    @Test
+    void deleteUnusedImagesDeletesFilesAndRecords() throws IOException {
+        Image image1 = Image.builder().id(1L).path("/tmp/1.png").linkedToAd(false).build();
+        Image image2 = Image.builder().id(2L).path("/tmp/2.png").linkedToAd(false).build();
+        when(imageRepository.findAllByLinkedToAdFalse()).thenReturn(List.of(image1, image2));
+
+        try (MockedStatic<Files> filesMock = mockStatic(Files.class)) {
+            filesMock.when(() -> Files.deleteIfExists(Paths.get("/tmp/1.png"))).thenReturn(true);
+            filesMock.when(() -> Files.deleteIfExists(Paths.get("/tmp/2.png"))).thenReturn(true);
+
+            imageService.deleteUnusedImages();
+
+            filesMock.verify(() -> Files.deleteIfExists(Paths.get("/tmp/1.png")));
+            filesMock.verify(() -> Files.deleteIfExists(Paths.get("/tmp/2.png")));
+        }
+
+        verify(imageRepository).deleteAll(List.of(image1, image2));
+    }
+
+    @Test
+    void deleteUnusedImagesThrowsWhenFileDeletionFails() throws IOException {
+        Image image = Image.builder().id(1L).path("/tmp/1.png").linkedToAd(false).build();
+        when(imageRepository.findAllByLinkedToAdFalse()).thenReturn(List.of(image));
+
+        try (MockedStatic<Files> filesMock = mockStatic(Files.class)) {
+            filesMock.when(() -> Files.deleteIfExists(Paths.get("/tmp/1.png")))
+                    .thenThrow(new IOException("disk error"));
+
+            assertThrows(FileStorageException.class, () -> imageService.deleteUnusedImages());
+        }
+
+        verify(imageRepository, never()).deleteAll(anyList());
     }
 }
 
