@@ -262,6 +262,7 @@ class UserServiceTest {
         assertEquals("not_provided_kc-id", result.getPhone());
         assertEquals(0.0, result.getRating());
         assertEquals(0L, result.getRatingCount());
+        assertEquals(0.0, result.getTotalEarned());
     }
 
     @Test

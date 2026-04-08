@@ -20,6 +20,6 @@
 
 
         @Modifying
-        @Query("UPDATE User u SET u.totalEarned = u.totalEarned + :newPrice WHERE u.id = :userId")
+        @Query("UPDATE User u SET u.totalEarned = COALESCE(u.totalEarned, 0) + :newPrice WHERE u.id = :userId")
         void  updateUserTotalEarned (@Param("userId") Long userId, @Param("newPrice") Double newPrice);
     }

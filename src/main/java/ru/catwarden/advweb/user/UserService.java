@@ -167,6 +167,7 @@ public class UserService {
                             .phone(jwt.getClaimAsString("phone_number") != null ? jwt.getClaimAsString("phone_number") : "not_provided_" + keycloakId)
                             .rating(0.0)
                             .ratingCount(0L)
+                            .totalEarned(0.0)
                             .build();
                     return userRepository.save(newUser);
                 });
