@@ -180,12 +180,8 @@ public class UserService {
             throw new EntityNotFoundException(User.class, userId);
         }
 
-        Object[] aggregate = reviewRepository
-                .aggregateRatingByRecipientAndStatus(userId, Status.APPROVED)
-                .orElse(new Object[]{0.0, 0L});
-
-        Double rating = aggregate[0] != null ? ((Number) aggregate[0]).doubleValue() : 0.0;
-        Long ratingCount = aggregate[1] != null ? ((Number) aggregate[1]).longValue() : 0L;
+        Double rating = reviewRepository.findAverageRatingByRecipientAndStatus(userId, Status.APPROVED);
+        Long ratingCount = reviewRepository.countByRecipientIdAndStatus(userId, Status.APPROVED);
 
         userRepository.updateUserRatingStats(userId, rating, ratingCount);
 

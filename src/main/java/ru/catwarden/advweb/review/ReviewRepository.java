@@ -7,8 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ru.catwarden.advweb.enums.Status;
 
-import java.util.Optional;
-
 public interface ReviewRepository extends JpaRepository<Review, Long> {
     Page<Review> findByStatus(Status status, Pageable pageable);
 
@@ -17,11 +15,17 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     Page<Review> findByAuthorIdAndStatus(Long authorId, Status status, Pageable pageable);
 
     @Query("""
-            SELECT AVG(r.rating), COUNT(r)
+            SELECT COALESCE(AVG(r.rating), 0)
             FROM Review r
             WHERE r.recipient.id = :recipientId
               AND r.status = :status
             """)
-    Optional<Object[]> aggregateRatingByRecipientAndStatus(@Param("recipientId") Long recipientId,
-                                                           @Param("status") Status status);
+    Double findAverageRatingByRecipientAndStatus(@Param("recipientId") Long recipientId,
+                                                 @Param("status") Status status);
+
+    Long countByRecipientIdAndStatus(Long recipientId, Status status);
+
+
+    boolean existsByAuthorIdAndRecipientId(Long authorId, Long recipientId);
+
 }

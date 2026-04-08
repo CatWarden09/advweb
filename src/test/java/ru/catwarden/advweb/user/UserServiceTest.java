@@ -275,8 +275,8 @@ class UserServiceTest {
     @Test
     void recalculateUserRatingUpdatesStatsFromAggregate() {
         when(userRepository.existsById(9L)).thenReturn(true);
-        when(reviewRepository.aggregateRatingByRecipientAndStatus(9L, Status.APPROVED))
-                .thenReturn(Optional.of(new Object[]{4.5, 2L}));
+        when(reviewRepository.findAverageRatingByRecipientAndStatus(9L, Status.APPROVED)).thenReturn(4.5);
+        when(reviewRepository.countByRecipientIdAndStatus(9L, Status.APPROVED)).thenReturn(2L);
 
         userService.recalculateUserRating(9L);
 

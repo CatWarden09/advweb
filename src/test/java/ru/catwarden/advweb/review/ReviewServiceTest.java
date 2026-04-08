@@ -286,6 +286,32 @@ class ReviewServiceTest {
     }
 
     @Test
+    void createReviewThrowsWhenAuthorAlreadyReviewedRecipient() {
+        User currentUser = User.builder().id(1L).keycloakId("author-id").build();
+        User recipient = User.builder().id(2L).keycloakId("recipient-id").build();
+        ReviewRequest request = ReviewRequest.builder()
+                .recipientId(2L)
+                .text("This review text is long enough and meaningful for duplicate review validation test.")
+                .rating(5)
+                .build();
+
+        when(userRepository.findByKeycloakId("author-id")).thenReturn(Optional.of(currentUser));
+        when(userRepository.findById(2L)).thenReturn(Optional.of(recipient));
+        when(reviewRepository.existsByAuthorIdAndRecipientId(1L, 2L)).thenReturn(true);
+
+        try (MockedStatic<SecurityUtils> securityUtilsMockedStatic = mockStatic(SecurityUtils.class)) {
+            securityUtilsMockedStatic.when(SecurityUtils::getCurrentUserKeycloakId).thenReturn("author-id");
+            InvalidRelationException exception = assertThrows(InvalidRelationException.class,
+                    () -> reviewService.createReview(request));
+            assertEquals("Author has already left a review on this recipient", exception.getMessage());
+            assertEquals(Map.of("Author user id:", 1L, "Recipient user id:", 2L), exception.getDetails());
+        }
+
+        verify(reviewMapper, never()).toEntity(any(ReviewRequest.class));
+        verify(reviewRepository, never()).save(any(Review.class));
+    }
+
+    @Test
     void updateReviewThrowsWhenCurrentUserHasNoAccess() {
         User author = User.builder().keycloakId("owner-id").build();
         Review review = Review.builder().id(4L).author(author).status(Status.PENDING).build();

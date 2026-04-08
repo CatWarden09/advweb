@@ -88,6 +88,11 @@ public class ReviewService {
                     Map.of("Recipient user id:", recipient.getId()));
         }
 
+        if (reviewRepository.existsByAuthorIdAndRecipientId(currentUser.getId(), recipient.getId())) {
+            throw new InvalidRelationException("Author has already left a review on this recipient",
+                    Map.of("Author user id:", currentUser.getId(), "Recipient user id:", recipient.getId()));
+        }
+
         Review review = reviewMapper.toEntity(reviewRequest);
 
         review.setAuthor(currentUser);
