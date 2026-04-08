@@ -387,6 +387,7 @@ public class AdvertisementService {
         }
 
         advertisement.setStatus(Status.APPROVED);
+        advertisement.setModerationRejectionReason(null);
 
         advertisementRepository.save(advertisement);
 
