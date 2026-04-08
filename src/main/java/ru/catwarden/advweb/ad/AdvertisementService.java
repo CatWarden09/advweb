@@ -190,6 +190,14 @@ public class AdvertisementService {
         User currentUser = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException(User.class, userId));
 
+        if(advertisement.getAuthor().getId().equals(userId)){
+            throw new OperationNotAllowedException("You cannot add your own advertisement to favorites",
+                    Map.of(
+                            "Advertisement id:", advertisementId,
+                            "User id:", userId
+                    ));
+        }
+
         boolean alreadyFavorite = currentUser.getFavoriteAdvertisements()
                 .stream()
                 .anyMatch(favoriteAd -> Objects.equals(favoriteAd.getId(), advertisementId));
