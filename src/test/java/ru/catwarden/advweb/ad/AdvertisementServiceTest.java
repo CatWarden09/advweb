@@ -726,19 +726,23 @@ class AdvertisementServiceTest {
     @Test
     void addAdvertisementToFavoritesAddsApprovedAdvertisementForRequestedUser() {
         Long userId = 5L;
+        User advertisementAuthor = User.builder()
+                .id(10L)
+                .keycloakId("author-kc")
+                .build();
         Advertisement advertisement = Advertisement.builder()
                 .id(100L)
                 .status(Status.APPROVED)
+                .author(advertisementAuthor)
                 .build();
         User currentUser = User.builder()
                 .id(userId)
                 .keycloakId("kc-user")
                 .favoriteAdvertisements(new java.util.ArrayList<>())
                 .build();
-        User requestedUser = User.builder().id(userId).keycloakId("kc-user").build();
 
         when(advertisementRepository.findById(100L)).thenReturn(Optional.of(advertisement));
-        when(userRepository.findById(userId)).thenReturn(Optional.of(requestedUser), Optional.of(currentUser));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(currentUser));
 
         try (MockedStatic<SecurityUtils> securityUtilsMockedStatic = mockStatic(SecurityUtils.class)) {
             securityUtilsMockedStatic.when(SecurityUtils::getCurrentUserKeycloakId).thenReturn("kc-user");
