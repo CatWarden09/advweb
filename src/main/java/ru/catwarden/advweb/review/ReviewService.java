@@ -116,7 +116,7 @@ public class ReviewService {
         Review review = reviewRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(Review.class, id));
 
-        boolean wasApproved = review.getStatus() == Status.APPROVED;
+
 
         String currentKeycloakId = SecurityUtils.getCurrentUserKeycloakId();
 
@@ -136,18 +136,13 @@ public class ReviewService {
 
         reviewRepository.save(review);
 
-        if (wasApproved) {
-            userService.recalculateUserRating(review.getRecipient().getId());
-        }
-
         log.info(
-                "AUDIT review updated: reviewId={}, authorId={}, recipientId={}, status={}, rating={}, wasApproved={}, actorId={}",
+                "AUDIT review updated: reviewId={}, authorId={}, recipientId={}, status={}, rating={}, actorId={}",
                 review.getId(),
                 getAuthorId(review),
                 getRecipientId(review),
                 review.getStatus(),
                 review.getRating(),
-                wasApproved,
                 currentKeycloakId
         );
     }
