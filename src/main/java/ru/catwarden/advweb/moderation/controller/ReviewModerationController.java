@@ -8,7 +8,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.catwarden.advweb.review.ReviewService;
+        import ru.catwarden.advweb.review.ReviewService;
 import ru.catwarden.advweb.review.dto.ReviewResponse;
 
 @RestController
@@ -17,7 +17,7 @@ import ru.catwarden.advweb.review.dto.ReviewResponse;
 @Validated
 public class ReviewModerationController {
     private final ReviewService reviewService;
-    
+
     @GetMapping("/pending")
     public Page<ReviewResponse> getAllPendingReviews(@RequestParam(defaultValue = "0") int page,
                                                      @RequestParam(defaultValue = "10") int size) {
