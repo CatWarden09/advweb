@@ -84,7 +84,7 @@ class CommentModerationControllerTest {
         );
         CommentRequest invalidRequest = CommentRequest.builder()
                 .advertisementId(null)
-                .text("Too short")
+                .text("abc")
                 .build();
 
         Set<ConstraintViolation<CommentModerationController>> violations =
