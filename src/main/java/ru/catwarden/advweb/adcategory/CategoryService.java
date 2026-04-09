@@ -154,7 +154,7 @@ public class CategoryService {
                 .orElseThrow(() -> new EntityNotFoundException(AdvertisementCategory.class, id));
 
         if(advertisementRepository.existsByCategory(advertisementCategory)
-        || advertisementRepository.existsBySubCategory(advertisementCategory)){
+        || advertisementRepository.existsBySubcategory(advertisementCategory)){
             throw new OperationNotAllowedException("Cannot delete category with advertisements",
                     Map.of("Category id:", id));
         }

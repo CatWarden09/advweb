@@ -24,7 +24,7 @@ public interface AdvertisementRepository extends JpaRepository<Advertisement, Lo
     Page<Advertisement> findAllByStatus(Status status, Pageable pageable);
     boolean existsByCategory(AdvertisementCategory advertisementCategory);
 
-    boolean existsBySubCategory(AdvertisementCategory advertisementCategory);
+    boolean existsBySubcategory(AdvertisementCategory advertisementCategory);
 
     Page<Advertisement> findAllByAuthorIdAndStatus(Long authorId, Status status, Pageable pageable);
 
