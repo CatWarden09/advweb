@@ -37,11 +37,6 @@ public class AdvertisementModerationController {
         return advertisementService.getAllRejectedAdvertisements(pageable);
     }
 
-    @GetMapping("/{id}")
-    public AdvertisementResponse getAdvertisement(@PathVariable Long id) {
-        return advertisementService.getAdvertisement(id);
-    }
-
     @PatchMapping("pending/{id}/approve")
     public void approveAdvertisement(@PathVariable Long id) {
         advertisementService.approveAdvertisement(id);
@@ -51,11 +46,5 @@ public class AdvertisementModerationController {
     public void rejectAdvertisement(@PathVariable Long id,
                                     @RequestParam @NotBlank @Size(max = 255) String moderationRejectionReason) {
         advertisementService.rejectAdvertisement(id, moderationRejectionReason);
-    }
-
-
-    @DeleteMapping("/{id}")
-    public void deleteAdvertisement(@PathVariable Long id) {
-        advertisementService.deleteAdvertisement(id);
     }
 }

@@ -69,15 +69,6 @@ class AdvertisementModerationControllerTest {
         assertEquals(7, captor.getValue().getPageSize());
     }
 
-    @Test
-    void getAdvertisementReturnsServiceResult() {
-        AdvertisementResponse response = AdvertisementResponse.builder().id(10L).build();
-        when(advertisementService.getAdvertisement(10L)).thenReturn(response);
-
-        AdvertisementResponse result = controller.getAdvertisement(10L);
-
-        assertEquals(response, result);
-    }
 
     @Test
     void approveAdvertisementDelegatesToService() {
@@ -92,13 +83,7 @@ class AdvertisementModerationControllerTest {
 
         verify(advertisementService).rejectAdvertisement(4L, "Violation of rules");
     }
-
-    @Test
-    void deleteAdvertisementDelegatesToService() {
-        controller.deleteAdvertisement(9L);
-
-        verify(advertisementService).deleteAdvertisement(9L);
-    }
+    
 
     @Test
     void rejectAdvertisementHasValidationForBlankReason() throws NoSuchMethodException {
