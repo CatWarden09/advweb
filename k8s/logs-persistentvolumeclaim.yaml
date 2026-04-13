@@ -3,6 +3,7 @@ kind: PersistentVolumeClaim
 metadata:
   labels:
     io.kompose.service: logs
+  namespace: advweb
   name: logs
 spec:
   accessModes:

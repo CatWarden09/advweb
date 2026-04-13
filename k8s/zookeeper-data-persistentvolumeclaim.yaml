@@ -4,6 +4,7 @@ metadata:
   labels:
     io.kompose.service: zookeeper-data
   name: zookeeper-data
+  namespace: advweb
 spec:
   accessModes:
     - ReadWriteOnce

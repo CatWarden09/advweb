@@ -4,6 +4,7 @@ metadata:
   labels:
     io.kompose.service: keycloak-data
   name: keycloak-data
+  namespace: advweb
 spec:
   accessModes:
     - ReadWriteOnce
