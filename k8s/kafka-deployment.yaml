@@ -34,7 +34,7 @@ spec:
 
           - name: KAFKA_INTER_BROKER_LISTENER_NAME
             value: "PLAINTEXT"
-      
+
           - name: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
             value: "1"
 
@@ -50,5 +50,7 @@ spec:
               mountPath: /var/lib/kafka/data
       volumes:
         - name: kafka-data
-          hostPath:
-            path: /var/lib/docker/volumes/advweb_kafka_data/_data
+          persistentVolumeClaim:
+            claimName: kafka-data
+      securityContext:
+        fsGroup: 1000
