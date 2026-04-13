@@ -27,6 +27,8 @@ spec:
               value: "PLAINTEXT"
             - name: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
               value: "1"
+            - name: KAFKA_DEBUG
+              value: "true"
           ports:
             - containerPort: 9092
           volumeMounts:
