@@ -13,6 +13,7 @@ spec:
       labels:
         app: zookeeper
     spec:
+      enableServiceLinks: false
       containers:
         - name: zookeeper
           image: confluentinc/cp-zookeeper:7.5.0
@@ -30,6 +31,8 @@ spec:
         - name: zookeeper-data
           hostPath:
             path: /var/lib/docker/volumes/advweb_zookeeper_data/_data
+            type: DirectoryOrCreate
         - name: zookeeper-log
           hostPath:
             path: /var/lib/docker/volumes/advweb_zookeeper_log/_data
+            type: DirectoryOrCreate

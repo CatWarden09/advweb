@@ -13,6 +13,7 @@ spec:
       labels:
         app: keycloak
     spec:
+      enableServiceLinks: false
       containers:
         - name: keycloak
           image: quay.io/keycloak/keycloak:26.1
@@ -71,3 +72,4 @@ spec:
         - name: keycloak-data
           hostPath:
             path: /var/lib/docker/volumes/advweb_keycloak_data/_data
+            type: DirectoryOrCreate

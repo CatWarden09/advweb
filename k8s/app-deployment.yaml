@@ -13,6 +13,7 @@ spec:
       labels:
         app: advweb-app
     spec:
+      enableServiceLinks: false
       containers:
         - name: advweb-app
           image: catwarden09/advweb:latest
@@ -99,6 +100,8 @@ spec:
         - name: uploads
           hostPath:
             path: /var/lib/docker/volumes/advweb_uploads/_data
+            type: DirectoryOrCreate
         - name: logs
           hostPath:
             path: /var/lib/docker/volumes/advweb_logs/_data
+            type: DirectoryOrCreate
