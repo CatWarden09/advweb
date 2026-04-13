@@ -56,5 +56,15 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             set -e
-            kubectl -n advweb rollout restart deployment/advweb-demo
-            kubectl -n advweb rollout status deployment/advweb-demo --timeout=600s
+            kubectl -n advweb rollout restart deployment/app
+            kubectl -n advweb rollout restart deployment/db
+            kubectl -n advweb rollout restart deployment/kafka
+            kubectl -n advweb rollout restart deployment/keycloak
+            kubectl -n advweb rollout restart deployment/redis
+            kubectl -n advweb rollout restart deployment/zookeeper
+            kubectl -n advweb rollout status deployment/app --timeout=600s
+            kubectl -n advweb rollout status deployment/db --timeout=600s
+            kubectl -n advweb rollout status deployment/kafka --timeout=600s
+            kubectl -n advweb rollout status deployment/keycloak --timeout=600s
+            kubectl -n advweb rollout status deployment/redis --timeout=600s
+            kubectl -n advweb rollout status deployment/zookeeper --timeout=600s
