@@ -1,0 +1,104 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app
+  namespace: advweb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: advweb-app
+  template:
+    metadata:
+      labels:
+        app: advweb-app
+    spec:
+      containers:
+        - name: advweb-app
+          image: catwarden09/advweb:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8088
+          env:
+            - name: SERVER_PORT
+              value: "8088"
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:postgresql://db:5432/advweb"
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: advweb-env
+                  key: POSTGRES_USER
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: advweb-env
+                  key: POSTGRES_PASSWORD
+            - name: SPRING_FLYWAY_ENABLED
+              value: "true"
+            - name: SPRING_FLYWAY_OUT_OF_ORDER
+              value: "true"
+            - name: SPRING_DATA_REDIS_HOST
+              value: "redis"
+            - name: SPRING_DATA_REDIS_PORT
+              value: "6379"
+            - name: APP_PUBLIC_BASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: advweb-env
+                  key: APP_PUBLIC_BASE_URL
+            - name: APP_KEYCLOAK_BASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: advweb-env
+                  key: APP_KEYCLOAK_BASE_URL
+            - name: APP_KEYCLOAK_REALM
+              value: "advweb"
+            - name: APP_KEYCLOAK_ISSUER_URI
+              value: "https://advweb.duckdns.org/auth/realms/advweb"
+            - name: APP_WEEKLY_DIGEST_MAIL_FROM
+              value: "iv4n.ivanov1909@gmail.com"
+            - name: SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI
+              value: "http://keycloak:8080/auth/realms/advweb/protocol/openid-connect/certs"
+            - name: SPRINGDOC_SWAGGER_UI_OAUTH_CLIENT_ID
+              value: "advweb-swagger"
+            - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
+              value: "kafka:9092"
+            - name: SPRING_MAIL_HOST
+              value: "smtp.gmail.com"
+            - name: SPRING_MAIL_PORT
+              value: "587"
+            - name: SPRING_MAIL_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: advweb-env
+                  key: SPRING_MAIL_USERNAME
+            - name: SPRING_MAIL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: advweb-env
+                  key: SPRING_MAIL_PASSWORD
+          volumeMounts:
+            - name: uploads
+              mountPath: /app/uploads
+            - name: logs
+              mountPath: /app/logs
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8088
+            initialDelaySeconds: 60
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8088
+            initialDelaySeconds: 30
+            periodSeconds: 10
+      volumes:
+        - name: uploads
+          hostPath:
+            path: /var/lib/docker/volumes/advweb_uploads/_data
+        - name: logs
+          hostPath:
+            path: /var/lib/docker/volumes/advweb_logs/_data
