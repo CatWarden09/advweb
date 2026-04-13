@@ -3,6 +3,7 @@ kind: PersistentVolumeClaim
 metadata:
   labels:
     io.kompose.service: advweb-db-data
+  namespace: advweb
   name: advweb-db-data
 spec:
   accessModes:
