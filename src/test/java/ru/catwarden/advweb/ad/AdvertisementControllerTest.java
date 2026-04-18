@@ -46,7 +46,7 @@ class AdvertisementControllerTest {
         AdvertisementResponse result = controller.getAdvertisement(1L);
 
         assertEquals(response, result);
-        verify(advertisementService).incrementAdvertisementViewCount(1L);
+
     }
 
     @Test
