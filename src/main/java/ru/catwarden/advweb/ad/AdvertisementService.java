@@ -530,5 +530,3 @@ public class AdvertisementService {
         return advertisement.getAuthor() != null ? advertisement.getAuthor().getId() : null;
     }
 }
-
-// test comment

@@ -15,7 +15,7 @@ import ru.catwarden.advweb.comment.CommentService;
 import ru.catwarden.advweb.comment.dto.CommentResponse;
 
 
-// TODO add default redirect (@GlobalExceptionHandler...)
+
 @RestController
 @RequestMapping("/advertisements")
 @RequiredArgsConstructor
@@ -27,8 +27,6 @@ public class AdvertisementController {
     @GetMapping("/{id}")
     public AdvertisementResponse getAdvertisement(@PathVariable Long id){
         AdvertisementResponse response = advertisementService.getAdvertisement(id);
-
-        
 
         return response;
     }
