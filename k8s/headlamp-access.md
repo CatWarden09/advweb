@@ -21,7 +21,7 @@ kubectl -n headlamp rollout status deployment/headlamp
 If you are already on the server shell:
 
 ```powershell
-kubectl -n headlamp port-forward svc/headlamp 8080:80
+kubectl -n headlamp port-forward svc/headlamp 8100:80
 ```
 
 Then open:
@@ -35,13 +35,13 @@ http://localhost:8080
 If the cluster is only available on the remote server, the simplest option is:
 
 ```powershell
-ssh -L 8080:127.0.0.1:8080 root@92.38.48.50 "kubectl -n headlamp port-forward svc/headlamp 8080:80"
+ssh -L 8100:127.0.0.1:8100 root@92.38.48.50 "kubectl -n headlamp port-forward svc/headlamp 8080:80"
 ```
 
 Then open locally:
 
 ```text
-http://localhost:8080
+http://localhost:8100
 ```
 
 Keep that terminal open while you use the UI.
