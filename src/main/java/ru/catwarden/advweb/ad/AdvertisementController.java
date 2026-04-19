@@ -28,7 +28,7 @@ public class AdvertisementController {
     public AdvertisementResponse getAdvertisement(@PathVariable Long id){
         AdvertisementResponse response = advertisementService.getAdvertisement(id);
 
-        advertisementService.incrementAdvertisementViewCount(id);
+        
 
         return response;
     }

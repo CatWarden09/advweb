@@ -84,6 +84,8 @@ public class AdvertisementService {
             );
         }
 
+        incrementAdvertisementViewCount(id);
+
         return mapWithImages(advertisement);
     }
 
