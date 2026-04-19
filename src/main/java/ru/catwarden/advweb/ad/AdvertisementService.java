@@ -457,6 +457,7 @@ public class AdvertisementService {
         userService.recalculateUserTotalEarned(advertisement.getAuthor().getId(), advertisement.getPrice());
     }
 
+    @Transactional
     @CacheEvict(
             value = {
                     "advertisements-list",
@@ -471,11 +472,13 @@ public class AdvertisementService {
 
         validateCurrentUserOrAdmin(advertisement.getAuthor().getId());
 
-        advertisementRepository.deleteById(advertisement.getId());
+
 
         commentService.deleteCommentsByAdId(advertisement.getId());
 
         imageService.unlinkAllImagesFromAdvertisement(advertisement.getId());
+
+        advertisementRepository.deleteById(advertisement.getId());
 
         log.info(
                 "AUDIT advertisement deleted: adId={}, authorId={}, actorId={}",
