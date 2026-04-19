@@ -27,7 +27,7 @@ kubectl -n headlamp port-forward svc/headlamp 8100:80
 Then open:
 
 ```text
-http://localhost:8080
+http://localhost:8100
 ```
 
 ## Access Over SSH
