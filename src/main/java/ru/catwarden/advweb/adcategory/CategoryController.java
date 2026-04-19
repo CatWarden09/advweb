@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.catwarden.advweb.ad.dto.AdvertisementResponse;
@@ -20,6 +21,8 @@ import java.util.List;
 @RequiredArgsConstructor
 @Validated
 public class CategoryController {
+    private static final Sort DEFAULT_SORT = Sort.by(Sort.Direction.DESC, "createdAt");
+
     private final CategoryService categoryService;
 
     @GetMapping("/{id}")
@@ -41,7 +44,7 @@ public class CategoryController {
     public Page<AdvertisementResponse> getCategoryAds(@RequestParam(defaultValue = "0") int page,
                                                               @RequestParam(defaultValue = "10") int size,
                                                               @PathVariable Long id){
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = buildPageable(page, size);
 
         return categoryService.getCategoryAds(pageable, id);
     }
@@ -52,7 +55,7 @@ public class CategoryController {
                                                          @PathVariable Long parent_id,
                                                          @PathVariable Long sub_id){
 
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = buildPageable(page, size);
 
         return categoryService.getSubcategoryAds(pageable, parent_id, sub_id);
     }
@@ -77,5 +80,9 @@ public class CategoryController {
     @DeleteMapping("/{id}")
     public void deleteCategory(@PathVariable Long id){
         categoryService.deleteCategory(id);
+    }
+
+    private Pageable buildPageable(int page, int size) {
+        return PageRequest.of(page, size, DEFAULT_SORT);
     }
 }

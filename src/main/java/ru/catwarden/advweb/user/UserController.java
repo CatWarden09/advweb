@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 import ru.catwarden.advweb.ad.AdvertisementService;
 import ru.catwarden.advweb.ad.dto.AdvertisementResponse;
@@ -19,6 +20,8 @@ import ru.catwarden.advweb.user.dto.UserUpdateRequest;
 @RequestMapping("/users")
 @RequiredArgsConstructor
 public class UserController {
+    private static final Sort DEFAULT_SORT = Sort.by(Sort.Direction.DESC, "createdAt");
+
     private final UserService userService;
     private final AdvertisementService advertisementService;
     private final ReviewService reviewService;
@@ -48,7 +51,7 @@ public class UserController {
     public Page<AdvertisementResponse> getUserApprovedAdvertisements(@PathVariable Long id,
                                                                      @RequestParam(defaultValue = "0") int page,
                                                                      @RequestParam(defaultValue = "10") int size) {
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = buildPageable(page, size);
         return advertisementService.getUserApprovedAdvertisements(id, pageable);
     }
 
@@ -56,7 +59,7 @@ public class UserController {
     public Page<AdvertisementResponse> getUserPendingAdvertisements(@PathVariable Long id,
                                                                     @RequestParam(defaultValue = "0") int page,
                                                                     @RequestParam(defaultValue = "10") int size) {
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = buildPageable(page, size);
         return advertisementService.getUserPendingAdvertisements(id, pageable);
     }
 
@@ -64,7 +67,7 @@ public class UserController {
     public Page<AdvertisementResponse> getUserRejectedAdvertisements(@PathVariable Long id,
                                                                      @RequestParam(defaultValue = "0") int page,
                                                                      @RequestParam(defaultValue = "10") int size) {
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = buildPageable(page, size);
         return advertisementService.getUserRejectedAdvertisements(id, pageable);
     }
 
@@ -72,7 +75,7 @@ public class UserController {
     public Page<AdvertisementResponse> getUserFinishedAdvertisements(@PathVariable Long id,
                                                                      @RequestParam(defaultValue = "0") int page,
                                                                      @RequestParam(defaultValue = "10") int size) {
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = buildPageable(page, size);
         return advertisementService.getUserFinishedAdvertisements(id, pageable);
     }
 
@@ -80,7 +83,7 @@ public class UserController {
     public Page<ReviewResponse> getApprovedReviewsAboutUser(@PathVariable Long id,
                                                             @RequestParam(defaultValue = "0") int page,
                                                             @RequestParam(defaultValue = "10") int size) {
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = buildPageable(page, size);
         return reviewService.getApprovedReviewsAboutUser(id, pageable);
     }
 
@@ -88,7 +91,7 @@ public class UserController {
     public Page<ReviewResponse> getUserRejectedReviews(@PathVariable Long id,
                                                        @RequestParam(defaultValue = "0") int page,
                                                        @RequestParam(defaultValue = "10") int size) {
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = buildPageable(page, size);
         return reviewService.getUserReviews(id, pageable, Status.REJECTED);
     }
 
@@ -96,7 +99,7 @@ public class UserController {
     public Page<ReviewResponse> getUserPendingReviews(@PathVariable Long id,
                                                       @RequestParam(defaultValue = "0") int page,
                                                       @RequestParam(defaultValue = "10") int size){
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = buildPageable(page, size);
         return reviewService.getUserReviews(id, pageable, Status.PENDING);
     }
 
@@ -104,7 +107,7 @@ public class UserController {
     public Page<ReviewResponse> getUserApprovedReviews(@PathVariable Long id,
                                                        @RequestParam(defaultValue = "0") int page,
                                                        @RequestParam(defaultValue = "10") int size){
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = buildPageable(page, size);
         return reviewService.getUserReviews(id, pageable, Status.APPROVED);
     }
 
@@ -112,7 +115,7 @@ public class UserController {
     public Page<AdvertisementResponse> getUserFavoriteAdvertisements(@PathVariable Long id,
                                                                      @RequestParam(defaultValue = "0") int page,
                                                                      @RequestParam(defaultValue = "10") int size) {
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = buildPageable(page, size);
         return advertisementService.getUserFavoriteAdvertisements(id, pageable);
     }
 
@@ -134,6 +137,10 @@ public class UserController {
     @DeleteMapping("/{id}/avatar")
     public void deleteUserAvatar(@PathVariable Long id) {
         userService.unlinkUserAvatar(id);
+    }
+
+    private Pageable buildPageable(int page, int size) {
+        return PageRequest.of(page, size, DEFAULT_SORT);
     }
 }
 

@@ -6,9 +6,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-        import ru.catwarden.advweb.review.ReviewService;
+import ru.catwarden.advweb.review.ReviewService;
 import ru.catwarden.advweb.review.dto.ReviewResponse;
 
 @RestController
@@ -16,12 +17,14 @@ import ru.catwarden.advweb.review.dto.ReviewResponse;
 @RequiredArgsConstructor
 @Validated
 public class ReviewModerationController {
+    private static final Sort DEFAULT_SORT = Sort.by(Sort.Direction.DESC, "createdAt");
+
     private final ReviewService reviewService;
 
     @GetMapping("/pending")
     public Page<ReviewResponse> getAllPendingReviews(@RequestParam(defaultValue = "0") int page,
                                                      @RequestParam(defaultValue = "10") int size) {
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = buildPageable(page, size);
 
         return reviewService.getAllPendingReviews(pageable);
     }
@@ -29,7 +32,7 @@ public class ReviewModerationController {
     @GetMapping("/rejected")
     public Page<ReviewResponse> getAllRejectedReviews(@RequestParam(defaultValue = "0") int page,
                                                       @RequestParam(defaultValue = "10") int size) {
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = buildPageable(page, size);
 
         return reviewService.getAllRejectedReviews(pageable);
     }
@@ -49,5 +52,9 @@ public class ReviewModerationController {
     @DeleteMapping("/{id}")
     public void deleteReview(@PathVariable Long id) {
         reviewService.deleteReview(id);
+    }
+
+    private Pageable buildPageable(int page, int size) {
+        return PageRequest.of(page, size, DEFAULT_SORT);
     }
 }

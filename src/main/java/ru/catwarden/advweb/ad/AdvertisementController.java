@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.catwarden.advweb.ad.dto.AdvertisementRequest;
@@ -21,6 +22,8 @@ import ru.catwarden.advweb.comment.dto.CommentResponse;
 @RequiredArgsConstructor
 @Validated
 public class AdvertisementController {
+    private static final Sort DEFAULT_SORT = Sort.by(Sort.Direction.DESC, "createdAt");
+
     private final AdvertisementService advertisementService;
     private final CommentService commentService;
 
@@ -34,7 +37,7 @@ public class AdvertisementController {
     @GetMapping
     public Page<AdvertisementResponse> getAllApprovedAdvertisements(@RequestParam(defaultValue = "0") int page,
                                                                     @RequestParam(defaultValue = "10") int size){
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = buildPageable(page, size);
         return advertisementService.getAllApprovedAdvertisements(pageable);
 
     }
@@ -43,7 +46,7 @@ public class AdvertisementController {
     @GetMapping("/{id}/comments")
     public Page<CommentResponse> getAdvertisementComments(@PathVariable Long id, @RequestParam(defaultValue = "0") int page,
                                                             @RequestParam(defaultValue = "10") int size){
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = buildPageable(page, size);
         return commentService.getAdvertisementModeratedComments(id, pageable);
     }
 
@@ -51,7 +54,7 @@ public class AdvertisementController {
     public Page<AdvertisementResponse> getAdvertisementsByFilter(@RequestParam(defaultValue = "0") int page,
                                                                  @RequestParam(defaultValue = "10") int size,
                                                                  @Valid @RequestBody AdvertisementSearchFilter filter){
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = buildPageable(page, size);
         return advertisementService.getAdvertisementsByFilter(pageable, filter);
     }
 
@@ -76,5 +79,8 @@ public class AdvertisementController {
         advertisementService.deleteAdvertisement(id);
     }
 
+    private Pageable buildPageable(int page, int size) {
+        return PageRequest.of(page, size, DEFAULT_SORT);
+    }
 
 }
