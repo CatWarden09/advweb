@@ -115,7 +115,7 @@ public class UserController {
     public Page<AdvertisementResponse> getUserFavoriteAdvertisements(@PathVariable Long id,
                                                                      @RequestParam(defaultValue = "0") int page,
                                                                      @RequestParam(defaultValue = "10") int size) {
-        Pageable pageable = buildPageable(page, size);
+        Pageable pageable = buildPageableWithoutSort(page, size);
         return advertisementService.getUserFavoriteAdvertisements(id, pageable);
     }
 
@@ -141,6 +141,10 @@ public class UserController {
 
     private Pageable buildPageable(int page, int size) {
         return PageRequest.of(page, size, DEFAULT_SORT);
+    }
+
+    private Pageable buildPageableWithoutSort(int page, int size) {
+        return PageRequest.of(page, size);
     }
 }
 
