@@ -1,5 +1,7 @@
 package ru.catwarden.advweb.comment;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
@@ -11,20 +13,24 @@ import ru.catwarden.advweb.comment.dto.CommentUpdateRequest;
 @RequestMapping("/comments")
 @RequiredArgsConstructor
 @Validated
+@Tag(name = "Comments", description = "Операции с комментариями")
 public class CommentController {
     private final CommentService commentService;
 
+    @Operation(summary = "Создать комментарий")
     @PostMapping
     public void createComment(@Valid @RequestBody CommentRequest commentRequest) {
         commentService.createComment(commentRequest);
     }
 
+    @Operation(summary = "Обновить комментарий")
     @PatchMapping("/{id}")
     public void updateComment(@PathVariable Long id,
                               @Valid @RequestBody CommentUpdateRequest commentUpdateRequest) {
         commentService.updateComment(id, commentUpdateRequest);
     }
 
+    @Operation(summary = "Удалить комментарий")
     @DeleteMapping("/{id}")
     public void deleteComment(@PathVariable Long id) {
         commentService.deleteComment(id);

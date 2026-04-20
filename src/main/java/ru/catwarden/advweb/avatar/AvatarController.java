@@ -1,5 +1,7 @@
 package ru.catwarden.advweb.avatar;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
@@ -14,9 +16,11 @@ import ru.catwarden.advweb.avatar.dto.AvatarDto;
 @RequestMapping("/avatars")
 @RequiredArgsConstructor
 @Validated
+@Tag(name = "Avatars", description = "Операции с аватарами")
 public class AvatarController {
     private final AvatarService avatarService;
 
+    @Operation(summary = "Загрузить аватар")
     @PostMapping
     public AvatarDto uploadAvatar(@Valid @RequestParam("file") MultipartFile avatar){
         return avatarService.uploadAvatar(avatar);

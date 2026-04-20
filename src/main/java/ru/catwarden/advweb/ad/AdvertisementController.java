@@ -1,5 +1,7 @@
 package ru.catwarden.advweb.ad;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,12 +23,14 @@ import ru.catwarden.advweb.comment.dto.CommentResponse;
 @RequestMapping("/advertisements")
 @RequiredArgsConstructor
 @Validated
+@Tag(name = "Advertisements", description = "Операции с объявлениями")
 public class AdvertisementController {
     private static final Sort DEFAULT_SORT = Sort.by(Sort.Direction.DESC, "createdAt");
 
     private final AdvertisementService advertisementService;
     private final CommentService commentService;
 
+    @Operation(summary = "Получить объявление по id")
     @GetMapping("/{id}")
     public AdvertisementResponse getAdvertisement(@PathVariable Long id){
         AdvertisementResponse response = advertisementService.getAdvertisement(id);
@@ -34,6 +38,7 @@ public class AdvertisementController {
         return response;
     }
 
+    @Operation(summary = "Получить список опубликованных объявлений")
     @GetMapping
     public Page<AdvertisementResponse> getAllApprovedAdvertisements(@RequestParam(defaultValue = "0") int page,
                                                                     @RequestParam(defaultValue = "10") int size){
@@ -43,6 +48,7 @@ public class AdvertisementController {
     }
 
 
+    @Operation(summary = "Получить комментарии к объявлению")
     @GetMapping("/{id}/comments")
     public Page<CommentResponse> getAdvertisementComments(@PathVariable Long id, @RequestParam(defaultValue = "0") int page,
                                                             @RequestParam(defaultValue = "10") int size){
@@ -50,6 +56,7 @@ public class AdvertisementController {
         return commentService.getAdvertisementModeratedComments(id, pageable);
     }
 
+    @Operation(summary = "Поиск объявлений по фильтру")
     @PostMapping("/search")
     public Page<AdvertisementResponse> getAdvertisementsByFilter(@RequestParam(defaultValue = "0") int page,
                                                                  @RequestParam(defaultValue = "10") int size,
@@ -58,22 +65,26 @@ public class AdvertisementController {
         return advertisementService.getAdvertisementsByFilter(pageable, filter);
     }
 
+    @Operation(summary = "Создать объявление")
     @PostMapping
     public Long createAdvertisement(@Valid @RequestBody AdvertisementRequest advertisementRequest){
         return advertisementService.createAdvertisement(advertisementRequest);
     }
 
+    @Operation(summary = "Обновить объявление")
     @PutMapping("/{id}/update")
     public void updateAdvertisement(@PathVariable Long id,
                                     @Valid @RequestBody AdvertisementUpdateRequest advertisementUpdateRequest){
         advertisementService.updateAdvertisement(id, advertisementUpdateRequest);
     }
 
+    @Operation(summary = "Завершить объявление")
     @PutMapping("/{id}/finish")
     public void finishAdvertisement(@PathVariable Long id){
         advertisementService.finishAdvertisement(id);
     }
 
+    @Operation(summary = "Удалить объявление")
     @DeleteMapping("/{id}")
     public void deleteAdvertisement(@PathVariable Long id){
         advertisementService.deleteAdvertisement(id);
