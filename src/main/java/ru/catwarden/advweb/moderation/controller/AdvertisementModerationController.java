@@ -1,6 +1,7 @@
 package ru.catwarden.advweb.moderation.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -18,7 +19,7 @@ import ru.catwarden.advweb.ad.AdvertisementService;
 @RequestMapping("/admin/ads-moderation")
 @RequiredArgsConstructor
 @Validated
-@Tag(name = "Ads Moderation", description = "Модерация объявлений")
+@Tag(name = "Модерация объявлений", description = "Модерация объявлений")
 public class AdvertisementModerationController {
     private static final Sort DEFAULT_SORT = Sort.by(Sort.Direction.DESC, "createdAt");
 
@@ -26,8 +27,9 @@ public class AdvertisementModerationController {
 
     @Operation(summary = "Получить объявления на модерации")
     @GetMapping("/pending")
-    public Page<AdvertisementResponse> getAllPendingAdvertisements(@RequestParam(defaultValue = "0") int page,
-                                                                   @RequestParam(defaultValue = "10") int size) {
+    public Page<AdvertisementResponse> getAllPendingAdvertisements(
+            @Parameter(description = "Номер страницы (с 0)") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Размер страницы") @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = buildPageable(page, size);
 
         return advertisementService.getAllPendingAdvertisements(pageable);
@@ -35,8 +37,9 @@ public class AdvertisementModerationController {
 
     @Operation(summary = "Получить отклонённые объявления")
     @GetMapping("/rejected")
-    public Page<AdvertisementResponse> getAllRejectedAdvertisements(@RequestParam(defaultValue = "0") int page,
-                                                                    @RequestParam(defaultValue = "10") int size) {
+    public Page<AdvertisementResponse> getAllRejectedAdvertisements(
+            @Parameter(description = "Номер страницы (с 0)") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Размер страницы") @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = buildPageable(page, size);
 
         return advertisementService.getAllRejectedAdvertisements(pageable);
@@ -44,14 +47,16 @@ public class AdvertisementModerationController {
 
     @Operation(summary = "Одобрить объявление")
     @PatchMapping("pending/{id}/approve")
-    public void approveAdvertisement(@PathVariable Long id) {
+    public void approveAdvertisement(@Parameter(description = "ID объявления") @PathVariable Long id) {
         advertisementService.approveAdvertisement(id);
     }
 
     @Operation(summary = "Отклонить объявление")
     @PatchMapping("/pending/{id}/reject")
-    public void rejectAdvertisement(@PathVariable Long id,
-                                    @RequestParam @NotBlank @Size(max = 255) String moderationRejectionReason) {
+    public void rejectAdvertisement(
+            @Parameter(description = "ID объявления") @PathVariable Long id,
+            @Parameter(description = "Причина отклонения модератором")
+            @RequestParam @NotBlank @Size(max = 255) String moderationRejectionReason) {
         advertisementService.rejectAdvertisement(id, moderationRejectionReason);
     }
 
@@ -59,3 +64,5 @@ public class AdvertisementModerationController {
         return PageRequest.of(page, size, DEFAULT_SORT);
     }
 }
+
+

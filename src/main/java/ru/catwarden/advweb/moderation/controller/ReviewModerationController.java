@@ -1,6 +1,7 @@
 package ru.catwarden.advweb.moderation.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -18,7 +19,7 @@ import ru.catwarden.advweb.review.dto.ReviewResponse;
 @RequestMapping("/admin/reviews-moderation")
 @RequiredArgsConstructor
 @Validated
-@Tag(name = "Reviews Moderation", description = "Модерация отзывов")
+@Tag(name = "Модерация отзывов", description = "Модерация отзывов")
 public class ReviewModerationController {
     private static final Sort DEFAULT_SORT = Sort.by(Sort.Direction.DESC, "createdAt");
 
@@ -26,8 +27,9 @@ public class ReviewModerationController {
 
     @Operation(summary = "Получить отзывы на модерации")
     @GetMapping("/pending")
-    public Page<ReviewResponse> getAllPendingReviews(@RequestParam(defaultValue = "0") int page,
-                                                     @RequestParam(defaultValue = "10") int size) {
+    public Page<ReviewResponse> getAllPendingReviews(
+            @Parameter(description = "Номер страницы (с 0)") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Размер страницы") @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = buildPageable(page, size);
 
         return reviewService.getAllPendingReviews(pageable);
@@ -35,8 +37,9 @@ public class ReviewModerationController {
 
     @Operation(summary = "Получить отклонённые отзывы")
     @GetMapping("/rejected")
-    public Page<ReviewResponse> getAllRejectedReviews(@RequestParam(defaultValue = "0") int page,
-                                                      @RequestParam(defaultValue = "10") int size) {
+    public Page<ReviewResponse> getAllRejectedReviews(
+            @Parameter(description = "Номер страницы (с 0)") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Размер страницы") @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = buildPageable(page, size);
 
         return reviewService.getAllRejectedReviews(pageable);
@@ -44,21 +47,23 @@ public class ReviewModerationController {
 
     @Operation(summary = "Одобрить отзыв")
     @PatchMapping("pending/{id}/approve")
-    public void approveReview(@PathVariable Long id) {
+    public void approveReview(@Parameter(description = "ID отзыва") @PathVariable Long id) {
         reviewService.approveReview(id);
     }
 
     @Operation(summary = "Отклонить отзыв")
     @PatchMapping("/pending/{id}/reject")
-    public void rejectReview(@PathVariable Long id,
-                             @RequestParam @NotBlank @Size(max = 255) String moderationRejectionReason) {
+    public void rejectReview(
+            @Parameter(description = "ID отзыва") @PathVariable Long id,
+            @Parameter(description = "Причина отклонения модератором")
+            @RequestParam @NotBlank @Size(max = 255) String moderationRejectionReason) {
         reviewService.rejectReview(id, moderationRejectionReason);
     }
 
 
     @Operation(summary = "Удалить отзыв")
     @DeleteMapping("/{id}")
-    public void deleteReview(@PathVariable Long id) {
+    public void deleteReview(@Parameter(description = "ID отзыва") @PathVariable Long id) {
         reviewService.deleteReview(id);
     }
 
@@ -66,3 +71,5 @@ public class ReviewModerationController {
         return PageRequest.of(page, size, DEFAULT_SORT);
     }
 }
+
+

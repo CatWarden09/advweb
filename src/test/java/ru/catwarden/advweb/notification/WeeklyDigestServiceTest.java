@@ -106,7 +106,7 @@ class WeeklyDigestServiceTest {
         SimpleMailMessage sentMessage = messageCaptor.getValue();
         assertEquals("no-reply@advweb.local", sentMessage.getFrom());
         assertEquals("ivan@example.com", sentMessage.getTo()[0]);
-        assertEquals("Weekly digest for your advertisements", sentMessage.getSubject());
+        assertEquals("Еженедельная рассылка о ваших объявлениях", sentMessage.getSubject());
         assertTrue(sentMessage.getText().contains("Bike"));
         assertTrue(sentMessage.getText().contains("https://advweb.example/advertisements/100"));
         assertTrue(sentMessage.getText().contains("Laptop"));

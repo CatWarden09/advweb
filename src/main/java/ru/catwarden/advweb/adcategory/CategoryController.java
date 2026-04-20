@@ -1,6 +1,7 @@
 package ru.catwarden.advweb.adcategory;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
@@ -22,7 +23,7 @@ import java.util.List;
 @RequestMapping("/categories")
 @RequiredArgsConstructor
 @Validated
-@Tag(name = "Categories", description = "Операции с категориями объявлений")
+@Tag(name = "Категории", description = "Операции с категориями объявлений")
 public class CategoryController {
     private static final Sort DEFAULT_SORT = Sort.by(Sort.Direction.DESC, "createdAt");
 
@@ -30,7 +31,7 @@ public class CategoryController {
 
     @Operation(summary = "Получить категорию по id")
     @GetMapping("/{id}")
-    public AdvertisementCategoryResponse getCategory(@PathVariable Long id){
+    public AdvertisementCategoryResponse getCategory(@Parameter(description = "ID категории") @PathVariable Long id){
         return categoryService.getCategory(id);
     }
 
@@ -42,15 +43,17 @@ public class CategoryController {
 
     @Operation(summary = "Получить подкатегории категории")
     @GetMapping("/{id}/subcategories")
-    public List<AdvertisementCategoryResponse> getSubcategories(@PathVariable Long id){
+    public List<AdvertisementCategoryResponse> getSubcategories(
+            @Parameter(description = "ID родительской категории") @PathVariable Long id){
         return categoryService.getSubcategories(id);
     }
 
     @Operation(summary = "Получить объявления категории")
     @GetMapping("/{id}/ads")
-    public Page<AdvertisementResponse> getCategoryAds(@RequestParam(defaultValue = "0") int page,
-                                                              @RequestParam(defaultValue = "10") int size,
-                                                              @PathVariable Long id){
+    public Page<AdvertisementResponse> getCategoryAds(
+            @Parameter(description = "Номер страницы (с 0)") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Размер страницы") @RequestParam(defaultValue = "10") int size,
+            @Parameter(description = "ID категории") @PathVariable Long id){
         Pageable pageable = buildPageable(page, size);
 
         return categoryService.getCategoryAds(pageable, id);
@@ -58,10 +61,11 @@ public class CategoryController {
 
     @Operation(summary = "Получить объявления подкатегории")
     @GetMapping("/{parent_id}/{sub_id}/ads")
-    public Page<AdvertisementResponse> getSubcategoryAds(@RequestParam(defaultValue = "0") int page,
-                                                         @RequestParam(defaultValue = "10") int size,
-                                                         @PathVariable Long parent_id,
-                                                         @PathVariable Long sub_id){
+    public Page<AdvertisementResponse> getSubcategoryAds(
+            @Parameter(description = "Номер страницы (с 0)") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Размер страницы") @RequestParam(defaultValue = "10") int size,
+            @Parameter(description = "ID родительской категории") @PathVariable Long parent_id,
+            @Parameter(description = "ID подкатегории") @PathVariable Long sub_id){
 
         Pageable pageable = buildPageable(page, size);
 
@@ -70,27 +74,33 @@ public class CategoryController {
 
     @Operation(summary = "Создать категорию")
     @PostMapping
-    public void createCategory(@Valid @RequestBody AdvertisementCategoryRequest advertisementCategoryRequest){
+    public void createCategory(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Тело запроса для создания категории")
+            @Valid @RequestBody AdvertisementCategoryRequest advertisementCategoryRequest){
         categoryService.createCategory(advertisementCategoryRequest);
     }
 
     @Operation(summary = "Создать подкатегории")
     @PostMapping("/{id}/subcategories")
-    public void createSubcategories(@PathVariable Long id,
-                                     @RequestBody @NotEmpty List<@Valid AdvertisementCategoryRequest> subcategoryList){
+    public void createSubcategories(
+            @Parameter(description = "ID родительской категории") @PathVariable Long id,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Список подкатегорий для создания")
+            @RequestBody @NotEmpty List<@Valid AdvertisementCategoryRequest> subcategoryList){
         categoryService.createSubcategories(id, subcategoryList);
     }
 
     @Operation(summary = "Обновить категорию")
     @PutMapping("/{id}")
-    public void updateCategory(@PathVariable Long id,
-                               @Valid @RequestBody AdvertisementCategoryUpdateRequest advertisementCategoryUpdateRequest){
+    public void updateCategory(
+            @Parameter(description = "ID категории") @PathVariable Long id,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Тело запроса для обновления категории")
+            @Valid @RequestBody AdvertisementCategoryUpdateRequest advertisementCategoryUpdateRequest){
         categoryService.updateCategory(id, advertisementCategoryUpdateRequest);
     }
 
     @Operation(summary = "Удалить категорию")
     @DeleteMapping("/{id}")
-    public void deleteCategory(@PathVariable Long id){
+    public void deleteCategory(@Parameter(description = "ID категории") @PathVariable Long id){
         categoryService.deleteCategory(id);
     }
 
@@ -98,3 +108,5 @@ public class CategoryController {
         return PageRequest.of(page, size, DEFAULT_SORT);
     }
 }
+
+
