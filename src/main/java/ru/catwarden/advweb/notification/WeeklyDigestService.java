@@ -53,7 +53,7 @@ public class WeeklyDigestService {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(fromEmail);
         message.setTo(user.getEmail());
-        message.setSubject("Weekly digest for your advertisements");
+        message.setSubject("Еженедельная рассылка о ваших объявлениях");
         message.setText(buildEmailBody(user, topAdvertisements, weekKey));
 
         javaMailSender.send(message);
@@ -86,7 +86,7 @@ public class WeeklyDigestService {
                     .append(" - ")
                     .append(advertisement.getViews())
                     .append(" просмотров, цена ")
-                    .append(advertisement.getPrice())
+                    .append(String.format("%.0f", advertisement.getPrice()))
                     .append("\n")
                     .append(publicBaseUrl)
                     .append("/advertisements/")
