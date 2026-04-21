@@ -1,0 +1,1 @@
+ALTER TABLE advertisements ALTER COLUMN description TYPE TEXT;
